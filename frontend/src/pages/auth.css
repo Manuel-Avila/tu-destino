@@ -1,0 +1,296 @@
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  font-family: var(--sans, system-ui, sans-serif);
+  background: #f6f6fb;
+}
+
+/* ---------- Panel visual (izquierda) ---------- */
+
+.auth-visual {
+  position: relative;
+  overflow: hidden;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #fff;
+  /* Degradado de respaldo: se ve un instante mientras carga la foto, o si
+     el navegador no puede cargarla por algún motivo. */
+  background: linear-gradient(160deg, #123b3a 0%, #1c5c56 35%, #2f8f80 65%, #9fd8c4 100%);
+}
+
+.auth-visual__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* "cover" recorta la imagen para llenar el contenedor sin deformarla,
+     sin importar su relación de aspecto. Nunca deja franjas vacías. */
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+.auth-visual__tint {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  /* Tiñe TODA la foto (no solo la parte de abajo) con el verde-azulado
+     de marca, para que el degradado se note en todo el panel. */
+  background: linear-gradient(
+    160deg,
+    rgba(18, 59, 58, 0.65) 0%,
+    rgba(28, 92, 86, 0.4) 45%,
+    rgba(159, 216, 196, 0.2) 100%
+  );
+}
+
+.auth-visual__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: linear-gradient(
+    to top,
+    rgba(4, 20, 18, 0.75) 0%,
+    rgba(4, 20, 18, 0.15) 45%,
+    rgba(4, 20, 18, 0.05) 100%
+  );
+  pointer-events: none;
+}
+
+.auth-visual__brand {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.01em;
+}
+
+.auth-visual__leaf {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  display: block;
+}
+
+.auth-visual__leaf--small {
+  width: 24px;
+  height: 24px;
+}
+
+.auth-visual__content {
+  position: relative;
+  z-index: 3;
+  max-width: 26rem;
+}
+
+.auth-visual__content h1 {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  line-height: 1.2;
+  font-weight: 700;
+  margin: 0 0 1.5rem;
+}
+
+.auth-visual__stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  opacity: 0.95;
+}
+
+/* ---------- Panel de formulario (derecha) ---------- */
+
+.auth-form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+  background: #f6f6fb;
+}
+
+.auth-form-panel__inner {
+  width: 100%;
+  max-width: 24rem;
+}
+
+.auth-form-panel h2 {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: #0d1b16;
+  margin: 0 0 0.4rem;
+}
+
+.auth-form-panel__subtitle {
+  color: #6b6f76;
+  font-size: 0.95rem;
+  margin: 0 0 1.75rem;
+}
+
+.auth-field {
+  margin-bottom: 1.1rem;
+}
+
+.auth-field label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1d2a24;
+  margin-bottom: 0.4rem;
+}
+
+.auth-field input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #dcdde3;
+  border-radius: 0.55rem;
+  font-size: 0.95rem;
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-field input:focus {
+  outline: none;
+  border-color: #1f6b52;
+  box-shadow: 0 0 0 3px rgba(31, 107, 82, 0.15);
+}
+
+.auth-field input[aria-invalid='true'] {
+  border-color: #d84a4a;
+}
+
+.auth-field__error {
+  color: #d84a4a;
+  font-size: 0.82rem;
+  margin-top: 0.35rem;
+}
+
+.auth-form__error-banner {
+  background: rgba(216, 74, 74, 0.08);
+  border: 1px solid rgba(216, 74, 74, 0.35);
+  color: #a8332f;
+  font-size: 0.88rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.1rem;
+}
+
+.auth-submit {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: none;
+  border-radius: 0.6rem;
+  background: #14453a;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.auth-submit:hover:not(:disabled) {
+  background: #0e352c;
+}
+
+.auth-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.2rem 0;
+  color: #9a9da4;
+  font-size: 0.85rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e3e4ea;
+}
+
+.auth-google {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #dcdde3;
+  border-radius: 0.6rem;
+  background: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1d2a24;
+  cursor: pointer;
+}
+
+.auth-google:hover {
+  background: #f9f9fb;
+}
+
+.auth-google-mount {
+  display: flex;
+  justify-content: center;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 1.4rem;
+  font-size: 0.9rem;
+  color: #4b4f57;
+}
+
+.auth-switch a {
+  color: #14453a;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+.auth-terms {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.78rem;
+  color: #9a9da4;
+  line-height: 1.5;
+}
+
+.auth-terms a {
+  color: #6b6f76;
+  text-decoration: underline;
+}
+
+.auth-loading {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4b4f57;
+  font-size: 0.95rem;
+}
+
+/* ---------- Mobile: se oculta el panel visual, queda solo el formulario ----------
+   Este bloque va al FINAL a propósito: con la misma especificidad (una
+   clase), la regla que aparece más abajo en el archivo gana en el cascade,
+   así que esto debe ir después de la regla base ".auth-visual { display: flex }"
+   para que sí la sobreescriba. */
+@media (max-width: 900px) {
+  .auth-shell {
+    grid-template-columns: 1fr;
+  }
+  .auth-visual {
+    display: none;
+  }
+}

@@ -27,6 +27,9 @@ services:
       - DB_HOST=db
       - DB_PORT=5432
       - DB_NAME=tudestino
+      - JWT_SECRET=${JWT_SECRET:-change_me_in_a_real_env_file}
+      - JWT_EXPIRES_IN=7d
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
     depends_on:
       - db
     command: npm run dev
