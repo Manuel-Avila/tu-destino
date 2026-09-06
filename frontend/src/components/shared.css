@@ -1,0 +1,157 @@
+.app-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: .48rem;
+  color: inherit;
+  font-size: 1.17rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: -.03em;
+}
+
+.app-brand img { 
+  width: 28px; 
+  height: 28px; 
+  object-fit: contain; 
+  filter: brightness(0) saturate(100%) invert(22%) sepia(22%) saturate(1120%) hue-rotate(126deg) brightness(88%) contrast(102%);
+}
+
+.app-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  padding: .82rem 1.15rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  font: inherit;
+  font-size: .91rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: transform .2s ease, background .2s ease, border-color .2s ease;
+}
+
+.app-button:hover { 
+  transform: translateY(-2px); 
+}
+
+.app-button--primary { 
+  color: #0b3834; 
+  background: #fff; 
+}
+
+.app-button--outline { 
+  color: #fff; 
+  border-color: rgba(255,255,255,.65); 
+  background: transparent; 
+}
+
+.app-button--light { 
+  color: #0b3834; 
+  background: #d6eee7; 
+}
+
+.app-button--ghost { 
+  color: inherit; 
+  background: transparent; 
+  border-color: rgba(255,255,255,.5); 
+  padding: .58rem .9rem; 
+}
+
+.dashboard-header { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  gap: 1.5rem; 
+}
+
+.dashboard-header__links, .dashboard-header__account { 
+  display: flex; 
+  align-items: center; 
+  gap: 2rem; 
+}
+
+.dashboard-header__links a { 
+  color: inherit; 
+  text-decoration: none; 
+  font-size: .9rem; 
+  font-weight: 500; 
+  opacity: .9; 
+}
+
+.dashboard-header__links a:hover { 
+  opacity: 1; 
+}
+
+.dashboard-header__welcome { 
+  font-size: .88rem; 
+  white-space: nowrap; 
+}
+
+.app-footer { 
+  min-height: 120px; 
+  padding: 2rem 7vw; 
+  display: flex; 
+  gap: 1.5rem; 
+  align-items: center; 
+  justify-content: space-between; 
+  color: #5e746e; 
+  font-size: .82rem; 
+}
+
+.app-footer__brand { 
+  color: #113c37; 
+}
+
+.app-footer p { 
+  margin: 0; 
+}
+
+.app-footer a:last-child { 
+  color: #113c37; 
+  font-weight: 700; 
+  text-decoration: none; 
+}
+
+.app-footer__links { 
+  display: grid; 
+  grid-template-columns: repeat(2, minmax(120px, 1fr)); 
+  gap: .70rem 2rem; 
+}
+
+.app-footer__links a { 
+  color: inherit; 
+  font-size: .82rem; 
+  text-decoration: none; 
+}
+
+.app-footer__links a:hover { 
+  text-decoration: 
+  underline; 
+}
+
+.section-heading__eyebrow { 
+  margin: 0 0 1.15rem; 
+  color: #43897f; 
+  font-size: .72rem; 
+  font-weight: 700; 
+  letter-spacing: .16em; 
+}
+
+.section-heading h2 { 
+  margin: 0; 
+  font-family: 'Playfair Display', Georgia, serif; 
+  font-size: clamp(1.5rem, 2.8vw, 2.5rem);
+  font-weight: 600; 
+  line-height: 1.08; 
+  letter-spacing: -.035em; 
+}
+
+
+@media (max-width: 760px) {
+  .dashboard-header__links, .dashboard-header__welcome { display: none; }
+  .dashboard-header__account { margin-left: auto; }
+  .app-footer { min-height: 0; padding: 2.5rem 1.5rem; flex-wrap: wrap; }
+}
