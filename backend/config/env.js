@@ -14,9 +14,6 @@ export const config = {
     secret: process.env.JWT_SECRET,
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   },
-  google: {
-    clientId: process.env.GOOGLE_CLIENT_ID,
-  },
 };
 
 // Fail fast if critical secrets are missing (except in test env).

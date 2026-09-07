@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthLayout from './AuthLayout';
-import GoogleSignInButton from '../components/GoogleSignInButton';
-import { useAuth } from '../context/AuthContext';
+import { useAuthStore } from '../store/authStore';
 
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d).{8,}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -17,22 +16,22 @@ function validate({ fullName, email, password }) {
   }
 
   if (!email.trim()) {
-    errors.email = 'El correo electrónico es obligatorio.';
+    errors.email = 'El correo electrnico es obligatorio.';
   } else if (!EMAIL_REGEX.test(email.trim())) {
-    errors.email = 'Escribe un correo electrónico válido.';
+    errors.email = 'Escribe un correo electrnico vlido.';
   }
 
   if (!password) {
-    errors.password = 'La contraseña es obligatoria.';
+    errors.password = 'La contrasea es obligatoria.';
   } else if (!PASSWORD_REGEX.test(password)) {
-    errors.password = 'Mínimo 8 caracteres, con al menos una letra y un número.';
+    errors.password = 'Mnimo 8 caracteres, con al menos una letra y un nmero.';
   }
 
   return errors;
 }
 
 export default function RegisterPage() {
-  const { register } = useAuth();
+  const register = useAuthStore((state) => state.register);
   const navigate = useNavigate();
 
   const [form, setForm] = useState({ fullName: '', email: '', password: '' });
@@ -71,10 +70,10 @@ export default function RegisterPage() {
   }
 
   return (
-    <AuthLayout headline={<>Conviértete en un guardián de las costas de BCS.</>}>
+    <AuthLayout headline={<>Convirtete en un guardin de las costas de BCS.</>}>
       <h2>Crear una cuenta</h2>
       <p className="auth-form-panel__subtitle">
-        Únete a nuestra comunidad y ayuda a proteger el paraíso.
+        nete a nuestra comunidad y ayuda a proteger el paraso.
       </p>
 
       {formError && <div className="auth-form__error-banner">{formError}</div>}
@@ -98,7 +97,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="auth-field">
-          <label htmlFor="email">Correo electrónico</label>
+          <label htmlFor="email">Correo electrnico</label>
           <input
             id="email"
             name="email"
@@ -113,13 +112,13 @@ export default function RegisterPage() {
         </div>
 
         <div className="auth-field">
-          <label htmlFor="password">Contraseña</label>
+          <label htmlFor="password">Contrasea</label>
           <input
             id="password"
             name="password"
             type="password"
             autoComplete="new-password"
-            placeholder="••••••••"
+            placeholder=""
             value={form.password}
             onChange={handleChange('password')}
             aria-invalid={Boolean(fieldErrors.password)}
@@ -130,22 +129,18 @@ export default function RegisterPage() {
         </div>
 
         <button type="submit" className="auth-submit" disabled={submitting}>
-          {submitting ? 'Creando cuenta…' : 'Registrarse'}
+          {submitting ? 'Creando cuenta...' : 'Registrarse'}
         </button>
       </form>
 
-      <div className="auth-divider">o</div>
-
-      <GoogleSignInButton onError={setFormError} />
-
-      <p className="auth-switch">
-        ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
+      <p className="auth-switch" style={{ marginTop: '1.5rem' }}>
+        Ya tienes cuenta? <Link to="/login">Inicia sesin</Link>
       </p>
 
       <p className="auth-terms">
         Al registrarte, aceptas nuestros{' '}
-        <a href="/terminos">Términos de Servicio</a> y{' '}
-        <a href="/privacidad">Política de Privacidad</a>.
+        <a href="/terminos">Trminos de Servicio</a> y{' '}
+        <a href="/privacidad">Poltica de Privacidad</a>.
       </p>
     </AuthLayout>
   );

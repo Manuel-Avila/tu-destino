@@ -1,16 +1,15 @@
 import { Router } from 'express';
-import { register, login, me, googleAuth } from '../controllers/auth.controller.js';
+import { register, login, me } from '../controllers/auth.controller.js';
 import { requireAuth } from '../middleware/auth.middleware.js';
 import { authRateLimiter } from '../middleware/rateLimit.middleware.js';
+import { validateRequest } from '../middleware/validate.middleware.js';
+import { registerSchema, loginSchema } from '../validators/auth.validators.js';
 
 const router = Router();
 
-// Rutas públicas
-router.post('/register', authRateLimiter, register);
-router.post('/login', authRateLimiter, login);
-router.post('/google', authRateLimiter, googleAuth);
+router.post('/register', authRateLimiter, validateRequest(registerSchema), register);
+router.post('/login', authRateLimiter, validateRequest(loginSchema), login);
 
-// Ruta protegida: requiere "Authorization: Bearer <token>"
 router.get('/me', requireAuth, me);
 
 export default router;

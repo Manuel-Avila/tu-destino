@@ -1,19 +1,13 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuthStore } from '../store/authStore';
 
-/**
- * Envuelve cualquier ruta que requiera sesión iniciada.
- * Uso en App.jsx:
- *   <Route element={<ProtectedRoute />}>
- *     <Route path="/dashboard" element={<DashboardPage />} />
- *   </Route>
- */
 export default function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
+  const loading = useAuthStore((state) => state.loading);
   const location = useLocation();
 
   if (loading) {
-    return <div className="auth-loading">Cargando…</div>;
+    return <div className="auth-loading">Cargando...</div>;
   }
 
   if (!isAuthenticated) {
