@@ -8,12 +8,12 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function validate({ email, password }) {
   const errors = {};
   if (!email.trim()) {
-    errors.email = 'El correo electrnico es obligatorio.';
+    errors.email = 'El correo electrónico es obligatorio.';
   } else if (!EMAIL_REGEX.test(email.trim())) {
-    errors.email = 'Escribe un correo electrnico vlido.';
+    errors.email = 'Escribe un correo electrónico válido.';
   }
   if (!password) {
-    errors.password = 'La contrasea es obligatoria.';
+    errors.password = 'La contraseña es obligatoria.';
   }
   return errors;
 }
@@ -56,17 +56,17 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthLayout headline={<>Bienvenido de vuelta, guardin de las costas.</>}>
-      <h2>Inicia sesin</h2>
+    <AuthLayout headline={<>Bienvenido de vuelta, guardián de las costas.</>}>
+      <h2>Inicia sesión</h2>
       <p className="auth-form-panel__subtitle">
-        Contina cuidando el paraso donde lo dejaste.
+        Continúa cuidando el paraíso donde lo dejaste.
       </p>
 
       {formError && <div className="auth-form__error-banner">{formError}</div>}
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="auth-field">
-          <label htmlFor="email">Correo electrnico</label>
+          <label htmlFor="email">Correo electrónico</label>
           <input
             id="email"
             name="email"
@@ -81,7 +81,7 @@ export default function LoginPage() {
         </div>
 
         <div className="auth-field">
-          <label htmlFor="password">Contrasea</label>
+          <label htmlFor="password">Contraseña</label>
           <input
             id="password"
             name="password"
@@ -98,12 +98,12 @@ export default function LoginPage() {
         </div>
 
         <button type="submit" className="auth-submit" disabled={submitting}>
-          {submitting ? 'Iniciando sesin...' : 'Iniciar sesin'}
+          {submitting ? 'Iniciando sesión...' : 'Iniciar sesión'}
         </button>
       </form>
 
       <p className="auth-switch" style={{ marginTop: '1.5rem' }}>
-        No tienes cuenta? <Link to="/register">Regstrate</Link>
+        ¿No tienes cuenta? <Link to="/register">Regístrate</Link>
       </p>
     </AuthLayout>
   );

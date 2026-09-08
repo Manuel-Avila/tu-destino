@@ -16,15 +16,15 @@ function validate({ fullName, email, password }) {
   }
 
   if (!email.trim()) {
-    errors.email = 'El correo electrnico es obligatorio.';
+    errors.email = 'El correo electrónico es obligatorio.';
   } else if (!EMAIL_REGEX.test(email.trim())) {
-    errors.email = 'Escribe un correo electrnico vlido.';
+    errors.email = 'Escribe un correo electrónico válido.';
   }
 
   if (!password) {
-    errors.password = 'La contrasea es obligatoria.';
+    errors.password = 'La contraseña es obligatoria.';
   } else if (!PASSWORD_REGEX.test(password)) {
-    errors.password = 'Mnimo 8 caracteres, con al menos una letra y un nmero.';
+    errors.password = 'Mínimo 8 caracteres, con al menos una letra y un número.';
   }
 
   return errors;
@@ -70,10 +70,10 @@ export default function RegisterPage() {
   }
 
   return (
-    <AuthLayout headline={<>Convirtete en un guardin de las costas de BCS.</>}>
+    <AuthLayout headline={<>Conviértete en un guardián de las costas de BCS.</>}>
       <h2>Crear una cuenta</h2>
       <p className="auth-form-panel__subtitle">
-        nete a nuestra comunidad y ayuda a proteger el paraso.
+        Únete a nuestra comunidad y ayuda a proteger el paraíso.
       </p>
 
       {formError && <div className="auth-form__error-banner">{formError}</div>}
@@ -97,7 +97,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="auth-field">
-          <label htmlFor="email">Correo electrnico</label>
+          <label htmlFor="email">Correo electrónico</label>
           <input
             id="email"
             name="email"
@@ -112,7 +112,7 @@ export default function RegisterPage() {
         </div>
 
         <div className="auth-field">
-          <label htmlFor="password">Contrasea</label>
+          <label htmlFor="password">Contraseña</label>
           <input
             id="password"
             name="password"
@@ -134,13 +134,13 @@ export default function RegisterPage() {
       </form>
 
       <p className="auth-switch" style={{ marginTop: '1.5rem' }}>
-        Ya tienes cuenta? <Link to="/login">Inicia sesin</Link>
+        ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
       </p>
 
       <p className="auth-terms">
         Al registrarte, aceptas nuestros{' '}
-        <a href="/terminos">Trminos de Servicio</a> y{' '}
-        <a href="/privacidad">Poltica de Privacidad</a>.
+        <a href="/terminos">Términos de Servicio</a> y{' '}
+        <a href="/privacidad">Política de Privacidad</a>.
       </p>
     </AuthLayout>
   );
