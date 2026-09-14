@@ -1,33 +1,46 @@
+import { useState, useEffect } from 'react';
 import './home.css';
-import Button from '../components/Button';
 import DashboardHeader from '../components/DashboardHeader';
 import Footer from '../components/Footer';
-import SectionHeading from '../components/SectionHeading';
-import balandraImage from '../assets/balandra-playa.jpg';
-import caboImage from '../assets/cabo-pulmo.jpg';
 
-const destinations = [
-  {
-    name: 'Playa Balandra',
-    label: 'Área Protegida',
-    description: 'Reconocida como una de las playas más hermosas de México, su ecosistema frágil de manglares necesita tu cuidado constante.',
-    className: 'destination-card--balandra',
-    image: balandraImage,
-  },
-  {
-    name: 'Cabo Pulmo',
-    label: 'Área Natural Protegida',
-    description: 'El arrecife de coral más exitoso en recuperación del mundo.',
-    className: 'destination-card--pulmo',
-    image: caboImage,
-  },
-];
+import HomeTab from '../components/home/HomeTab';
+import DestinationsTab from '../components/home/DestinationsTab';
+import EducationTab from '../components/home/EducationTab';
+import AboutTab from '../components/home/AboutTab';
+import ReportsTab from '../components/home/ReportsTab';
 
 export default function HomePage() {
+  // Pestaña activa ('inicio', 'destinos', 'educacion', 'acerca-de', 'reportes')
+  const [activeTab, setActiveTab] = useState(() => {
+    const hash = window.location.hash.replace('#', '');
+    return ['inicio', 'destinos', 'educacion', 'acerca-de', 'reportes'].includes(hash)
+      ? hash
+      : 'inicio';
+  });
+
+  useEffect(() => {
+    const onHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (['inicio', 'destinos', 'educacion', 'acerca-de', 'reportes'].includes(hash)) {
+        setActiveTab(hash);
+      }
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  const handleSelectTab = (tabId) => {
+    setActiveTab(tabId);
+    window.location.hash = tabId;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <main className="home-page" id="inicio">
       <DashboardHeader
         className="home-header"
+        activeTab={activeTab}
+        onSelectTab={handleSelectTab}
         links={[
           { href: '#inicio', label: 'Inicio' },
           { href: '#destinos', label: 'Destinos' },
@@ -37,47 +50,18 @@ export default function HomePage() {
         ]}
       />
 
-      <section className="home-hero" aria-labelledby="home-title">
-        <div className="home-hero__content">
-          <h1 id="home-title">Descubre Baja California Sur.<br />Protege lo que amas.</h1>
-          <p>
-            Únete a nuestra comunidad de viajeros conscientes y guardianes del océano.<br />
-            Explora destinos increíbles mientras contribuyes a la conservación marina.
-          </p>
-          <div className="home-hero__actions">
-            <Button href="#destinos">Explorar destinos <span>→</span></Button>
-            <Button href="#reportes" variant="outline">Realizar un reporte <span>ⓘ</span></Button>
-          </div>
-        </div>
-      </section>
-
-      <section className="home-destinations" id="destinos" aria-label="Destinos destacados">
-        <SectionHeading eyebrow={null} title="Destinos Destacados" className="home-destinations__heading" />
-        <p className="home-destinations__intro">Lugares impresionantes que requieren nuestra protección y respeto.</p>
-
-        <div className="home-destination-grid">
-          {destinations.map((destination) => (
-            <article
-              className={`destination-card ${destination.className}`}
-              key={destination.name}
-              style={{ backgroundImage: `url(${destination.image})` }}
-            >
-              <div className="destination-card__content">
-                <span className="destination-card__label">{destination.label}</span>
-                <h3>{destination.name}</h3>
-                <p>{destination.description}</p>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+      {activeTab === 'inicio' && <HomeTab onSelectTab={handleSelectTab} />}
+      {activeTab === 'destinos' && <DestinationsTab />}
+      {activeTab === 'educacion' && <EducationTab />}
+      {activeTab === 'acerca-de' && <AboutTab />}
+      {activeTab === 'reportes' && <ReportsTab />}
 
       <Footer
         className="home-footer"
         description=""
         links={[
-          { label: 'Privacy Policy', href: '/public/Politica_de_Privacidad_Tu_Destino.pdf'},
-          { label: 'Terms of Service', href: '/public/Terminos_de_Servicio_Tu_Destino.pdf'},
+          { label: 'Privacy Policy', href: '/Politica_de_Privacidad_Tu_Destino.pdf' },
+          { label: 'Terms of Service', href: '/Terminos_de_Servicio_Tu_Destino.pdf' },
           { label: 'Scientific Data', href: '#destinos' },
           { label: 'Contact Us', href: '#acerca-de' },
         ]}

@@ -1,0 +1,97 @@
+/* Reportes Section */
+.home-reports { 
+  padding: 2.75rem 2vw 4rem; 
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+/* Modo Informativo: Tipos de reporte */
+.reports-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.report-info-card {
+  background: #fff;
+  border: 1px solid #cbebe0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 3px 12px rgba(0, 89, 80, 0.04);
+}
+
+.report-info-icon {
+  font-size: 2.2rem;
+  margin-bottom: .8rem;
+}
+
+.report-info-card h4 {
+  margin: 0 0 .5rem;
+  color: #004d40;
+  font-size: 1.05rem;
+}
+
+.report-info-card p {
+  margin: 0;
+  color: #4b6662;
+  font-size: .88rem;
+  line-height: 1.5;
+}
+
+/* Flujo de atención */
+.report-workflow-box {
+  background: #fff;
+  border: 1px solid #bce6d7;
+  border-radius: 12px;
+  padding: 1.8rem;
+  margin-bottom: 2rem;
+}
+
+.report-workflow-box h4 {
+  margin: 0 0 1.2rem;
+  color: #004d40;
+  font-size: 1.15rem;
+  text-align: center;
+}
+
+.workflow-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.workflow-step {
+  text-align: center;
+}
+
+.step-badge {
+  display: inline-block;
+  background: #e0f2f1;
+  color: #00796b;
+  font-size: .78rem;
+  font-weight: 700;
+  padding: .2rem .7rem;
+  border-radius: 999px;
+  margin-bottom: .6rem;
+}
+
+.workflow-step strong {
+  display: block;
+  color: #004d40;
+  font-size: .98rem;
+  margin-bottom: .4rem;
+}
+
+.workflow-step p {
+  margin: 0;
+  color: #557570;
+  font-size: .85rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 760px) {
+  .home-reports { 
+    padding: 2rem 1rem 3rem; 
+  }
+}

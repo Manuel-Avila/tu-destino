@@ -1,0 +1,110 @@
+/* Acerca de Section */
+.home-about { 
+  padding: 2.75rem 2vw 4rem; 
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 2rem;
+}
+
+.about-text-card {
+  background: #fff;
+  border: 1px solid #d4ede3;
+  border-radius: 14px;
+  padding: 2.2rem;
+  box-shadow: 0 4px 16px rgba(0, 89, 80, 0.05);
+}
+
+.about-text-card h3 {
+  margin: 1.5rem 0 .7rem;
+  color: #004d40;
+  font-family: Montserrat, Arial, sans-serif;
+}
+
+.about-text-card h3:first-child {
+  margin-top: 0;
+}
+
+.about-text-card p {
+  color: #3b5a55;
+  line-height: 1.6;
+  font-size: .95rem;
+  margin-bottom: 1rem;
+}
+
+.about-bullets {
+  padding-left: 1.2rem;
+  color: #3b5a55;
+  line-height: 1.7;
+  font-size: .92rem;
+}
+
+.about-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.about-info-box {
+  background: #f3faf7;
+  border: 1px solid #bce4d6;
+  border-radius: 12px;
+  padding: 1.8rem;
+}
+
+.about-info-box h4 {
+  margin: 0 0 .9rem;
+  color: #005950;
+  font-size: 1.1rem;
+}
+
+.about-info-box p {
+  margin: 0 0 .6rem;
+  color: #3b5a55;
+  font-size: .9rem;
+  line-height: 1.45;
+}
+
+.about-info-box ul {
+  margin: .4rem 0 0;
+  padding-left: 1.2rem;
+  color: #3b5a55;
+  font-size: .88rem;
+  line-height: 1.55;
+}
+
+.about-join-card {
+  background: #00796b;
+  color: #fff;
+  border-radius: 12px;
+  padding: 1.8rem;
+  text-align: center;
+}
+
+.about-join-card h4 {
+  margin: 0 0 .5rem;
+  color: #fff;
+  font-size: 1.15rem;
+}
+
+.about-join-card p {
+  color: #e0f2f1;
+  font-size: .88rem;
+  margin-bottom: 1.2rem;
+}
+
+@media (max-width: 900px) {
+  .about-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .home-about { 
+    padding: 2rem 1rem 3rem; 
+  }
+}
