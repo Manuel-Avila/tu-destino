@@ -19,6 +19,7 @@ export const destinationsData = [
       'Prohibido pisar o dañar los manglares',
     ],
     bestActivities: 'Kayak suave, paddle board y senderismo por rutas autorizadas.',
+    coordinates: [24.3216, -110.3242],
   },
   {
     id: 'pulmo',
@@ -35,6 +36,7 @@ export const destinationsData = [
       'Distancia mínima con tortugas, mantas y tiburones toro',
     ],
     bestActivities: 'Buceo y snorkel en arrecife, observación de cardúmenes masivos.',
+    coordinates: [23.4475, -109.4311],
   },
   {
     id: 'espiritu',
@@ -51,6 +53,7 @@ export const destinationsData = [
       'Senderismo únicamente por senderos trazados por CONANP',
     ],
     bestActivities: 'Nado respetuoso con lobos marinos en temporada, kayak y campamento regulado.',
+    coordinates: [24.4842, -110.3164],
   },
   {
     id: 'loreto',
@@ -67,5 +70,6 @@ export const destinationsData = [
       'Uso de chaleco salvavidas obligatorio en recorridos',
     ],
     bestActivities: 'Avistamiento responsable de ballena azul, snorkel en aguas abiertas y senderismo.',
+    coordinates: [25.9928, -111.1215],
   },
 ];

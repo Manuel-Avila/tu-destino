@@ -107,6 +107,25 @@
   color: rgba(255, 255, 255, 0.88) !important;
 }
 
+.destination-map-container {
+  margin-top: 1rem;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.destination-map {
+  height: 150px;
+  width: 100%;
+  z-index: 1;
+}
+
+/* Ensure map controls (like zoom buttons) look ok on dark background or reset their styles if needed */
+.leaflet-control-zoom a {
+  color: #333 !important;
+}
+
 @media (max-width: 760px) {
   .destinations-tab-section { 
     padding: 2rem 1rem 3rem; 

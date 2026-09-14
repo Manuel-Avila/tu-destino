@@ -1,6 +1,20 @@
 import SectionHeading from '../SectionHeading';
 import { destinationsData } from '../../data/destinations';
+import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import './DestinationsTab.css';
+
+// Fix for default Leaflet marker icon in React/Vite
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIcon2x,
+  shadowUrl: markerShadow,
+});
 
 export default function DestinationsTab() {
   return (
@@ -73,6 +87,22 @@ export default function DestinationsTab() {
                 <p className="dest-activities">
                   <strong>Actividades sustentables:</strong> {destination.bestActivities}
                 </p>
+                {destination.coordinates && (
+                  <div className="destination-map-container" onClick={(e) => e.stopPropagation()}>
+                    <MapContainer
+                      center={destination.coordinates}
+                      zoom={12}
+                      scrollWheelZoom={false}
+                      className="destination-map"
+                    >
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <Marker position={destination.coordinates}></Marker>
+                    </MapContainer>
+                  </div>
+                )}
               </div>
             </div>
           </article>
