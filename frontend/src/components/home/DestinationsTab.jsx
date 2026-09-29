@@ -1,22 +1,86 @@
+import { Link } from 'react-router-dom';
 import SectionHeading from '../SectionHeading';
+import Icon from '../events/EventIcons';
+import AuthCallout from '../public/AuthCallout';
 import { destinationsData } from '../../data/destinations';
-import { MapContainer, TileLayer, Marker } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import './EventsTab.css';
 import './DestinationsTab.css';
 
-// Fix for default Leaflet marker icon in React/Vite
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconUrl: markerIcon,
-  iconRetinaUrl: markerIcon2x,
-  shadowUrl: markerShadow,
-});
+function StarRating({ rating }) {
+  const rounded = Math.round(rating);
+  return (
+    <span className="catalog-card__stars" aria-hidden="true">
+      {Array.from({ length: 5 }, (_, i) => (
+        <span key={i} className={i < rounded ? 'is-filled' : 'is-empty'}>★</span>
+      ))}
+    </span>
+  );
+}
 
-export default function DestinationsTab() {
+function CatalogGrid() {
+  return (
+    <div className="destinations-catalog-grid">
+      {destinationsData.map((destination) => (
+        <div
+          className="catalog-card"
+          key={destination.id}
+          style={{ backgroundImage: `url(${destination.image})` }}
+        >
+          <span className="catalog-card__badge">{destination.tag || destination.label}</span>
+
+          <div className="catalog-card__content">
+            <h3>{destination.name}</h3>
+            <p className="dest-location">📍 {destination.location}</p>
+
+            {typeof destination.rating === 'number' && (
+              <p className="catalog-card__rating">
+                <StarRating rating={destination.rating} />
+                <span className="catalog-card__rating-number">{destination.rating.toFixed(1)}</span>
+                <span className="catalog-card__rating-count">({destination.reviewCount} reviews)</span>
+              </p>
+            )}
+
+            <p className="dest-description">{destination.description}</p>
+
+            <Link to={`/app/destinos/${destination.id}`} className="catalog-card__cta">
+              Explorar destino
+            </Link>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// locked = antes de iniciar sesión: solo se muestra la información de la sección.
+// Con sesión, usa el mismo formato de contenedor que Eventos ecológicos.
+export default function DestinationsTab({ locked = false }) {
+  if (!locked) {
+    return (
+      <div className="ev-tab-wrap">
+        <section className="ev-tab" id="destinos" aria-label="Destinos protegidos de Baja California Sur">
+          <nav className="ev-breadcrumb" aria-label="Ruta de navegación">
+            <Link to="/app"><Icon name="building" size={13} /> Inicio</Link>
+            <Icon name="chevron-right" size={12} />
+            <span className="is-current">Destinos</span>
+          </nav>
+
+          <header className="ev-hero">
+            <p className="ev-hero__eyebrow"><Icon name="pin" size={14} /> ÁREAS NATURALES PROTEGIDAS</p>
+            <h1>Destinos de Baja California Sur</h1>
+            <p className="ev-hero__lead">
+              Explora playas, arrecifes y santuarios marinos de alto valor ecológico. Conoce su estatus de
+              protección, sus reglas de visita y las actividades de bajo impacto que te permiten disfrutarlos
+              sin alterar sus hábitats.
+            </p>
+          </header>
+
+          <CatalogGrid />
+        </section>
+      </div>
+    );
+  }
+
   return (
     <section className="destinations-tab-section" id="destinos" aria-label="Destinos protegidos de Baja California Sur">
       <div className="section-header-wrap">
@@ -59,55 +123,10 @@ export default function DestinationsTab() {
         </div>
       </div>
 
-      {/* Grid de Destinos del Catálogo */}
-      <div className="destinations-catalog-grid">
-        {destinationsData.map((destination) => (
-          <article
-            className="catalog-card"
-            key={destination.id}
-            style={{ backgroundImage: `url(${destination.image})` }}
-          >
-            <div className="catalog-card__content">
-              <div className="catalog-card__top">
-                <span className="catalog-card__label">{destination.label}</span>
-              </div>
-              <h3>{destination.name}</h3>
-              <p className="dest-location">📍 {destination.location}</p>
-              <p className="dest-description">{destination.description}</p>
-
-              <div className="catalog-card__details">
-                <div className="dest-rules">
-                  <strong>Reglas de preservación:</strong>
-                  <ul>
-                    {destination.rules.map((rule, idx) => (
-                      <li key={idx}>{rule}</li>
-                    ))}
-                  </ul>
-                </div>
-                <p className="dest-activities">
-                  <strong>Actividades sustentables:</strong> {destination.bestActivities}
-                </p>
-                {destination.coordinates && (
-                  <div className="destination-map-container" onClick={(e) => e.stopPropagation()}>
-                    <MapContainer
-                      center={destination.coordinates}
-                      zoom={12}
-                      scrollWheelZoom={false}
-                      className="destination-map"
-                    >
-                      <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                      />
-                      <Marker position={destination.coordinates}></Marker>
-                    </MapContainer>
-                  </div>
-                )}
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
+      <AuthCallout
+        title="Inicia sesión para ver los destinos"
+        text="Con tu cuenta podrás ver la ficha completa de cada destino, sus reglas de preservación y las reseñas de la comunidad."
+      />
     </section>
   );
 }

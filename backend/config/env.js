@@ -10,6 +10,8 @@ export const config = {
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT,
   },
+  // Secreto compartido con el Apps Script del Google Form (ver docs/google-forms-cupos.md).
+  formsWebhookSecret: process.env.FORMS_WEBHOOK_SECRET,
   jwt: {
     secret: process.env.JWT_SECRET,
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',

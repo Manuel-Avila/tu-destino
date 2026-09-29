@@ -151,7 +151,22 @@
 
 
 @media (max-width: 760px) {
-  .dashboard-header__links, .dashboard-header__welcome { display: none; }
+  .dashboard-header__links { display: none; }
+  .dashboard-header__welcome-text { display: none; }
   .dashboard-header__account { margin-left: auto; }
   .app-footer { min-height: 0; padding: 2.5rem 1.5rem; flex-wrap: wrap; }
+}
+
+/* "Hola, nombre" es un enlace a Mi perfil */
+a.dashboard-header__welcome { 
+  display: inline-flex; 
+  align-items: center; 
+  gap: .4rem; 
+  color: inherit; 
+  font-weight: 600; 
+  text-decoration: none; 
+}
+
+a.dashboard-header__welcome:hover { 
+  text-decoration: underline; 
 }

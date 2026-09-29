@@ -4,6 +4,8 @@ import { config } from './config/env.js';
 import './config/db.js';
 import { initDb } from './db/init.js';
 import authRouter from './routes/auth.routes.js';
+import eventosRouter from './routes/eventos.routes.js';
+import resenasRouter from './routes/resenas.routes.js';
 
 const app = express();
 
@@ -17,6 +19,12 @@ app.get('/', (req, res) => {
 // Todas las rutas de autenticación viven bajo /api/auth (router en
 // backend/routes/auth.routes.js). Ahí también se protege /me con JWT.
 app.use('/api/auth', authRouter);
+
+// Eventos ecológicos: listado, detalle y webhook de confirmaciones del Google Form.
+app.use('/api/eventos', eventosRouter);
+
+// Reseñas de destinos (requieren sesión; se guardan en PostgreSQL).
+app.use('/api/resenas', resenasRouter);
 
 // 404 para cualquier ruta de API no encontrada.
 app.use('/api', (req, res) => {

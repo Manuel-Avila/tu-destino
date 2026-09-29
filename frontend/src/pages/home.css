@@ -153,13 +153,16 @@
 }
 
 .home-destination-grid { 
-  display: grid; 
-  grid-template-columns: 2fr 1.20fr; 
+  display: flex; 
   gap: 1rem; 
 }
 
 .destination-card { 
+  flex: 1 1 0; 
+  min-width: 0; 
   min-height: 420px; 
+  cursor: pointer; 
+  transition: flex-grow .5s ease, box-shadow .5s ease; 
   position: relative; 
   overflow: hidden; 
   border-radius: 4px; 
@@ -169,6 +172,13 @@
   background-position: center; 
   background-size: cover; 
   isolation: isolate; 
+}
+
+/* Al pasar el cursor, la tarjeta ocupa más espacio y la otra se achica. */
+.home-destination-grid:hover .destination-card { flex-grow: 1; }
+.home-destination-grid .destination-card:hover { 
+  flex-grow: 1.7; 
+  box-shadow: 0 14px 34px rgba(0, 36, 33, .28); 
 }
 
 .destination-card::before { 
@@ -368,7 +378,8 @@
   .home-header .dashboard-header__account { margin-left: auto; }
   .home-hero { min-height: 340px; }
   .home-destinations { padding: 2.2rem 1rem 2.8rem; }
-  .home-destination-grid { grid-template-columns: 1fr; }
+  .home-destination-grid { flex-direction: column; }
+  .home-destination-grid .destination-card:hover { flex-grow: 1; }
   .destination-card { min-height: 200px; }
   .home-footer .app-footer__legal { text-align: left; }
   .auth-prompt-banner { flex-direction: column; align-items: flex-start; }

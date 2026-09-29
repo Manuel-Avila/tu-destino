@@ -22,7 +22,7 @@ export default function LoginPage() {
   const login = useAuthStore((state) => state.login);
   const navigate = useNavigate();
   const location = useLocation();
-  const redirectTo = location.state?.from?.pathname || '/dashboard';
+  const redirectTo = location.state?.from?.pathname || '/app/destinos';
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [fieldErrors, setFieldErrors] = useState({});

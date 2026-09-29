@@ -1,10 +1,16 @@
-import { useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import Brand from './Brand';
 import Button from './Button';
+import Icon from './events/EventIcons';
 import './shared.css';
 
-export default function DashboardHeader({ links = [], activeTab = '', onSelectTab, className = '' }) {
+/**
+ * Header compartido. Recibe los enlaces como rutas reales de react-router:
+ *   links = [{ to: '/app/destinos', label: 'Destinos', end?: boolean }]
+ * `brandTo` es a donde lleva el logo + "TuDestino" (el Inicio).
+ */
+export default function DashboardHeader({ links = [], brandTo = '/', className = '' }) {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
   const navigate = useNavigate();
@@ -12,39 +18,35 @@ export default function DashboardHeader({ links = [], activeTab = '', onSelectTa
 
   function handleLogout() {
     logout();
-    navigate('/login', { replace: true });
+    navigate('/', { replace: true });
   }
 
   return (
     <header className={`dashboard-header ${className}`.trim()}>
-      <Brand className="dashboard-header__brand" />
+      <Brand className="dashboard-header__brand" to={brandTo} />
 
       <nav className="dashboard-header__links" aria-label="Navegación principal">
-        {links.map((link) => {
-          const tabId = link.id || link.href?.replace('#', '');
-          const isActive = activeTab ? activeTab === tabId : false;
-          return (
-            <a
-              key={link.href}
-              href={link.href}
-              className={`dashboard-header__link ${isActive ? 'is-active' : ''}`.trim()}
-              onClick={(e) => {
-                if (onSelectTab) {
-                  e.preventDefault();
-                  onSelectTab(tabId);
-                }
-              }}
-            >
-              {link.label}
-            </a>
-          );
-        })}
+        {links.map((link) => (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            end={link.end}
+            className={({ isActive }) => `dashboard-header__link ${isActive ? 'is-active' : ''}`.trim()}
+          >
+            {link.label}
+          </NavLink>
+        ))}
       </nav>
 
       <div className="dashboard-header__account">
         {user ? (
           <>
-            {firstName && <span className="dashboard-header__welcome">Hola, {firstName}</span>}
+            {firstName && (
+              <Link to="/app/perfil" className="dashboard-header__welcome" title="Ir a mi perfil">
+                <Icon name="user" size={18} />
+                <span className="dashboard-header__welcome-text">Hola, {firstName}</span>
+              </Link>
+            )}
             <Button variant="ghost" onClick={handleLogout}>Cerrar sesión</Button>
           </>
         ) : (

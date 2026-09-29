@@ -30,6 +30,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:-change_me_in_a_real_env_file}
       - JWT_EXPIRES_IN=7d
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - FORMS_WEBHOOK_SECRET=${FORMS_WEBHOOK_SECRET}
     depends_on:
       - db
     command: npm run dev

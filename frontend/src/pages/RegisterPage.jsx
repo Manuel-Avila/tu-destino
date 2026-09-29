@@ -57,7 +57,7 @@ export default function RegisterPage() {
     setSubmitting(true);
     try {
       await register(form);
-      navigate('/dashboard', { replace: true });
+      navigate('/app/destinos', { replace: true });
     } catch (err) {
       if (err.fieldErrors) {
         setFieldErrors(err.fieldErrors);

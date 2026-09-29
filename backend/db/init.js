@@ -1,4 +1,7 @@
 import { query } from '../config/db.js';
+import { createEventosTables } from './eventos.schema.js';
+import { seedEventosIfEmpty } from './eventos.seed.js';
+import { createResenasTables } from './resenas.schema.js';
 
 /**
  * Crea las tablas necesarias si no existen todavía.
@@ -29,6 +32,10 @@ export async function initDb() {
   await query(`
     CREATE INDEX IF NOT EXISTS idx_users_email ON users (LOWER(email));
   `);
+
+  await createResenasTables();
+  await createEventosTables();
+  await seedEventosIfEmpty();
 
   console.log('[db] Tablas verificadas/creadas correctamente.');
 }

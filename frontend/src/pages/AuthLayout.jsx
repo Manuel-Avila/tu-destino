@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import './auth.css';
 import coastHero from '../assets/playa.jpg';
 import hoja1 from '../assets/logo.png';
@@ -6,15 +7,16 @@ import hoja2 from '../assets/Icon.png';
 export default function AuthLayout({ headline, children }) {
   return (
     <div className="auth-shell">
-      <aside className="auth-visual" aria-hidden="true">
-        <img src={coastHero} alt="" className="auth-visual__photo" />
-        <div className="auth-visual__tint" />
-        <div className="auth-visual__scrim" />
+      <aside className="auth-visual">
+        <img src={coastHero} alt="" className="auth-visual__photo" aria-hidden="true" />
+        <div className="auth-visual__tint" aria-hidden="true" />
+        <div className="auth-visual__scrim" aria-hidden="true" />
 
-        <div className="auth-visual__brand">
+        {/* Clic en el logo o en "TuDestino" regresa al Inicio */}
+        <Link to="/" className="auth-visual__brand" aria-label="TuDestino, ir al inicio">
           <img src={hoja1} alt="" className="auth-visual__leaf" />
           <span>TuDestino</span>
-        </div>
+        </Link>
 
         <div className="auth-visual__content">
           <h1>{headline}</h1>

@@ -1,3 +1,4 @@
+import { useAuthStore } from '../../store/authStore';
 import Button from '../Button';
 import SectionHeading from '../SectionHeading';
 import balandraImage from '../../assets/balandra-playa.jpg';
@@ -21,7 +22,9 @@ const destinations = [
   },
 ];
 
-export default function HomeTab({ onSelectTab }) {
+// El Inicio es igual con y sin sesión; solo cambia a dónde llevan los botones.
+export default function HomeTab() {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
   return (
     <div className="tab-view tab-view--inicio">
       <section className="home-hero" aria-labelledby="home-title">
@@ -35,24 +38,8 @@ export default function HomeTab({ onSelectTab }) {
             Explora destinos increíbles mientras contribuyes a la conservación marina.
           </p>
           <div className="home-hero__actions">
-            <Button
-              href="#destinos"
-              onClick={(e) => {
-                e.preventDefault();
-                onSelectTab?.('destinos');
-              }}
-            >
-              Explorar destinos <span>→</span>
-            </Button>
-            <Button
-              href="#reportes"
-              variant="outline"
-              onClick={(e) => {
-                e.preventDefault();
-                onSelectTab?.('reportes');
-              }}
-            >
-              Realizar un reporte 
+            <Button to={isAuthenticated ? '/app/destinos' : '/login'}>
+              Explorar destinos
             </Button>
           </div>
         </div>

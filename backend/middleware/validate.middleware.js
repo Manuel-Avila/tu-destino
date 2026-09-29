@@ -7,7 +7,7 @@ export const validateRequest = (schema) => {
     } catch (err) {
       if (err.name === 'ZodError') {
         const errors = {};
-        err.errors.forEach((e) => {
+        (err.issues ?? err.errors).forEach((e) => {
           if (e.path.length > 0) {
             errors[e.path[0]] = e.message;
           }
