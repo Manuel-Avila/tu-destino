@@ -26,6 +26,7 @@ export async function register(req, res) {
         id: user.id,
         fullName: user.full_name,
         email: user.email,
+        isAdmin: user.is_admin,
         createdAt: user.created_at,
       },
     });
@@ -60,6 +61,7 @@ export async function login(req, res) {
         id: user.id,
         fullName: user.full_name,
         email: user.email,
+        isAdmin: user.is_admin,
         createdAt: user.created_at,
       },
     });
@@ -80,6 +82,7 @@ export async function me(req, res) {
         id: user.id,
         fullName: user.full_name,
         email: user.email,
+        isAdmin: user.is_admin,
         createdAt: user.created_at,
       },
     });

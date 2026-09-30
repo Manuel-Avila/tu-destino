@@ -1,0 +1,208 @@
+import { query } from '../config/db.js';
+
+const destinosData = [
+  {
+    id: 'balandra',
+    name: 'Playa Balandra',
+    location: 'La Paz, B.C.S.',
+    label: 'Área de Protección de Flora y Fauna',
+    tag: 'Área Protegida',
+    category: 'kayak',
+    description: 'Reconocida como una de las playas más hermosas de México, su ecosistema frágil de manglares y aguas cristalinas de poca profundidad necesita tu cuidado constante.',
+    image: '/src/assets/balandra-playa.jpg',
+    images: ['/src/assets/balandra-playa.jpg', '/src/assets/playa-main.webp', '/src/assets/playa.jpg'],
+    rules: [
+      'Sin plásticos de un solo uso',
+      'Uso de protector solar biodegradable (Reef-Safe)',
+      'Aforo controlado por turnos matutino y vespertino',
+      'Prohibido pisar o dañar los manglares',
+    ],
+    best_activities: 'Kayak suave, paddle board y senderismo por rutas autorizadas.',
+    coordinates: [24.3216, -110.3242],
+    rating: 4.9,
+    review_count: 120,
+    rating_breakdown: [
+      { label: 'Limpieza y conservación del entorno', value: 4.9 },
+      { label: 'Biodiversidad y estado de manglares', value: 5.0 },
+      { label: 'Cumplimiento de reglas y respeto al aforo', value: 4.8 },
+      { label: 'Accesibilidad y señalización de senderos', value: 4.7 },
+    ],
+    reviews: [
+      {
+        name: 'Mariana Rodríguez',
+        initials: 'MR',
+        date: 'Septiembre 2024',
+        activity: 'Visitó en el turno matutino',
+        rating: 5,
+        comment: 'Una experiencia inigualable. El mar parecía una alberca infinita sin olas. Los guardaparques de CONANP son súper amables y revisan que no lleves desechables. Recomiendo 100% llevar escarpines o calzado acuático porque hay pequeñas rayas enterradas en la arena. ¡Cuidemos este tesoro!',
+      },
+      {
+        name: 'Carlos Gómez Treviño',
+        initials: 'CG',
+        date: 'Agosto 2024',
+        activity: 'Visitó con kayak',
+        rating: 5,
+        comment: 'Hacer kayak hacia los manglares respetando la distancia delimitada por las boyas fue fascinante. No hay señal celular ni comercios, lo cual agradezco infinitamente porque conserva la magia salvaje del lugar.',
+      },
+    ],
+  },
+  {
+    id: 'pulmo',
+    name: 'Parque Nacional Cabo Pulmo',
+    location: 'Los Cabos / La Ribera, B.C.S.',
+    label: 'Parque Nacional y Arrecife Vivo',
+    tag: 'Parque Nacional',
+    category: 'snorkel',
+    description: 'El arrecife de coral duro más antiguo del Golfo de California y el ejemplo mundial más exitoso de regeneración marina protegida por su comunidad.',
+    image: '/src/assets/cabo-pulmo.jpg',
+    images: ['/src/assets/cabo-pulmo.jpg'],
+    rules: [
+      'Prohibido tocar o pararse sobre los corales vivos',
+      'Ingreso exclusivamente con guías certificados de la comunidad',
+      'Prohibida la pesca deportiva y comercial en la zona núcleo',
+      'Distancia mínima con tortugas, mantas y tiburones toro',
+    ],
+    best_activities: 'Buceo y snorkel en arrecife, observación de cardúmenes masivos.',
+    coordinates: [23.4475, -109.4311],
+    rating: 4.8,
+    review_count: 96,
+    rating_breakdown: [
+      { label: 'Limpieza y conservación del entorno', value: 4.8 },
+      { label: 'Biodiversidad y estado del arrecife', value: 5.0 },
+      { label: 'Cumplimiento de reglas y respeto a guías', value: 4.7 },
+      { label: 'Accesibilidad y señalización', value: 4.5 },
+    ],
+    reviews: [
+      {
+        name: 'Ana Sofía Beltrán',
+        initials: 'AB',
+        date: 'Julio 2024',
+        activity: 'Visitó haciendo snorkel',
+        rating: 5,
+        comment: 'El arrecife está lleno de vida, vimos cardúmenes enormes y hasta un tiburón toro a la distancia. Los guías de la comunidad explican muy bien las reglas antes de entrar al agua.',
+      },
+      {
+        name: 'Diego Fernández',
+        initials: 'DF',
+        date: 'Junio 2024',
+        activity: 'Visitó buceando',
+        rating: 4,
+        comment: 'Excelente estado de conservación gracias a que solo se puede entrar con guía certificado. El acceso por tierra es un poco pedregoso, lleven buen calzado.',
+      },
+    ],
+  },
+  {
+    id: 'espiritu',
+    name: 'Isla Espíritu Santo',
+    location: 'Bahía de La Paz, B.C.S.',
+    label: 'Reserva de la Biósfera UNESCO',
+    tag: 'Reserva UNESCO',
+    category: 'senderismo',
+    description: 'Joya insular de contrastes desérticos y caletas turquesas, hogar de una colonia protegida de lobos marinos y aves marinas protegidas.',
+    image: '/src/assets/coast-hero.jpg',
+    images: ['/src/assets/coast-hero.jpg'],
+    rules: [
+      'Distancia mínima reglamentaria con los lobos marinos',
+      'Todo residuo generado debe regresar a tierra continental',
+      'Prohibido ingresar con mascotas o especies exóticas',
+      'Senderismo únicamente por senderos trazados por CONANP',
+    ],
+    best_activities: 'Nado respetuoso con lobos marinos en temporada, kayak y campamento regulado.',
+    coordinates: [24.4842, -110.3164],
+    rating: 4.9,
+    review_count: 84,
+    rating_breakdown: [
+      { label: 'Limpieza y conservación del entorno', value: 4.9 },
+      { label: 'Biodiversidad y colonia de lobos marinos', value: 5.0 },
+      { label: 'Cumplimiento de reglas y respeto a fauna', value: 4.9 },
+      { label: 'Accesibilidad y señalización de senderos', value: 4.6 },
+    ],
+    reviews: [
+      {
+        name: 'Paola Iturbide',
+        initials: 'PI',
+        date: 'Mayo 2024',
+        activity: 'Visitó nadando con lobos marinos',
+        rating: 5,
+        comment: 'Nadar cerca de la colonia de lobos marinos respetando la distancia fue una experiencia que jamás olvidaré. El guía fue muy estricto con no tocarlos ni perseguirlos, tal como debe ser.',
+      },
+      {
+        name: 'Héctor Manríquez',
+        initials: 'HM',
+        date: 'Abril 2024',
+        activity: 'Visitó en campamento regulado',
+        rating: 5,
+        comment: 'Acampamos una noche siguiendo todos los lineamientos de CONANP. El cielo estrellado y las caletas turquesas hacen que valga totalmente la pena cuidar este lugar.',
+      },
+    ],
+  },
+  {
+    id: 'loreto',
+    name: 'Parque Nacional Bahía de Loreto',
+    location: 'Loreto, B.C.S.',
+    label: 'Santuario de Cetáceos y Parque Marino',
+    tag: 'Parque Marino',
+    category: 'snorkel',
+    description: 'Cinco islas vírgenes que constituyen el santuario de alimentación y crianza de la ballena azul, delfines y gigantes marinos del Mar de Cortés.',
+    image: '/src/assets/playa.jpg',
+    images: ['/src/assets/playa.jpg'],
+    rules: [
+      'Velocidad de navegación reducida en zonas de avistamiento',
+      'No alimentar ni perseguir a mamíferos marinos',
+      'Portar brazalete CONANP obligatorio para conservación',
+      'Uso de chaleco salvavidas obligatorio en recorridos',
+    ],
+    best_activities: 'Avistamiento responsable de ballena azul, snorkel en aguas abiertas y senderismo.',
+    coordinates: [25.9928, -111.1215],
+    rating: 4.7,
+    review_count: 73,
+    rating_breakdown: [
+      { label: 'Limpieza y conservación del entorno', value: 4.7 },
+      { label: 'Biodiversidad y avistamiento de cetáceos', value: 4.9 },
+      { label: 'Cumplimiento de reglas de navegación', value: 4.6 },
+      { label: 'Accesibilidad y organización de tours', value: 4.5 },
+    ],
+    reviews: [
+      {
+        name: 'Renata Osuna',
+        initials: 'RO',
+        date: 'Marzo 2024',
+        activity: 'Visitó en avistamiento de ballenas',
+        rating: 5,
+        comment: 'Ver una ballena azul tan de cerca, con el capitán respetando la velocidad reducida, fue impresionante. Se nota el cuidado que le tienen a estos gigantes marinos.',
+      },
+      {
+        name: 'Iván Castellanos',
+        initials: 'IC',
+        date: 'Febrero 2024',
+        activity: 'Visitó haciendo snorkel',
+        rating: 4,
+        comment: 'Muy buena organización de los tours y el chaleco salvavidas es obligatorio en todo momento. El agua estaba un poco fría pero la visibilidad fue excelente.',
+      },
+    ],
+  },
+];
+
+export async function seedDestinosIfEmpty() {
+  const { rows } = await query('SELECT COUNT(*) AS count FROM destinos');
+  if (parseInt(rows[0].count, 10) > 2) { // Allow skipping if it already has 4 or at least some. I'll just check > 0 and I'll drop manually
+    return;
+  }
+
+  for (const d of destinosData) {
+    await query(
+      `INSERT INTO destinos (
+        id, name, location, label, tag, category, description, image,
+        images, rules, best_activities, coordinates, rating, review_count,
+        rating_breakdown, reviews
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      ON CONFLICT (id) DO NOTHING`,
+      [
+        d.id, d.name, d.location, d.label, d.tag, d.category, d.description, d.image,
+        d.images, JSON.stringify(d.rules), d.best_activities, JSON.stringify(d.coordinates),
+        d.rating, d.review_count, JSON.stringify(d.rating_breakdown), JSON.stringify(d.reviews)
+      ]
+    );
+  }
+  console.log('[db] Destinos insertados (seed) correctamente.');
+}

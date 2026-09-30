@@ -2,7 +2,7 @@ import { query } from '../config/db.js';
 
 export async function findUserByEmail(email) {
   const result = await query(
-    `SELECT id, full_name, email, password_hash, auth_provider, created_at
+    `SELECT id, full_name, email, password_hash, auth_provider, is_admin, created_at
      FROM users WHERE LOWER(email) = LOWER($1)`,
     [email]
   );
@@ -11,7 +11,7 @@ export async function findUserByEmail(email) {
 
 export async function findUserById(id) {
   const result = await query(
-    `SELECT id, full_name, email, auth_provider, created_at
+    `SELECT id, full_name, email, auth_provider, is_admin, created_at
      FROM users WHERE id = $1`,
     [id]
   );

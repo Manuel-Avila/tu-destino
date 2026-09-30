@@ -33,6 +33,9 @@ const PATHS = {
   help: <><circle cx="12" cy="12" r="9" /><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 .9-1 1.7M12 17h.01" /></>,
   people: <><circle cx="9" cy="8" r="3" /><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 5.2a3 3 0 0 1 0 5.6M18 14.5c1.8.8 3 2.5 3 5.5" /></>,
   leaf2: <path d="M5 21c0-9 4-15 15-16 0 10-5 15-13 15" />,
+  edit: <path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />,
+  trash: <><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6" /></>,
+  x: <path d="M18 6L6 18M6 6l12 12" />,
 };
 
 export default function Icon({ name, size = 16, className = '', ...rest }) {

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap');
 
 /* Tokens compartidos por la lista y el detalle de eventos */
 .ev-tab,
@@ -41,6 +41,7 @@
   line-height: 1.2;
   text-decoration: none;
   cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
   transition: background .2s ease, border-color .2s ease;
 }
 .ev-btn--solid { background: var(--ev-green); color: #fff; }
@@ -131,12 +132,13 @@
   -webkit-appearance: none;
   text-overflow: ellipsis;
 }
-.ev-field select { cursor: pointer; padding-right: 1.2rem; }
+.ev-field select { cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease; padding-right: 1.2rem; }
 .ev-field input::placeholder { color: #8b95aa; }
 .ev-field:focus-within { box-shadow: 0 0 0 2px var(--ev-green); }
 .ev-field__caret { position: absolute; right: .9rem; pointer-events: none; }
 
-/* Chips de categoría */
+/* Chips de categorÃ­a */
 .ev-chips {
   display: flex;
   gap: .5rem;
@@ -159,6 +161,7 @@
   font-size: .76rem;
   font-weight: 500;
   cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
   transition: background .2s ease, color .2s ease;
 }
 .ev-chip:hover { background: var(--ev-lav); }
@@ -206,8 +209,9 @@
   background: var(--ev-lav);
   color: #6b7397;
   cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
 }
-.ev-card__save:hover { color: #c2384f; }
+.ev-card__save:hover { color: #c2384f; background: #fde8ec; }
 .ev-card__save.is-saved { color: #c2384f; background: #fde8ec; }
 
 .ev-card__meta {
@@ -263,7 +267,7 @@
 .ev-state { display: grid; justify-items: center; gap: .8rem; padding: 2.6rem 1rem; text-align: center; color: var(--ev-text); background: #fff; border-radius: 18px; }
 .ev-state p { margin: 0; }
 
-/* Paginación */
+/* PaginaciÃ³n */
 .ev-pagination {
   display: flex;
   flex-wrap: wrap;
@@ -293,6 +297,7 @@
   font-size: .8rem;
   font-weight: 700;
   cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 .ev-pagination nav button.is-active { background: var(--ev-green); color: #fff; }
 .ev-pagination nav button:disabled { opacity: .45; cursor: default; }
@@ -308,3 +313,22 @@
   .ev-tab { padding-inline: 1rem; }
   .ev-hero { padding: 1.2rem; }
 }
+
+.admin-card-actions { position: absolute; top: 1.1rem; right: 1.1rem; display: flex; gap: 0.5rem; z-index: 10; }
+
+
+
+
+
+.ev-btn--ghost { background: rgba(10, 77, 60, 0.08); color: var(--ev-green); }
+.ev-btn--ghost:hover { background: rgba(10, 77, 60, 0.15); }
+
+.ev-tab .admin-card-btn { display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--ev-lav, #ecedf9); cursor: pointer; transition: all 0.2s ease; box-shadow: none; }
+.ev-tab .admin-card-btn:hover { transform: scale(1.05); }
+.ev-tab .admin-card-btn--edit { color: #e65100; }
+.ev-tab .admin-card-btn--edit:hover { background: #ffe0b2; }
+.ev-tab .admin-card-btn--delete { color: #c62828; }
+.ev-tab .admin-card-btn--delete:hover { background: #ffcdd2; }
+
+
+

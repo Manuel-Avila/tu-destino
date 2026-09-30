@@ -30,3 +30,21 @@ export function requireAuth(req, res, next) {
     return res.status(401).json({ error: message });
   }
 }
+
+import { findUserById } from '../models/user.model.js';
+
+export async function requireAdmin(req, res, next) {
+  // First ensure user is authenticated
+  requireAuth(req, res, async () => {
+    try {
+      const user = await findUserById(req.user.id);
+      if (!user || !user.is_admin) {
+        return res.status(403).json({ error: 'Acceso denegado. Se requieren permisos de administrador.' });
+      }
+      next();
+    } catch (err) {
+      console.error('[requireAdmin] error:', err);
+      return res.status(500).json({ error: 'Error interno del servidor.' });
+    }
+  });
+}
