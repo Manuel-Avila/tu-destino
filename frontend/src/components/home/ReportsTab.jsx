@@ -68,7 +68,7 @@ export default function ReportsTab() {
             <div className="workflow-step">
               <span className="step-badge">Paso 3</span>
               <strong>Canalización</strong>
-              <p>Notificación a brigadas comunitarias y autoridades competentes (PROFEPA y CONANP).</p>
+              <p>Notificación a los administradores del sistema.</p>
             </div>
           </div>
         </div>
