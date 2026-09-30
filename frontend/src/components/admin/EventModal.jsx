@@ -54,14 +54,23 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
     setErrors({});
     if (evento) {
       setFormData({
-        ...evento,
-        imagenes: evento.imagenes ? evento.imagenes.join(', ') : '',
+        slug: evento.slug || '',
+        tituloEvento: evento.tituloEvento || '',
+        descripcionEvento: evento.descripcionEvento || '',
+        categoria: evento.categoria || 'limpieza',
+        fecha: evento.fecha || '',
+        horaInicio: evento.horaInicio || '',
+        horaFin: evento.horaFin || '',
+        duracionHoras: evento.duracionHoras || '',
+        lugarEvento: evento.lugarEvento || '',
+        localidad: evento.localidad || '',
+        latitud: evento.coordenadas?.[0] || evento.puntoEncuentro?.coordenadas?.[0] || 24.1422,
+        longitud: evento.coordenadas?.[1] || evento.puntoEncuentro?.coordenadas?.[1] || -110.3108,
+        imagenes: Array.isArray(evento.imagenes) ? evento.imagenes.join(', ') : '',
         responsableNombre: evento.responsable?.nombre || '',
         responsableCorreo: evento.responsable?.correo || '',
         responsableTelefono: evento.responsable?.telefono || '',
-        cupoTotal: evento.convocatoria?.cupoTotal || 100,
-        latitud: evento.coordenadas?.[0] || evento.puntoEncuentro?.coordenadas?.[0] || 24.1422,
-        longitud: evento.coordenadas?.[1] || evento.puntoEncuentro?.coordenadas?.[1] || -110.3108
+        cupoTotal: evento.convocatoria?.cupoTotal || 100
       });
     } else {
       setFormData({
@@ -212,7 +221,7 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
         <label>Imágenes</label>
         <ImagePicker 
           multiple={true} 
-          initialImages={formData.imagenes || []} 
+          initialImages={Array.isArray(formData.imagenes) ? formData.imagenes : (typeof formData.imagenes === 'string' && formData.imagenes.trim() ? formData.imagenes.split(',').map(s => s.trim()).filter(Boolean) : [])} 
           onChange={(filesOrUrls) => setFormData(prev => ({ ...prev, imagenes: filesOrUrls }))}
         />
 

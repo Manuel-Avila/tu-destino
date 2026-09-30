@@ -34,6 +34,7 @@ export default function MapPicker({ lat, lng, onChange }) {
   return (
     <div style={{ height: '300px', width: '100%', borderRadius: '8px', overflow: 'hidden', border: '1px solid #ccc', marginBottom: '1rem' }}>
       <MapContainer 
+        key={`${(position || DEFAULT_CENTER).join(',')}`}
         center={position || DEFAULT_CENTER} 
         zoom={position ? 12 : DEFAULT_ZOOM} 
         style={{ height: '100%', width: '100%' }}
