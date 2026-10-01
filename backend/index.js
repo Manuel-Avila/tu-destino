@@ -2,11 +2,18 @@ import express from 'express';
 import cors from 'cors';
 import { config } from './config/env.js';
 import './config/db.js';
+import { v2 as cloudinary } from 'cloudinary';
 import { initDb } from './db/init.js';
 import authRouter from './routes/auth.routes.js';
 import eventosRouter from './routes/eventos.routes.js';
 import resenasRouter from './routes/resenas.routes.js';
 import destinosRouter from './routes/destinos.routes.js';
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 const app = express();
 

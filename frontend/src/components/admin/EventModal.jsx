@@ -49,6 +49,7 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
     imagenes: '' 
   });
   const [errors, setErrors] = useState({});
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     setErrors({});
@@ -103,7 +104,7 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
     }
   };
 
-  const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
     const result = eventSchema.safeParse(formData);
     if (!result.success) {
@@ -114,29 +115,53 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
       setErrors(fieldErrors);
       return;
     }
-    const payload = {
-      slug: formData.slug,
-      titulo_evento: formData.tituloEvento,
-      descripcion_evento: formData.descripcionEvento,
-      categoria: formData.categoria,
-      fecha_evento: formData.fecha,
-      hora_inicio: formData.horaInicio,
-      hora_fin: formData.horaFin,
-      duracion_horas: Number(formData.duracionHoras),
-      lugar_evento: formData.lugarEvento,
-      localidad: formData.localidad,
-      latitud: Number(formData.latitud),
-      longitud: Number(formData.longitud),
-      responsable_nombre: formData.responsableNombre,
-      responsable_correo: formData.responsableCorreo,
-      responsable_telefono: formData.responsableTelefono,
-      cupo_total: Number(formData.cupoTotal),
-      imagenes: Array.isArray(formData.imagenes) 
-        ? formData.imagenes.filter(img => typeof img === 'string') 
-        : (typeof formData.imagenes === 'string' ? formData.imagenes.split(',').map(s => s.trim()).filter(Boolean) : []),
-      activo: true
-    };
-    onSave(payload);
+
+    setIsUploading(true);
+    try {
+      const payload = new FormData();
+      
+      payload.append('slug', formData.slug);
+      payload.append('titulo_evento', formData.tituloEvento);
+      payload.append('descripcion_evento', formData.descripcionEvento);
+      payload.append('categoria', formData.categoria);
+      payload.append('fecha_evento', formData.fecha);
+      payload.append('hora_inicio', formData.horaInicio);
+      payload.append('hora_fin', formData.horaFin);
+      payload.append('duracion_horas', formData.duracionHoras);
+      payload.append('lugar_evento', formData.lugarEvento);
+      payload.append('localidad', formData.localidad);
+      payload.append('latitud', formData.latitud);
+      payload.append('longitud', formData.longitud);
+      payload.append('responsable_nombre', formData.responsableNombre);
+      payload.append('responsable_correo', formData.responsableCorreo);
+      payload.append('responsable_telefono', formData.responsableTelefono);
+      payload.append('cupo_total', formData.cupoTotal);
+      payload.append('activo', 'true');
+
+      let existingImages = [];
+      const currentImages = Array.isArray(formData.imagenes) 
+        ? formData.imagenes 
+        : (typeof formData.imagenes === 'string' && formData.imagenes.trim() ? formData.imagenes.split(',').map(s => s.trim()).filter(Boolean) : []);
+      
+      for (const img of currentImages) {
+        if (img instanceof File) {
+          payload.append('imagenes', img);
+        } else if (typeof img === 'string') {
+          existingImages.push(img);
+        }
+      }
+      
+      if (existingImages.length > 0) {
+        payload.append('imagenes_existentes', JSON.stringify(existingImages));
+      }
+
+      await onSave(payload);
+    } catch (err) {
+      console.error(err);
+      alert('Error al guardar el evento. Inténtalo de nuevo.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -227,7 +252,7 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
 
         <div className="admin-form-actions">
           <button type="button" className="admin-btn admin-btn--secondary" onClick={onClose}>Cancelar</button>
-          <button type="submit" className="admin-btn admin-btn--primary">Guardar</button>
+          <button type="submit" className="admin-btn admin-btn--primary" disabled={isUploading}>{isUploading ? "Subiendo..." : "Guardar"}</button>
         </div>
       </form>
     </ReactModal>

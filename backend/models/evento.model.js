@@ -200,15 +200,15 @@ export async function createEvento(data) {
         $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, COALESCE($34, TRUE)
       ) RETURNING *
     `, [
-      data.slug, data.titulo_evento, data.subtitulo_evento, data.descripcion_evento,
-      data.categoria, data.etiqueta_imagen, data.insignia_tarjeta, data.badges || [], data.fase_evento, data.imagenes || [],
-      data.fecha_evento, data.hora_inicio, data.hora_fin, data.duracion_horas,
-      data.lugar_evento, data.localidad, data.punto_encuentro_nombre, data.punto_encuentro_direccion,
-      data.latitud, data.longitud,
-      data.responsable_nombre, data.responsable_cargo, data.responsable_correo, data.responsable_telefono, data.responsable_cita,
-      data.cupo_total, data.cupos_ocupados || 0, data.forms_url,
-      JSON.stringify(data.metricas || []), data.reglas_titulo, data.reglas_intro, JSON.stringify(data.reglas || []), JSON.stringify(data.preguntas_frecuentes || []),
-      data.activo
+      data.slug ?? null, data.titulo_evento ?? null, data.subtitulo_evento ?? null, data.descripcion_evento ?? null,
+      data.categoria ?? null, data.etiqueta_imagen ?? null, data.insignia_tarjeta ?? null, data.badges || [], data.fase_evento ?? null, data.imagenes || [],
+      data.fecha_evento ?? null, data.hora_inicio ?? null, data.hora_fin ?? null, data.duracion_horas ?? null,
+      data.lugar_evento ?? null, data.localidad ?? null, data.punto_encuentro_nombre ?? null, data.punto_encuentro_direccion ?? null,
+      data.latitud ?? null, data.longitud ?? null,
+      data.responsable_nombre ?? null, data.responsable_cargo ?? null, data.responsable_correo ?? null, data.responsable_telefono ?? null, data.responsable_cita ?? null,
+      data.cupo_total ?? null, data.cupos_ocupados || 0, data.forms_url ?? null,
+      JSON.stringify(data.metricas || []), data.reglas_titulo ?? null, data.reglas_intro ?? null, JSON.stringify(data.reglas || []), JSON.stringify(data.preguntas_frecuentes || []),
+      data.activo ?? null
     ]);
 
     const id = rows[0].id;
@@ -284,15 +284,15 @@ export async function updateEvento(slug, data) {
         activo = COALESCE($33, activo), slug = COALESCE($34, slug)
       WHERE slug = $35 RETURNING id
     `, [
-      data.titulo_evento, data.subtitulo_evento, data.descripcion_evento,
-      data.categoria, data.etiqueta_imagen, data.insignia_tarjeta, data.badges, data.fase_evento, data.imagenes,
-      data.fecha_evento, data.hora_inicio, data.hora_fin, data.duracion_horas,
-      data.lugar_evento, data.localidad, data.punto_encuentro_nombre, data.punto_encuentro_direccion,
-      data.latitud, data.longitud,
-      data.responsable_nombre, data.responsable_cargo, data.responsable_correo, data.responsable_telefono, data.responsable_cita,
-      data.cupo_total, data.cupos_ocupados, data.forms_url,
-      data.metricas ? JSON.stringify(data.metricas) : null, data.reglas_titulo, data.reglas_intro, data.reglas ? JSON.stringify(data.reglas) : null, data.preguntas_frecuentes ? JSON.stringify(data.preguntas_frecuentes) : null,
-      data.activo, data.slug, slug
+      data.titulo_evento ?? null, data.subtitulo_evento ?? null, data.descripcion_evento ?? null,
+      data.categoria ?? null, data.etiqueta_imagen ?? null, data.insignia_tarjeta ?? null, data.badges ?? null, data.fase_evento ?? null, data.imagenes ?? null,
+      data.fecha_evento ?? null, data.hora_inicio ?? null, data.hora_fin ?? null, data.duracion_horas ?? null,
+      data.lugar_evento ?? null, data.localidad ?? null, data.punto_encuentro_nombre ?? null, data.punto_encuentro_direccion ?? null,
+      data.latitud ?? null, data.longitud ?? null,
+      data.responsable_nombre ?? null, data.responsable_cargo ?? null, data.responsable_correo ?? null, data.responsable_telefono ?? null, data.responsable_cita ?? null,
+      data.cupo_total ?? null, data.cupos_ocupados ?? null, data.forms_url ?? null,
+      data.metricas ? JSON.stringify(data.metricas) : null, data.reglas_titulo ?? null, data.reglas_intro ?? null, data.reglas ? JSON.stringify(data.reglas) : null, data.preguntas_frecuentes ? JSON.stringify(data.preguntas_frecuentes) : null,
+      data.activo ?? null, data.slug ?? null, slug
     ]);
 
     if (!rows[0]) {

@@ -48,9 +48,9 @@ export async function createDestino(data) {
       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16
     ) RETURNING *`,
     [
-      id, name, location, label, tag, category, description, image,
-      images, JSON.stringify(rules), bestActivities, JSON.stringify(coordinates),
-      rating, reviewCount, JSON.stringify(ratingBreakdown), JSON.stringify(reviews)
+      id ?? null, name ?? null, location ?? null, label ?? null, tag ?? null, category ?? null, description ?? null, image ?? null,
+      images ?? [], rules ? JSON.stringify(rules) : '[]', bestActivities ?? null, coordinates ? JSON.stringify(coordinates) : '[]',
+      rating ?? 0, reviewCount ?? 0, ratingBreakdown ? JSON.stringify(ratingBreakdown) : '[]', reviews ? JSON.stringify(reviews) : '[]'
     ]
   );
   return toApi(rows[0]);
@@ -82,12 +82,12 @@ export async function updateDestino(id, data) {
       reviews = COALESCE($15, reviews)
     WHERE id = $16 RETURNING *`,
     [
-      name, location, label, tag, category, description, image,
+      name ?? null, location ?? null, label ?? null, tag ?? null, category ?? null, description ?? null, image ?? null,
       images ? images : null,
       rules ? JSON.stringify(rules) : null,
-      bestActivities,
+      bestActivities ?? null,
       coordinates ? JSON.stringify(coordinates) : null,
-      rating, reviewCount,
+      rating ?? null, reviewCount ?? null,
       ratingBreakdown ? JSON.stringify(ratingBreakdown) : null,
       reviews ? JSON.stringify(reviews) : null,
       id

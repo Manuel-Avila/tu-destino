@@ -42,6 +42,7 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
     coordinates: [24.1422, -110.3108] // Default BCS
   });
   const [errors, setErrors] = useState({});
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     setErrors({});
@@ -71,7 +72,7 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const result = destinationSchema.safeParse(formData);
     if (!result.success) {
@@ -82,11 +83,34 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
       setErrors(fieldErrors);
       return;
     }
-    const payload = { ...formData };
-    if (payload.image instanceof File) {
-      payload.image = '';
+    
+    setIsUploading(true);
+    try {
+      const payload = new FormData();
+      Object.keys(formData).forEach(key => {
+         if (key !== 'image') {
+            let val = formData[key];
+            if (val !== null && typeof val === 'object') {
+              payload.append(key, JSON.stringify(val));
+            } else {
+              payload.append(key, val);
+            }
+         }
+      });
+      
+      if (formData.image instanceof File) {
+        payload.append('image', formData.image);
+      } else if (typeof formData.image === 'string') {
+        payload.append('image', formData.image); // Will be handled normally as a string if we need it
+      }
+
+      await onSave(payload);
+    } catch (err) {
+      console.error(err);
+      alert('Error al guardar el destino. Inténtalo de nuevo.');
+    } finally {
+      setIsUploading(false);
     }
-    onSave(payload);
   };
 
   return (
@@ -144,7 +168,7 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
 
         <div className="admin-form-actions">
           <button type="button" className="admin-btn admin-btn--secondary" onClick={onClose}>Cancelar</button>
-          <button type="submit" className="admin-btn admin-btn--primary">Guardar</button>
+          <button type="submit" className="admin-btn admin-btn--primary" disabled={isUploading}>{isUploading ? "Subiendo..." : "Guardar"}</button>
         </div>
       </form>
     </ReactModal>

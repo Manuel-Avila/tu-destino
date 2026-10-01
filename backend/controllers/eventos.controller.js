@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { uploadBufferToCloudinary } from '../utils/cloudinary.js';
 import { listEventos, findEventoBySlug, registrarInscripcion, createEvento as createEventoModel, updateEvento as updateEventoModel, deleteEvento as deleteEventoModel } from '../models/evento.model.js';
 
 
@@ -50,17 +51,60 @@ export async function confirmarAsistencia(req, res) {
 
 export async function createEvento(req, res) {
   try {
-    const evento = await createEventoModel(req.body);
+    const data = { ...req.body };
+    if (data.duracion_horas) data.duracion_horas = Number(data.duracion_horas);
+    if (data.latitud) data.latitud = Number(data.latitud);
+    if (data.longitud) data.longitud = Number(data.longitud);
+    if (data.cupo_total) data.cupo_total = Number(data.cupo_total);
+    if (data.activo === 'true') data.activo = true;
+    if (data.activo === 'false') data.activo = false;
+    
+    if (data.imagenes_existentes) {
+       try { data.imagenes = JSON.parse(data.imagenes_existentes); } catch (e) { data.imagenes = []; }
+    } else {
+       data.imagenes = [];
+    }
+
+    if (req.files && req.files.length > 0) {
+      const uploadPromises = req.files.map(file => uploadBufferToCloudinary(file.buffer));
+      const newUrls = await Promise.all(uploadPromises);
+      data.imagenes = [...data.imagenes, ...newUrls];
+    }
+
+    const evento = await createEventoModel(data);
     res.status(201).json({ evento });
   } catch (err) {
     console.error('[eventos] crear:', err);
+    if (err.code === '23505') {
+      return res.status(400).json({ error: 'El Slug (URL) ya existe. Por favor usa uno diferente.' });
+    }
     res.status(500).json({ error: 'No se pudo crear el evento.' });
   }
 }
 
 export async function updateEvento(req, res) {
   try {
-    const evento = await updateEventoModel(req.params.slug, req.body);
+    const data = { ...req.body };
+    if (data.duracion_horas) data.duracion_horas = Number(data.duracion_horas);
+    if (data.latitud) data.latitud = Number(data.latitud);
+    if (data.longitud) data.longitud = Number(data.longitud);
+    if (data.cupo_total) data.cupo_total = Number(data.cupo_total);
+    if (data.activo === 'true') data.activo = true;
+    if (data.activo === 'false') data.activo = false;
+    
+    if (data.imagenes_existentes) {
+       try { data.imagenes = JSON.parse(data.imagenes_existentes); } catch (e) { data.imagenes = []; }
+    } else {
+       data.imagenes = [];
+    }
+
+    if (req.files && req.files.length > 0) {
+      const uploadPromises = req.files.map(file => uploadBufferToCloudinary(file.buffer));
+      const newUrls = await Promise.all(uploadPromises);
+      data.imagenes = [...data.imagenes, ...newUrls];
+    }
+
+    const evento = await updateEventoModel(req.params.slug, data);
     if (!evento) return res.status(404).json({ error: 'Evento no encontrado.' });
     res.json({ evento });
   } catch (err) {

@@ -144,7 +144,8 @@ export default function DestinationsTab({ locked = false }) {
       fetchDestinations();
     } catch (err) {
       console.error(err);
-      Toast.fire({ icon: 'error', title: 'Error al guardar destino' });
+      const msg = err.response?.data?.error || 'Error al guardar destino';
+      Toast.fire({ icon: 'error', title: msg });
     }
   };
 
