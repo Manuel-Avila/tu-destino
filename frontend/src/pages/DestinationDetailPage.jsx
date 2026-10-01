@@ -8,7 +8,7 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { crearResena, eliminarResena, getResenasDestino } from '../services/resenas.service';
 import ImageCarousel from '../components/ImageCarousel';
-import { destinationsData } from '../data/destinations';
+import { axiosInstance } from '../api/axios';
 import './destinationDetail.css';
 
 // Fix para el icono por default de Leaflet en React/Vite
@@ -58,7 +58,10 @@ function toCardReview(r) {
 }
 
 function DestinationDetail({ id }) {
-  const destination = destinationsData.find((item) => item.id === id);
+  const [destination, setDestination] = useState(null);
+  const [loadingDest, setLoadingDest] = useState(true);
+  const [destError, setDestError] = useState(false);
+
   const [saved, setSaved] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
@@ -70,6 +73,20 @@ function DestinationDetail({ id }) {
   const [formError, setFormError] = useState('');
 
   const destinationId = destination?.id;
+
+  useEffect(() => {
+    setLoadingDest(true);
+    axiosInstance.get(`/api/destinos/${id}`)
+      .then(res => {
+        setDestination(res.data.destino);
+        setLoadingDest(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setDestError(true);
+        setLoadingDest(false);
+      });
+  }, [id]);
 
   const loadReviews = useCallback(() => {
     if (!destinationId) return Promise.resolve();
@@ -83,19 +100,19 @@ function DestinationDetail({ id }) {
   }, [destinationId]);
 
   useEffect(() => {
-    // Al cambiar de destino se vuelve a pedir la lista (la ruta reutiliza el componente).
-    loadReviews();
-  }, [loadReviews]);
+    if (destinationId) loadReviews();
+  }, [loadReviews, destinationId]);
 
   // Calificación combinada: la base del catálogo + las reseñas reales de usuarios.
   const summary = useMemo(() => {
     if (!destination) return { rating: 0, count: 0 };
-    const count = destination.reviewCount + stats.total;
-    const rating = count > 0 ? (destination.rating * destination.reviewCount + stats.suma) / count : destination.rating;
+    const count = (destination.reviewCount || 0) + stats.total;
+    const rating = count > 0 ? ((destination.rating || 0) * (destination.reviewCount || 0) + stats.suma) / count : (destination.rating || 0);
     return { rating, count };
   }, [destination, stats]);
 
-  if (!destination) {
+  if (loadingDest) return <div style={{ padding: '2rem', textAlign: 'center' }}>Cargando destino...</div>;
+  if (destError || !destination) {
     return <Navigate to="/app/destinos" replace />;
   }
 
@@ -155,7 +172,7 @@ function DestinationDetail({ id }) {
     }
   };
 
-  const allReviews = [...dbReviews.map(toCardReview), ...destination.reviews];
+  const allReviews = [...dbReviews.map(toCardReview), ...(destination.reviews || [])];
 
   return (
     <div className="destination-detail-page">
@@ -201,7 +218,7 @@ function DestinationDetail({ id }) {
         </div>
 
         <div className="destination-detail__hero">
-          <ImageCarousel images={destination.images || [destination.image]} title={destination.name} />
+          <ImageCarousel images={destination.images?.length > 0 ? destination.images : (destination.image ? [destination.image] : [])} title={destination.name} />
         </div>
 
         <div className="destination-detail__grid">

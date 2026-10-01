@@ -34,6 +34,7 @@ const REFRESH_MS = 30000;
 
 function Gallery({ imagenes, titulo }) {
   const [index, setIndex] = useState(0);
+  if (!imagenes || imagenes.length === 0) return null;
   const total = imagenes.length;
   const go = (delta) => setIndex((i) => (i + delta + total) % total);
 
