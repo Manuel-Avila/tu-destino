@@ -12,6 +12,7 @@ const WINDOW_MS = 15 * 60 * 1000; // 15 minutos
 const MAX_ATTEMPTS = 10;
 
 const attemptsByIp = new Map();
+const reportRequestsByIp = new Map();
 
 export function authRateLimiter(req, res, next) {
   const ip = req.ip;
@@ -34,6 +35,37 @@ export function authRateLimiter(req, res, next) {
     res.set('Retry-After', String(retryAfterSeconds));
     return res.status(429).json({
       error: 'Demasiados intentos. Intenta de nuevo más tarde.',
+    });
+  }
+
+  next();
+}
+
+/**
+ * Protege los endpoints públicos de reportes sin impedir el uso normal.
+ * Se mantiene separado del límite de autenticación para que una consulta
+ * de folio no bloquee el inicio de sesión del usuario.
+ */
+export function reportRateLimiter(req, res, next) {
+  const ip = req.ip;
+  const now = Date.now();
+  const entry = reportRequestsByIp.get(ip) || { count: 0, windowStart: now };
+
+  if (now - entry.windowStart > WINDOW_MS) {
+    entry.count = 0;
+    entry.windowStart = now;
+  }
+
+  entry.count += 1;
+  reportRequestsByIp.set(ip, entry);
+
+  if (entry.count > 30) {
+    const retryAfterSeconds = Math.ceil(
+      (WINDOW_MS - (now - entry.windowStart)) / 1000
+    );
+    res.set('Retry-After', String(retryAfterSeconds));
+    return res.status(429).json({
+      error: 'Demasiadas solicitudes de reportes. Intenta de nuevo más tarde.',
     });
   }
 

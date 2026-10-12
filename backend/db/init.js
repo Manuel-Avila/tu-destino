@@ -3,6 +3,7 @@ import { createEventosTables } from './eventos.schema.js';
 import { seedEventosIfEmpty } from './eventos.seed.js';
 import { createResenasTables } from './resenas.schema.js';
 import { createDestinosTables } from './destinos.schema.js';
+import { createReportesTables } from './reportes.schema.js';
 
 /**
  * Crea las tablas necesarias si no existen todavía.
@@ -39,6 +40,7 @@ export async function initDb() {
   await createEventosTables();
   await seedEventosIfEmpty();
   await createDestinosTables();
+  await createReportesTables();
   
   const { seedDestinosIfEmpty } = await import('./destinos.seed.js');
   await seedDestinosIfEmpty();

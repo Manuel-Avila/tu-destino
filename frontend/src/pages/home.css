@@ -2,9 +2,17 @@
 
 .home-page { 
   --teal: #00796b; 
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
   color: #003f39; 
   background: #fff; 
   font-family: 'DM Sans', Arial, sans-serif; 
+}
+
+.home-page > .home-footer {
+  margin-top: auto;
 }
 
 .home-header { 

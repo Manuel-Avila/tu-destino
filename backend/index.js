@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { config } from './config/env.js';
 import './config/db.js';
 import { v2 as cloudinary } from 'cloudinary';
@@ -8,6 +10,7 @@ import authRouter from './routes/auth.routes.js';
 import eventosRouter from './routes/eventos.routes.js';
 import resenasRouter from './routes/resenas.routes.js';
 import destinosRouter from './routes/destinos.routes.js';
+import reportesRouter from './routes/reportes.routes.js';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -16,9 +19,11 @@ cloudinary.config({
 });
 
 const app = express();
+const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(path.join(currentDirectory, 'uploads')));
 
 app.get('/', (req, res) => {
   res.send('Backend is running and connected to DB!');
@@ -35,6 +40,7 @@ app.use('/api/eventos', eventosRouter);
 app.use('/api/resenas', resenasRouter);
 
 app.use('/api/destinos', destinosRouter);
+app.use('/api/reportes', reportesRouter);
 
 // 404 para cualquier ruta de API no encontrada.
 app.use('/api', (req, res) => {
