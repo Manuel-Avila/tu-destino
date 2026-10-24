@@ -42,7 +42,7 @@ export default function DashboardHeader({ links = [], brandTo = '/', className =
         {user ? (
           <>
             {firstName && (
-              <Link to="/app/perfil" className="dashboard-header__welcome" title="Ir a mi perfil">
+              <Link to="/app/perfil" className="dashboard-header__welcome" title="Ir a mi perfil" aria-label={`Ir a mi perfil, ${firstName}`}>
                 <Icon name="user" size={18} />
                 <span className="dashboard-header__welcome-text">Hola, {firstName}</span>
               </Link>

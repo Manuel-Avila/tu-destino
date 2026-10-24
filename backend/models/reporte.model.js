@@ -80,6 +80,7 @@ export async function findReporteByFolio(folio) {
   return {
     folio: row.folio,
     incidentType: row.incident_type,
+    description: row.description,
     status: row.status,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -88,6 +89,37 @@ export async function findReporteByFolio(folio) {
       createdAt: item.created_at,
     })),
   };
+}
+
+function toMine(row) {
+  return {
+    folio: row.folio,
+    incidentType: row.incident_type,
+    description: row.description,
+    status: row.status,
+    createdAt: row.created_at,
+  };
+}
+
+/** Resumen de varios reportes a partir de sus folios (los reportes anónimos solo se pueden consultar así). */
+export async function findReportesByFolios(folios) {
+  const { rows } = await query(
+    `SELECT folio, incident_type, description, status, created_at
+     FROM reportes WHERE UPPER(folio) = ANY($1::text[])
+     ORDER BY created_at DESC`,
+    [folios.map((f) => String(f).trim().toUpperCase())]
+  );
+  return rows.map(toMine);
+}
+
+/** Reportes enviados con la cuenta (no anónimos) de un usuario. */
+export async function listReportesByUser(userId) {
+  const { rows } = await query(
+    `SELECT folio, incident_type, description, status, created_at
+     FROM reportes WHERE user_id = $1 ORDER BY created_at DESC`,
+    [userId]
+  );
+  return rows.map(toMine);
 }
 
 export async function listReportes({ status, incidentType, search }) {

@@ -13,7 +13,7 @@ export default function EducationDetailPage() {
     <div className="ev-tab-wrap">
       <section className="ev-tab ev-detail education-detail">
         <nav className="ev-breadcrumb" aria-label="Ruta de navegación">
-          <Link to="/app"><Icon name="home" size={13} /> Inicio</Link>
+          <Link to="/app"><Icon name="building" size={13} /> Inicio</Link>
           <Icon name="chevron-right" size={12} />
           <Link to="/app/educacion">Educación Ambiental</Link>
           <Icon name="chevron-right" size={12} />

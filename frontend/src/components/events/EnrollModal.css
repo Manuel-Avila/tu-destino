@@ -1,0 +1,80 @@
+/* La confirmación de SweetAlert debe verse por encima de la ventana de inscripción */
+.swal2-container { z-index: 3000 !important; }
+
+.enroll-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgba(6, 30, 24, .55);
+  overflow-y: auto;
+}
+
+.enroll-modal {
+  width: min(560px, 100%);
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  padding: 1.5rem 1.6rem 1.4rem;
+  border-radius: 18px;
+  background: #fff;
+  color: #0c3b31;
+  box-shadow: 0 24px 60px rgba(0, 20, 15, .35);
+  font-family: 'DM Sans', Arial, sans-serif;
+}
+
+.enroll-modal__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.1rem; }
+.enroll-modal__eyebrow { margin: 0 0 .25rem; color: #0a7a68; font-size: .68rem; font-weight: 800; letter-spacing: .14em; }
+.enroll-modal__header h2 { margin: 0; font-size: 1.15rem; line-height: 1.3; color: #0a4d3c; }
+.enroll-modal__close {
+  display: grid; place-items: center; flex: 0 0 auto;
+  width: 34px; height: 34px; padding: 0;
+  border: 0; border-radius: 50%;
+  background: #ecedf9; color: #454a78; cursor: pointer;
+}
+.enroll-modal__close:hover { background: #dfe1f3; }
+
+.enroll-form { display: flex; flex-direction: column; gap: 1rem; }
+.enroll-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.enroll-field { display: flex; flex-direction: column; gap: .35rem; min-width: 0; color: #264c46; font-size: .8rem; font-weight: 700; }
+.enroll-field em { color: #738b86; font-style: normal; font-weight: 500; }
+.enroll-field input,
+.enroll-field textarea {
+  width: 100%;
+  padding: .65rem .8rem;
+  border: 1px solid #d3e3dd;
+  border-radius: 9px;
+  background: #fff;
+  color: #123d38;
+  font: inherit;
+  font-size: .88rem;
+  font-weight: 500;
+}
+.enroll-field textarea { resize: vertical; line-height: 1.5; }
+.enroll-field input:focus,
+.enroll-field textarea:focus { outline: 0; border-color: #0a4d3c; box-shadow: 0 0 0 3px rgba(10, 77, 60, .14); }
+.enroll-field input[readonly] { background: #f2f7f5; color: #526b66; }
+.enroll-field input[aria-invalid='true'] { border-color: #c0392b; }
+.enroll-error { color: #a32929; font-size: .74rem; font-weight: 600; }
+.enroll-help { color: #718581; font-size: .72rem; font-weight: 500; }
+.enroll-submit-error { padding: .75rem .9rem; border-radius: 8px; background: #fff0f0; color: #9f2828; font-size: .84rem; }
+
+.enroll-actions { display: flex; justify-content: flex-end; gap: .6rem; margin-top: .3rem; }
+.enroll-btn {
+  min-height: 44px; padding: .6rem 1.1rem;
+  border-radius: 999px; font: inherit; font-size: .85rem; font-weight: 700; cursor: pointer;
+  transition: background .2s ease, color .2s ease;
+}
+.enroll-btn--outline { border: 1px solid #0a4d3c; background: #fff; color: #0a4d3c; }
+.enroll-btn--outline:hover { background: #ecedf9; }
+.enroll-btn--solid { border: 1px solid #0a4d3c; background: #0a4d3c; color: #fff; }
+.enroll-btn--solid:hover { background: #073a2d; }
+.enroll-btn:disabled { cursor: wait; opacity: .65; }
+
+@media (max-width: 560px) {
+  .enroll-modal { padding: 1.2rem 1.1rem; }
+  .enroll-grid { grid-template-columns: 1fr; }
+  .enroll-actions { flex-direction: column-reverse; }
+  .enroll-btn { width: 100%; }
+}

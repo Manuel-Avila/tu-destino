@@ -41,6 +41,18 @@ export async function getReporteByFolio(folio) {
   return data.reporte;
 }
 
+/** Estado de varios reportes a la vez (folios guardados en este navegador). */
+export async function consultarFolios(folios) {
+  const { data } = await axiosInstance.post('/api/reportes/consulta', { folios });
+  return data.reportes;
+}
+
+/** Reportes enviados con la cuenta del usuario (los anónimos no se asocian a ella). */
+export async function getMisReportes() {
+  const { data } = await axiosInstance.get('/api/reportes/mios');
+  return data.reportes;
+}
+
 export async function getReportes(filters = {}) {
   const params = Object.fromEntries(Object.entries(filters).filter(([, value]) => value));
   const { data } = await axiosInstance.get('/api/reportes', { params });

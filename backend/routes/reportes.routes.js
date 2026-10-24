@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { optionalAuth, requireAdmin } from '../middleware/auth.middleware.js';
+import { optionalAuth, requireAdmin, requireAuth } from '../middleware/auth.middleware.js';
 import { reportRateLimiter } from '../middleware/rateLimit.middleware.js';
 import { validateRequest } from '../middleware/validate.middleware.js';
 import { createReporteSchema, updateReporteStatusSchema } from '../validators/reportes.validators.js';
@@ -8,6 +8,8 @@ import {
   createReporte,
   getReporte,
   getReporteByFolio,
+  consultarFolios,
+  getMisReportes,
   getReportes,
   patchReporteStatus,
 } from '../controllers/reportes.controller.js';
@@ -37,6 +39,8 @@ function uploadEvidence(req, res, next) {
 
 router.post('/', reportRateLimiter, optionalAuth, uploadEvidence, validateRequest(createReporteSchema), createReporte);
 router.get('/folio/:folio', reportRateLimiter, getReporteByFolio);
+router.post('/consulta', reportRateLimiter, consultarFolios);
+router.get('/mios', requireAuth, getMisReportes);
 router.get('/', requireAdmin, getReportes);
 router.get('/:id', requireAdmin, getReporte);
 router.patch('/:id/estado', requireAdmin, validateRequest(updateReporteStatusSchema), patchReporteStatus);

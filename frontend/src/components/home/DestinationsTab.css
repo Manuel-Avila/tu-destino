@@ -8,7 +8,7 @@
 /* Grid de Destinos del CatÃ¡logo */
 .destinations-catalog-grid { 
   display: grid; 
-  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); 
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); 
   gap: 1.5rem; 
 }
 
@@ -42,18 +42,47 @@
   background: linear-gradient(180deg, rgba(4, 15, 20, .10) 0%, rgba(4, 12, 16, .55) 55%, rgba(2, 8, 10, .94) 100%); 
 }
 
+/* Etiqueta en verde oscuro (mismo tono que en Eventos y Educación) */
 .catalog-card__badge {
   position: absolute;
   top: 1.1rem;
   left: 1.1rem;
-  padding: .45rem 1rem;
+  padding: .42rem .95rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.96);
-  color: #00695b;
-  font-size: .82rem;
+  background: rgba(0, 85, 70, .9);
+  color: #fff;
+  font-size: .8rem;
   font-weight: 700;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.18);
 }
+
+/* Botones de la esquina superior derecha: admin + guardar */
+.catalog-card__actions {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.catalog-card__save {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .92);
+  color: #0a4d3c;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .22);
+  transition: transform .2s ease, color .2s ease;
+}
+.catalog-card__save:hover { transform: scale(1.08); }
+.catalog-card__save.is-saved { color: #e0245e; }
+.catalog-card:focus-visible { outline: 3px solid #8aeedb; outline-offset: 3px; }
 
 .catalog-card__content { 
   padding: 1.6rem 1.5rem 1.5rem;
@@ -131,6 +160,10 @@
 .catalog-card:hover .catalog-card__cta {
   background: #00564a;
 }
+
+/* Filtros de Destinos (reutilizan el estilo de Eventos) */
+.dest-filters { margin-bottom: 1.3rem; }
+.dest-filters__star { color: #f5a623; font-size: 1.05rem; line-height: 1; }
 
 @media (max-width: 760px) {
   .destinations-tab-section { 

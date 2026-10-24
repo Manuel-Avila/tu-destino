@@ -65,7 +65,16 @@
   align-items: center; 
   justify-content: space-between; 
   gap: 1.5rem; 
+  /* Menú fijo: se queda arriba aunque se haga scroll */
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  box-shadow: 0 2px 14px rgba(0, 70, 58, .09);
 }
+
+/* Los controles de los mapas (z-index 1000) no deben pasar por encima del menú fijo */
+.leaflet-container { z-index: 0; }
+html { scroll-padding-top: 96px; }
 
 .dashboard-header__links, .dashboard-header__account { 
   display: flex; 
@@ -151,9 +160,33 @@
 
 
 @media (max-width: 760px) {
-  .dashboard-header__links { display: none; }
+  .dashboard-header { flex-wrap: wrap; gap: .6rem 1rem; }
+
+  /* El menú ya no desaparece: pasa a una segunda fila que se desliza con el dedo, sin barra visible */
+  .dashboard-header__links {
+    display: flex;
+    order: 3;
+    width: 100%;
+    gap: 1.3rem;
+    overflow-x: auto;
+    padding: .1rem 0 .45rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .dashboard-header__links::-webkit-scrollbar { display: none; }
+  .dashboard-header__links a { flex-shrink: 0; white-space: nowrap; }
+
+  /* En móvil solo se ve el icono de perfil, sin "Hola, nombre" */
   .dashboard-header__welcome-text { display: none; }
-  .dashboard-header__account { margin-left: auto; }
+  a.dashboard-header__welcome {
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    background: rgba(0, 121, 107, .12);
+  }
+  .dashboard-header__account { margin-left: auto; gap: .5rem; }
   .app-footer { min-height: 0; padding: 2.5rem 1.5rem; flex-wrap: wrap; }
 }
 

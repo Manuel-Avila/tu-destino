@@ -5,7 +5,13 @@ import { educationResources } from '../../data/educationResources';
 import '../../components/home/EventsTab.css';
 import './AppEducationPage.css';
 
-const CATEGORIES = ['Todos', 'Fauna Marina', 'Biodiversidad', 'Turismo Responsable', 'Guías Prácticas'];
+const CATEGORIES = [
+  { name: 'Todos', icon: 'grid' },
+  { name: 'Fauna Marina', icon: 'paw' },
+  { name: 'Biodiversidad', icon: 'sprout' },
+  { name: 'Turismo Responsable', icon: 'pin' },
+  { name: 'Guías Prácticas', icon: 'book' },
+];
 
 export default function AppEducationPage() {
   const [category, setCategory] = useState('Todos');
@@ -23,7 +29,7 @@ export default function AppEducationPage() {
     <div className="ev-tab-wrap">
     <section className="ev-tab app-education" aria-labelledby="app-education-title">
       <nav className="ev-breadcrumb" aria-label="Ruta de navegación">
-        <Link to="/app"><Icon name="home" size={13} /> Inicio</Link>
+        <Link to="/app"><Icon name="building" size={13} /> Inicio</Link>
         <Icon name="chevron-right" size={12} />
         <span className="is-current">Educación Ambiental</span>
       </nav>
@@ -35,17 +41,32 @@ export default function AppEducationPage() {
             Explora nuestros recursos educativos sobre el ecosistema marino de Baja California Sur. Aprende sobre conservación, especies locales y turismo responsable.
           </p>
         </div>
-        <label className="app-education__search">
-          <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.3" /><path d="m15.5 15.5 4.2 4.2" /></svg>
-          <span className="app-education__sr-only">Buscar recursos</span>
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar recursos..." />
-        </label>
       </header>
 
-      <div className="app-education__filters" aria-label="Filtrar recursos por categoría">
+      <div className="ev-filters app-education__searchbar">
+        <label className="ev-field ev-field--search">
+          <Icon name="search" size={17} />
+          <input
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Buscar recursos (ej. tortugas, manglares)..."
+            aria-label="Buscar recursos"
+          />
+        </label>
+      </div>
+
+      <div className="app-education__filters ev-chips" role="tablist" aria-label="Filtrar recursos por categoría">
         {CATEGORIES.map((item) => (
-          <button key={item} type="button" className={category === item ? 'is-active' : ''} aria-pressed={category === item} onClick={() => setCategory(item)}>
-            {item}
+          <button
+            key={item.name}
+            type="button"
+            role="tab"
+            aria-selected={category === item.name}
+            className={`ev-chip ${category === item.name ? 'is-active' : ''}`.trim()}
+            onClick={() => setCategory(item.name)}
+          >
+            <Icon name={item.icon} size={14} /> {item.name}
           </button>
         ))}
       </div>

@@ -135,6 +135,16 @@ export async function createEventosTables() {
     );
   `);
 
+  // Inscripciones hechas desde la app (formulario propio): quién se inscribió y sus datos de contacto.
+  await query(`ALTER TABLE evento_inscripciones ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id) ON DELETE SET NULL;`);
+  await query(`ALTER TABLE evento_inscripciones ADD COLUMN IF NOT EXISTS telefono VARCHAR(30);`);
+  await query(`ALTER TABLE evento_inscripciones ADD COLUMN IF NOT EXISTS edad SMALLINT;`);
+  await query(`ALTER TABLE evento_inscripciones ADD COLUMN IF NOT EXISTS contacto_emergencia_nombre VARCHAR(150);`);
+  await query(`ALTER TABLE evento_inscripciones ADD COLUMN IF NOT EXISTS contacto_emergencia_telefono VARCHAR(30);`);
+  await query(`ALTER TABLE evento_inscripciones ADD COLUMN IF NOT EXISTS notas TEXT;`);
+  // Una persona solo puede inscribirse una vez a cada evento.
+  await query(`CREATE UNIQUE INDEX IF NOT EXISTS uq_evento_inscripcion_usuario ON evento_inscripciones (evento_id, user_id) WHERE user_id IS NOT NULL;`);
+
   await query(`CREATE INDEX IF NOT EXISTS idx_eventos_fecha ON eventos (fecha_evento);`);
   await query(`CREATE INDEX IF NOT EXISTS idx_evento_itinerario ON evento_itinerario (evento_id, orden);`);
 }

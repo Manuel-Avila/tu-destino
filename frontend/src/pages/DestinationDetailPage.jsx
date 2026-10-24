@@ -8,6 +8,7 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { crearResena, eliminarResena, getResenasDestino } from '../services/resenas.service';
 import ImageCarousel from '../components/ImageCarousel';
+import { useSavedDestinations } from '../hooks/useSavedDestinations';
 import { axiosInstance } from '../api/axios';
 import './destinationDetail.css';
 
@@ -31,6 +32,7 @@ function StarRating({ rating, size = 'md' }) {
 }
 
 function ratingLabel(rating) {
+  if (rating <= 0) return 'Sin calificaciones aún';
   if (rating >= 4.5) return 'Calificación Excelente';
   if (rating >= 4) return 'Calificación Muy Buena';
   if (rating >= 3) return 'Calificación Buena';
@@ -62,7 +64,7 @@ function DestinationDetail({ id }) {
   const [loadingDest, setLoadingDest] = useState(true);
   const [destError, setDestError] = useState(false);
 
-  const [saved, setSaved] = useState(false);
+  const { isSaved, toggle: toggleSaved } = useSavedDestinations();
   const [form, setForm] = useState(emptyForm);
 
   // Reseñas guardadas en la base de datos (persisten para siempre).
@@ -103,13 +105,18 @@ function DestinationDetail({ id }) {
     if (destinationId) loadReviews();
   }, [loadReviews, destinationId]);
 
-  // Calificación combinada: la base del catálogo + las reseñas reales de usuarios.
+  // Calificación REAL: solo cuentan las reseñas que dejaron los usuarios.
   const summary = useMemo(() => {
-    if (!destination) return { rating: 0, count: 0 };
-    const count = (destination.reviewCount || 0) + stats.total;
-    const rating = count > 0 ? ((destination.rating || 0) * (destination.reviewCount || 0) + stats.suma) / count : (destination.rating || 0);
+    const count = stats.total;
+    const rating = count > 0 ? stats.suma / count : 0;
     return { rating, count };
-  }, [destination, stats]);
+  }, [stats]);
+
+  // Cuántas reseñas hay de 5, 4, 3, 2 y 1 estrellas.
+  const distribution = useMemo(
+    () => [5, 4, 3, 2, 1].map((n) => ({ stars: n, count: dbReviews.filter((r) => r.rating === n).length })),
+    [dbReviews]
+  );
 
   if (loadingDest) return <div style={{ padding: '2rem', textAlign: 'center' }}>Cargando destino...</div>;
   if (destError || !destination) {
@@ -172,7 +179,7 @@ function DestinationDetail({ id }) {
     }
   };
 
-  const allReviews = [...dbReviews.map(toCardReview), ...(destination.reviews || [])];
+  const allReviews = dbReviews.map(toCardReview);
 
   return (
     <div className="destination-detail-page">
@@ -195,13 +202,17 @@ function DestinationDetail({ id }) {
           <div>
             <h1>{destination.name}</h1>
             <p className="destination-detail__location">📍 {destination.location}</p>
-            {typeof destination.rating === 'number' && (
-              <p className="destination-detail__rating">
-                <StarRating rating={summary.rating} />
-                <strong>{summary.rating.toFixed(1)}</strong>
-                <span>{summary.count} evaluaciones</span>
-              </p>
-            )}
+            <p className="destination-detail__rating">
+              <StarRating rating={summary.rating} />
+              {summary.count > 0 ? (
+                <>
+                  <strong>{summary.rating.toFixed(1)}</strong>
+                  <span>{summary.count} {summary.count === 1 ? 'evaluación' : 'evaluaciones'}</span>
+                </>
+              ) : (
+                <span>Sin calificaciones aún</span>
+              )}
+            </p>
           </div>
           <div className="destination-detail__actions">
             <button type="button" className="detail-btn detail-btn--outline" onClick={handleShare}>
@@ -209,10 +220,10 @@ function DestinationDetail({ id }) {
             </button>
             <button
               type="button"
-              className={`detail-btn detail-btn--outline ${saved ? 'is-active' : ''}`.trim()}
-              onClick={() => setSaved((prev) => !prev)}
+              className={`detail-btn detail-btn--outline ${isSaved(destination.id) ? 'is-active' : ''}`.trim()}
+              onClick={() => toggleSaved(destination.id)}
             >
-              {saved ? '♥ Guardado' : '♡ Guardar en favoritos'}
+              {isSaved(destination.id) ? '♥ Guardado' : '♡ Guardar en favoritos'}
             </button>
           </div>
         </div>
@@ -285,32 +296,32 @@ function DestinationDetail({ id }) {
 
           <div className="reviews-summary">
             <div className="reviews-summary__score">
-              <span className="reviews-summary__number">{summary.rating.toFixed(1)}</span>
+              <span className="reviews-summary__number">{summary.count > 0 ? summary.rating.toFixed(1) : '—'}</span>
               <StarRating rating={summary.rating} size="lg" />
               <p className="reviews-summary__label">{ratingLabel(summary.rating)}</p>
               <p className="reviews-summary__count">
-                Basado en {summary.count} opiniones de visitantes
+                {summary.count > 0
+                  ? `Basado en ${summary.count} ${summary.count === 1 ? 'opinión' : 'opiniones'} de visitantes`
+                  : 'Todavía nadie ha calificado este destino'}
               </p>
             </div>
 
-            {destination.ratingBreakdown && (
-              <div className="reviews-summary__breakdown">
-                {destination.ratingBreakdown.map((item) => (
-                  <div className="breakdown-row" key={item.label}>
-                    <div className="breakdown-row__top">
-                      <span>{item.label}</span>
-                      <span>{item.value.toFixed(1)} / 5.0</span>
-                    </div>
-                    <div className="breakdown-row__track">
-                      <div
-                        className="breakdown-row__fill"
-                        style={{ width: `${(item.value / 5) * 100}%` }}
-                      />
-                    </div>
+            <div className="reviews-summary__breakdown">
+              {distribution.map((item) => (
+                <div className="breakdown-row" key={item.stars}>
+                  <div className="breakdown-row__top">
+                    <span>{item.stars} {item.stars === 1 ? 'estrella' : 'estrellas'}</span>
+                    <span>{item.count} {item.count === 1 ? 'reseña' : 'reseñas'}</span>
                   </div>
-                ))}
-              </div>
-            )}
+                  <div className="breakdown-row__track">
+                    <div
+                      className="breakdown-row__fill"
+                      style={{ width: `${summary.count > 0 ? (item.count / summary.count) * 100 : 0}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
           <form className="review-form" onSubmit={handleReviewSubmit}>

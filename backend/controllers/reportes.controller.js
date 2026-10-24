@@ -4,6 +4,8 @@ import { findUserById } from '../models/user.model.js';
 import {
   createReporte as createReporteModel,
   findReporteByFolio,
+  findReportesByFolios,
+  listReportesByUser,
   findReporteById,
   listReportes,
   updateReporteStatus,
@@ -68,6 +70,31 @@ export async function getReporteByFolio(req, res) {
   } catch (err) {
     console.error('[reportes.folio] error:', err);
     return res.status(500).json({ error: 'No se pudo consultar el reporte.' });
+  }
+}
+
+/** Estado de varios reportes a la vez, a partir de los folios guardados en el navegador. */
+export async function consultarFolios(req, res) {
+  const folios = Array.isArray(req.body?.folios) ? req.body.folios : [];
+  const limpios = [...new Set(
+    folios.filter((f) => typeof f === 'string').map((f) => f.trim().toUpperCase()).filter((f) => /^TD-\d{4}-[0-9A-F]{8}$/.test(f))
+  )].slice(0, 50);
+  if (limpios.length === 0) return res.json({ reportes: [] });
+  try {
+    return res.json({ reportes: await findReportesByFolios(limpios) });
+  } catch (err) {
+    console.error('[reportes.consulta] error:', err);
+    return res.status(500).json({ error: 'No se pudieron consultar los reportes.' });
+  }
+}
+
+/** Reportes que la persona envió con su cuenta (los anónimos no se asocian a ella). */
+export async function getMisReportes(req, res) {
+  try {
+    return res.json({ reportes: await listReportesByUser(req.user.id) });
+  } catch (err) {
+    console.error('[reportes.mios] error:', err);
+    return res.status(500).json({ error: 'No se pudieron cargar tus reportes.' });
   }
 }
 

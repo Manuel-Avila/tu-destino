@@ -8,7 +8,9 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import Icon from '../components/events/EventIcons';
 import { useSavedEvents } from '../hooks/useSavedEvents';
-import { getEvento } from '../services/eventos.service';
+import { getEvento, getMisInscripciones } from '../services/eventos.service';
+import { useAuthStore } from '../store/authStore';
+import EnrollModal from '../components/events/EnrollModal';
 import {
   formatDuracion,
   formatFechaLarga,
@@ -55,8 +57,8 @@ function Gallery({ imagenes, titulo }) {
   );
 }
 
-function Convocatoria({ convocatoria }) {
-  const { cupoTotal, cuposOcupados, cuposRestantes, lleno, formsUrl } = convocatoria;
+function Convocatoria({ convocatoria, inscrito, onEnroll }) {
+  const { cupoTotal, cuposOcupados, cuposRestantes, lleno } = convocatoria;
   const porcentaje = Math.min(100, Math.round((cuposOcupados / cupoTotal) * 100));
   // Se avisa "últimos espacios" cuando queda el 30 % o menos del cupo.
   const ultimos = !lleno && cuposRestantes <= Math.ceil(cupoTotal * 0.3);
@@ -72,6 +74,7 @@ function Convocatoria({ convocatoria }) {
 
       <p className="evd-convocatoria__count" aria-live="polite">
         <strong>{cuposOcupados} de {cupoTotal}</strong> lugares ocupados ({porcentaje}%)
+        {!lleno && <> · <strong>{cuposRestantes}</strong> {cuposRestantes === 1 ? 'disponible' : 'disponibles'}</>}
       </p>
       <div className="evd-bar" role="progressbar" aria-valuemin={0} aria-valuemax={cupoTotal} aria-valuenow={cuposOcupados} aria-label="Lugares ocupados">
         <span style={{ width: `${porcentaje}%` }} />
@@ -80,16 +83,20 @@ function Convocatoria({ convocatoria }) {
         <Icon name="shield" size={14} /> Cupo regulado para salvaguardar la capacidad de carga del ecosistema.
       </p>
 
-      {lleno || !formsUrl ? (
-        <span className="evd-cta is-disabled" aria-disabled="true">
-          {lleno ? 'Cupo lleno' : 'Inscripción próximamente'}
+      {inscrito ? (
+        <span className="evd-cta is-enrolled" aria-live="polite">
+          <Icon name="check" size={16} /> Ya estás inscrito
         </span>
+      ) : lleno ? (
+        <span className="evd-cta is-disabled" aria-disabled="true">Cupo lleno</span>
       ) : (
-        <a className="evd-cta" href={formsUrl} target="_blank" rel="noreferrer">
-          Llenar Formulario de Inscripción <Icon name="external" size={15} />
-        </a>
+        <button type="button" className="evd-cta" onClick={onEnroll}>
+          Llenar Formulario de Inscripción <Icon name="arrow" size={15} />
+        </button>
       )}
-      <p className="evd-convocatoria__hint">Apertura externa oficial en Google Forms</p>
+      <p className="evd-convocatoria__hint">
+        {inscrito ? 'Encuentra este evento en tu perfil, en "Voy a asistir".' : 'Tus datos se guardan de forma segura con tu cuenta.'}
+      </p>
     </div>
   );
 }
@@ -98,6 +105,33 @@ function EventDetail({ slug }) {
   const [evento, setEvento] = useState(null);
   const [status, setStatus] = useState('loading'); // loading | ready | notfound | error
   const { isSaved, toggle } = useSavedEvents();
+  const user = useAuthStore((state) => state.user);
+  const [inscrito, setInscrito] = useState(false);
+  const [formAbierto, setFormAbierto] = useState(false);
+
+  // ¿Esta persona ya está inscrita en el evento?
+  useEffect(() => {
+    let cancelado = false;
+    getMisInscripciones()
+      .then((slugs) => !cancelado && setInscrito(slugs.includes(slug)))
+      .catch(() => {});
+    return () => {
+      cancelado = true;
+    };
+  }, [slug]);
+
+  // Tras inscribirse: los lugares disponibles se actualizan al instante con la respuesta del servidor.
+  const handleInscrito = (convocatoria, mensajeError) => {
+    if (convocatoria) setEvento((prev) => (prev ? { ...prev, convocatoria } : prev));
+    if (!mensajeError) {
+      setInscrito(true);
+      setFormAbierto(false);
+      return;
+    }
+    // Ya estaba inscrito o el cupo se llenó mientras llenaba el formulario: se vuelve a consultar todo.
+    getEvento(slug).then((data) => setEvento(data)).catch(() => {});
+    getMisInscripciones().then((slugs) => setInscrito(slugs.includes(slug))).catch(() => {});
+  };
 
   useEffect(() => {
     let cancelado = false;
@@ -309,7 +343,10 @@ function EventDetail({ slug }) {
           </div>
 
           <aside className="evd-side">
-            <Convocatoria convocatoria={e.convocatoria} />
+            <Convocatoria convocatoria={e.convocatoria} inscrito={inscrito} onEnroll={() => setFormAbierto(true)} />
+            {formAbierto && !inscrito && !e.convocatoria.lleno && (
+              <EnrollModal evento={e} user={user} onClose={() => setFormAbierto(false)} onSuccess={handleInscrito} />
+            )}
 
             <section className="evd-card evd-committee">
               <p className="evd-eyebrow evd-eyebrow--muted">COMITÉ ORGANIZADOR &amp; AVAL CIENTÍFICO</p>
