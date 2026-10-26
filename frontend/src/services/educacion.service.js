@@ -5,6 +5,11 @@ export async function getPublicaciones() {
   return data.publicaciones;
 }
 
+export async function getPublicacion(id) {
+  const { data } = await axiosInstance.get(`/api/educacion/${id}`);
+  return data.publicacion;
+}
+
 export async function crearPublicacion(formData) {
   const { data } = await axiosInstance.post('/api/educacion', formData);
   return data.publicacion;

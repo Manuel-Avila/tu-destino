@@ -49,6 +49,7 @@ function App() {
         <Route path="/destinos" element={<PublicDestinationsPage />} />
         <Route path="/eventos" element={<PublicEventsPage />} />
         <Route path="/educacion" element={<PublicEducationPage />} />
+        <Route path="/educacion/:id" element={<EducationDetailPage variant="public" />} />
         <Route path="/reportes" element={<PublicReportsPage />} />
         <Route path="/acerca-de" element={<PublicAboutPage />} />
       </Route>
@@ -71,7 +72,7 @@ function App() {
         <Route path="eventos" element={<AppEventsPage />} />
         <Route path="eventos/:id" element={<EventDetailPage />} />
         <Route path="educacion" element={<AppEducationPage />} />
-        <Route path="educacion/:id" element={<EducationDetailPage />} />
+        <Route path="educacion/:id" element={<EducationDetailPage variant="app" />} />
         <Route path="acerca-de" element={<AppAboutPage />} />
         <Route path="reportes" element={<AppReportsPage />} />
         <Route path="perfil" element={<ProfilePage />} />

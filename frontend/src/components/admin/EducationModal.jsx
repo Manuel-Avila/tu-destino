@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ReactModal from 'react-modal';
 import { educationSchema } from '../../validators/admin.validators';
+import { EDUCATION_CATEGORIES, EDUCATION_CATEGORY_NAMES } from '../../data/educationCategories';
 import ImagePicker from './ImagePicker';
 import './AdminModals.css';
 
@@ -34,21 +35,14 @@ const emptyForm = {
   imagen: '',
 };
 
-const CATEGORIAS_SUGERIDAS = [
-  'Arrecifes',
-  'Manglares',
-  'Fauna marina',
-  'Residuos',
-  'Turismo responsable',
-  'General',
-];
-
 export default function EducationModal({ isOpen, onClose, publicacion, onSave }) {
   const [formData, setFormData] = useState(() =>
     publicacion
       ? {
           titulo: publicacion.titulo || '',
-          categoria: publicacion.categoria || '',
+          categoria: EDUCATION_CATEGORY_NAMES.includes(publicacion.categoria)
+            ? publicacion.categoria
+            : '',
           texto: publicacion.texto || '',
           imagen: publicacion.imagen || '',
         }
@@ -135,18 +129,18 @@ export default function EducationModal({ isOpen, onClose, publicacion, onSave })
 
         <label>
           Categoría
-          <input
+          <select
             name="categoria"
-            list="educacion-categorias"
             value={formData.categoria}
             onChange={handleChange}
-            placeholder="Ej. Arrecifes, Manglares, Fauna marina..."
-          />
-          <datalist id="educacion-categorias">
-            {CATEGORIAS_SUGERIDAS.map((categoria) => (
-              <option key={categoria} value={categoria} />
+          >
+            <option value="">Selecciona una categoría</option>
+            {EDUCATION_CATEGORIES.map((categoria) => (
+              <option key={categoria.name} value={categoria.name}>
+                {categoria.name}
+              </option>
             ))}
-          </datalist>
+          </select>
           {errors.categoria && <span style={{ color: 'red', fontSize: '0.85em' }}>{errors.categoria}</span>}
         </label>
 

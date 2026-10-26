@@ -2,6 +2,7 @@ import { uploadBufferToCloudinary } from '../utils/cloudinary.js';
 import {
   createPublicacion,
   deletePublicacion,
+  findPublicacionById,
   listPublicaciones,
   updatePublicacion,
 } from '../models/educacion.model.js';
@@ -22,6 +23,22 @@ export async function getAll(req, res) {
   } catch (err) {
     console.error('[educacion] listar:', err);
     res.status(500).json({ error: 'No se pudieron cargar las publicaciones.' });
+  }
+}
+
+export async function getById(req, res) {
+  const id = parseId(req, res);
+  if (!id) return;
+
+  try {
+    const publicacion = await findPublicacionById(id);
+    if (!publicacion) {
+      return res.status(404).json({ error: 'Publicación no encontrada.' });
+    }
+    return res.json({ publicacion });
+  } catch (err) {
+    console.error('[educacion] obtener:', err);
+    return res.status(500).json({ error: 'No se pudo cargar la publicación.' });
   }
 }
 

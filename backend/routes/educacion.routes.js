@@ -4,6 +4,7 @@ import { requireAdmin } from '../middleware/auth.middleware.js';
 import {
   create,
   getAll,
+  getById,
   remove,
   update,
 } from '../controllers/educacion.controller.js';
@@ -13,6 +14,7 @@ const router = Router();
 
 // Cualquier visitante puede leer las publicaciones.
 router.get('/', getAll);
+router.get('/:id', getById);
 
 // Solo administradores pueden modificarlas.
 router.post('/', requireAdmin, upload.single('imagen'), create);

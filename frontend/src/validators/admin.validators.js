@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { EDUCATION_CATEGORY_NAMES } from '../data/educationCategories';
 
 export const destinationSchema = z.object({
   id: z.string().min(3, 'El ID debe tener al menos 3 caracteres').max(50),
@@ -21,7 +22,9 @@ export const destinationSchema = z.object({
 
 export const educationSchema = z.object({
   titulo: z.string().trim().min(5, 'El título debe tener al menos 5 caracteres').max(200),
-  categoria: z.string().trim().min(3, 'La categoría debe tener al menos 3 caracteres').max(100),
+  categoria: z.enum(EDUCATION_CATEGORY_NAMES, {
+    error: 'Selecciona una categoría válida.',
+  }),
   texto: z.string().trim().min(20, 'El texto debe tener al menos 20 caracteres'),
   imagen: z.any().optional(),
 });
