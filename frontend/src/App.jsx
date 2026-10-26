@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
+import { useThemeStore } from './store/themeStore';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicLayout from './layouts/PublicLayout';
 import AppLayout from './layouts/AppLayout';
@@ -30,11 +31,17 @@ import EventDetailPage from './pages/EventDetailPage';
 
 function App() {
   const loadCurrentUser = useAuthStore((state) => state.loadCurrentUser);
+  const theme = useThemeStore((state) => state.theme);
   const { pathname } = useLocation();
 
   useEffect(() => {
     loadCurrentUser();
   }, [loadCurrentUser]);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+  }, [theme]);
 
   // Al cambiar de pantalla, regresa al inicio de la página.
   useEffect(() => {

@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import { useAuthStore } from '../../store/authStore';
+import { useThemeStore } from '../../store/themeStore';
 // Asumo que tu Icon y SectionHeading los sigues usando o los reemplazas por Material Symbols
-import Icon from '../../components/events/EventIcons'; 
+import Icon from '../../components/events/EventIcons';
+import ProfileEditModal from '../../components/profile/ProfileEditModal';
+import ChangePasswordModal from '../../components/profile/ChangePasswordModal';
 import { destinationsData } from '../../data/destinations';
 import { eliminarResena, getMisResenas } from '../../services/resenas.service';
 import { getEventos, getMisInscripciones } from '../../services/eventos.service';
@@ -23,6 +27,14 @@ function badgeFecha(fecha) {
 function formatDate(value) {
   return new Date(value).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
 }
+
+const Toast = Swal.mixin({
+  toast: true,
+  position: 'top-end',
+  showConfirmButton: false,
+  timer: 3200,
+  timerProgressBar: true,
+});
 
 // Botones para cambiar entre las dos listas de un panel.
 function PanelTabs({ tabs, active, onChange, label }) {
@@ -47,6 +59,10 @@ function PanelTabs({ tabs, active, onChange, label }) {
 
 export default function ProfilePage() {
   const user = useAuthStore((state) => state.user);
+  const updateProfile = useAuthStore((state) => state.updateProfile);
+  const changePassword = useAuthStore((state) => state.changePassword);
+  const theme = useThemeStore((state) => state.theme);
+  const toggleTheme = useThemeStore((state) => state.toggleTheme);
   const { saved, toggle } = useSavedEvents();
   const { saved: savedDestIds, toggle: toggleDest } = useSavedDestinations();
 
@@ -57,7 +73,8 @@ export default function ProfilePage() {
   const [allDestinos, setAllDestinos] = useState([]);
   const [destTab, setDestTab] = useState('guardados'); // guardados | resenas
   const [eventTab, setEventTab] = useState('guardados'); // guardados | asistire
-  const [highContrast, setHighContrast] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -93,8 +110,16 @@ export default function ProfilePage() {
 
   const destinationName = (id) =>
     allDestinos.find((d) => d.id === id)?.name || destinationsData.find((d) => d.id === id)?.name || id;
-  const firstName = user?.fullName?.trim().split(' ')[0] || 'Explorador';
-  const initial = (user?.fullName || '?').trim().slice(0, 1).toUpperCase();
+  const displayName = user?.fullName?.trim() || 'Explorador';
+  const initial = displayName.slice(0, 1).toUpperCase();
+  const memberSince = user?.createdAt ? formatDate(user.createdAt) : '—';
+  const userLocation = user?.location?.trim();
+  const avatarUrl = user?.avatarUrl;
+  const visitedCount = new Set(reviews.map((review) => review.destinoId)).size;
+  const explorerBadge = reviews.length > 0 ? 'Eco-Explorador' : 'Nuevo explorador';
+  const passwordStatus = user?.passwordUpdatedAt
+    ? `Actualizada el ${formatDate(user.passwordUpdatedAt)}`
+    : 'Aún no has cambiado tu contraseña';
 
   async function handleDelete(review) {
     if (!window.confirm('¿Eliminar esta reseña? Esta acción no se puede deshacer.')) return;
@@ -106,14 +131,26 @@ export default function ProfilePage() {
     }
   }
 
+  async function handleProfileSave(formData) {
+    await updateProfile(formData);
+    setEditOpen(false);
+    Toast.fire({ icon: 'success', title: 'Perfil actualizado correctamente' });
+  }
+
+  async function handlePasswordSave(payload) {
+    await changePassword(payload);
+    setPasswordOpen(false);
+    Toast.fire({ icon: 'success', title: 'Contraseña actualizada correctamente' });
+  }
+
   return (
     <main className="profile-page bg-surface text-on-surface">
       <div className="profile-container">
         
         {/* Navegación y Encabezado */}
         <nav aria-label="Ruta de navegación" className="profile-breadcrumb">
-          <Link to="/app/cuenta" className="breadcrumb-link">
-            <Icon name="user" size={16} /> Tu Cuenta
+          <Link to="/app" className="breadcrumb-link">
+            <Icon name="home" size={16} /> Inicio
           </Link>
           <Icon name="chevron-right" size={14} className="divider" />
           <span className="breadcrumb-current">Mi perfil y Configuración</span>
@@ -135,31 +172,39 @@ export default function ProfilePage() {
         <section className="profile-hero card-surface">
           <div className="profile-hero-bg">
             <div className="hero-verified">
-              <Icon name="shield" size={15} /> Perfil Verificado
+              <Icon name="shield" size={15} /> Cuenta activa
             </div>
           </div>
           <div className="profile-hero-content">
             <div className="profile-hero-identity">
               <div className="profile-avatar-wrapper">
-                <div className="profile-avatar">{initial}</div>
-                <button aria-label="Cambiar foto de perfil" className="btn-camera" type="button">
-                  <Icon name="user" size={16} />
+                <div className={`profile-avatar ${avatarUrl ? 'profile-avatar--image' : ''}`.trim()}>
+                  {avatarUrl ? <img src={avatarUrl} alt={`Foto de ${displayName}`} /> : initial}
+                </div>
+                <button
+                  aria-label="Cambiar foto de perfil"
+                  className="btn-camera"
+                  type="button"
+                  onClick={() => setEditOpen(true)}
+                >
+                  <Icon name="camera" size={16} />
                 </button>
               </div>
               <div className="profile-user-info">
                 <div className="profile-name-row">
-                  <h2>{user?.fullName || firstName}</h2>
+                  <h2>{displayName}</h2>
                   <span className="badge-eco">
                     <Icon name="leaf" size={14} />
-                    Eco-Explorador
+                    {explorerBadge}
                   </span>
                 </div>
-                <p className="user-email"><Icon name="mail" size={16} /> {user?.email || 'correo@ejemplo.com'}</p>
+                <p className="user-email"><Icon name="mail" size={16} /> {user?.email || 'Sin correo registrado'}</p>
                 <div className="user-meta">
-                  <span><Icon name="pin" size={15} /> Baja California, MX</span>
+                  <span><Icon name="pin" size={15} /> {userLocation || 'Ubicación no definida'}</span>
                   <span className="dot-divider">•</span>
-                  <span><Icon name="calendar" size={15} /> Miembro desde {user?.createdAt ? formatDate(user.createdAt) : 'Sep 2026'}</span>
+                  <span><Icon name="calendar" size={15} /> Miembro desde {memberSince}</span>
                 </div>
+                {user?.bio && <p className="profile-bio">{user.bio}</p>}
               </div>
             </div>
 
@@ -172,11 +217,11 @@ export default function ProfilePage() {
                   <strong className="text-secondary">{saved.length + savedDestIds.length}</strong><span>Guardados</span>
                 </div>
                 <div className="stat-box">
-                  <strong>5</strong><span>Visitados</span>
+                  <strong>{visitedCount}</strong><span>Visitados</span>
                 </div>
               </div>
-              <button className="btn-primary" type="button">
-                <Icon name="grid" size={17} /> Editar datos personales
+              <button className="btn-primary" type="button" onClick={() => setEditOpen(true)}>
+                <Icon name="edit" size={17} /> Editar datos personales
               </button>
             </div>
           </div>
@@ -197,17 +242,24 @@ export default function ProfilePage() {
               <div className="panel-body">
                 <div className="setting-row">
                   <div className="setting-info">
-                    <div className="setting-icon"><Icon name="lightbulb" size={18} /></div>
+                    <div className="setting-icon">
+                      <Icon name={theme === 'dark' ? 'moon' : 'sun'} size={18} />
+                    </div>
                     <div>
-                      <strong>Modo de tema</strong>
-                      <small>Tema optimizado para legibilidad bajo luz.</small>
+                      <strong>Modo oscuro</strong>
+                      <small>
+                        {theme === 'dark'
+                          ? 'Activado: interfaz en tonos oscuros.'
+                          : 'Desactivado: interfaz en tonos claros.'}
+                      </small>
                     </div>
                   </div>
-                  <button 
-                    role="switch" 
-                    aria-checked={highContrast} 
-                    className={`toggle-switch ${highContrast ? 'active' : ''}`} 
-                    onClick={() => setHighContrast(!highContrast)}
+                  <button
+                    role="switch"
+                    aria-checked={theme === 'dark'}
+                    aria-label="Cambiar modo oscuro"
+                    className={`toggle-switch ${theme === 'dark' ? 'active' : ''}`.trim()}
+                    onClick={toggleTheme}
                     type="button"
                   >
                     <span className="toggle-knob"></span>
@@ -231,10 +283,10 @@ export default function ProfilePage() {
                       <strong>Contraseña de acceso</strong>
                       <span className="badge-secure"><span className="dot-secure"></span> Segura</span>
                     </div>
-                    <small>Último cambio hace 3 meses</small>
+                    <small>{passwordStatus}</small>
                   </div>
-                  <button className="btn-outline" type="button">
-                    <Icon name="shield" size={16} /> Cambiar contraseña
+                  <button className="btn-outline" type="button" onClick={() => setPasswordOpen(true)}>
+                    <Icon name="lock" size={16} /> Cambiar contraseña
                   </button>
                 </div>
               </div>
@@ -406,6 +458,23 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {editOpen && (
+        <ProfileEditModal
+          isOpen={editOpen}
+          user={user}
+          onClose={() => setEditOpen(false)}
+          onSave={handleProfileSave}
+        />
+      )}
+
+      {passwordOpen && (
+        <ChangePasswordModal
+          isOpen={passwordOpen}
+          onClose={() => setPasswordOpen(false)}
+          onSave={handlePasswordSave}
+        />
+      )}
     </main>
   );
 }

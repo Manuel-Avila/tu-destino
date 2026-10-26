@@ -45,7 +45,7 @@ export default function MapPicker({ lat, lng, onChange }) {
           setPosition={(pos) => onChange(pos[0], pos[1])} 
         />
       </MapContainer>
-      <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px', textAlign: 'center' }}>
+      <p className="map-picker__hint" style={{ fontSize: '0.8rem', color: '#666', marginTop: '4px', textAlign: 'center' }}>
         Haz clic en el mapa para {position ? 'cambiar' : 'seleccionar'} la ubicación.
       </p>
     </div>

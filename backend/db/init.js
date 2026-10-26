@@ -33,6 +33,10 @@ export async function initDb() {
   await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS google_id VARCHAR(255) UNIQUE;`);
   await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_provider VARCHAR(20) NOT NULL DEFAULT 'password';`);
   await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT FALSE;`);
+  await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS location VARCHAR(120);`);
+  await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT;`);
+  await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;`);
+  await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS password_updated_at TIMESTAMPTZ;`);
 
   await query(`
     CREATE INDEX IF NOT EXISTS idx_users_email ON users (LOWER(email));

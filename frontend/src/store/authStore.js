@@ -1,5 +1,11 @@
 import { create } from 'zustand';
-import { me, login as loginService, register as registerService } from '../services/auth.service';
+import {
+  me,
+  login as loginService,
+  register as registerService,
+  updateProfile as updateProfileService,
+  changePassword as changePasswordService,
+} from '../services/auth.service';
 
 const TOKEN_KEY = 'tudestino_token';
 
@@ -24,7 +30,7 @@ export const useAuthStore = create((set, get) => ({
     try {
       const data = await me();
       set({ user: data.user, loading: false });
-    } catch (err) {
+    } catch {
       localStorage.removeItem(TOKEN_KEY);
       set({ token: null, user: null, loading: false });
     }
@@ -39,6 +45,18 @@ export const useAuthStore = create((set, get) => ({
   login: async ({ email, password }) => {
     const data = await loginService({ email, password });
     get().persistSession(data.token, data.user);
+    return data.user;
+  },
+
+  updateProfile: async (formData) => {
+    const data = await updateProfileService(formData);
+    set({ user: data.user });
+    return data.user;
+  },
+
+  changePassword: async ({ currentPassword, newPassword }) => {
+    const data = await changePasswordService({ currentPassword, newPassword });
+    set({ user: data.user });
     return data.user;
   },
 
