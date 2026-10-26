@@ -29,37 +29,45 @@ const customStyles = {
 
 ReactModal.setAppElement('#root');
 
+const emptyForm = {
+  id: '',
+  name: '',
+  location: '',
+  label: '',
+  tag: '',
+  category: '',
+  description: '',
+  rules: [],
+  bestActivities: '',
+  image: '',
+  coordinates: [24.1422, -110.3108] // Default BCS
+};
+
 export default function DestinationModal({ isOpen, onClose, destination, onSave }) {
-  const [formData, setFormData] = useState({
-    id: '',
-    name: '',
-    location: '',
-    label: '',
-    tag: '',
-    category: '',
-    description: '',
-    image: '',
-    coordinates: [24.1422, -110.3108] // Default BCS
-  });
+  const [formData, setFormData] = useState(emptyForm);
   const [errors, setErrors] = useState({});
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     setErrors({});
     if (destination) {
-      setFormData(destination);
-    } else {
       setFormData({
-        id: '',
-        name: '',
-        location: '',
-        label: '',
-        tag: '',
-        category: '',
-        description: '',
-        image: '',
-        coordinates: [24.1422, -110.3108]
+        id: destination.id || '',
+        name: destination.name || '',
+        location: destination.location || '',
+        label: destination.label || '',
+        tag: destination.tag || '',
+        category: destination.category || '',
+        description: destination.description || '',
+        rules: Array.isArray(destination.rules) ? destination.rules : [],
+        bestActivities: destination.bestActivities || '',
+        image: destination.image || '',
+        coordinates: Array.isArray(destination.coordinates) && destination.coordinates.length === 2
+          ? destination.coordinates
+          : [24.1422, -110.3108]
       });
+    } else {
+      setFormData(emptyForm);
     }
   }, [destination, isOpen]);
 
@@ -72,9 +80,21 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
     }
   };
 
+  // Las reglas se capturan una por línea y se guardan como arreglo.
+  const handleRulesChange = (e) => {
+    setFormData((prev) => ({ ...prev, rules: e.target.value.split('\n') }));
+    if (errors.rules) {
+      setErrors(prev => ({ ...prev, rules: null }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = destinationSchema.safeParse(formData);
+    const dataToValidate = {
+      ...formData,
+      rules: formData.rules.map(rule => rule.trim()).filter(Boolean)
+    };
+    const result = destinationSchema.safeParse(dataToValidate);
     if (!result.success) {
       const fieldErrors = {};
       result.error.issues.forEach(issue => {
@@ -87,9 +107,9 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
     setIsUploading(true);
     try {
       const payload = new FormData();
-      Object.keys(formData).forEach(key => {
+      Object.keys(dataToValidate).forEach(key => {
          if (key !== 'image') {
-            let val = formData[key];
+            let val = dataToValidate[key];
             if (val !== null && typeof val === 'object') {
               payload.append(key, JSON.stringify(val));
             } else {
@@ -151,6 +171,31 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
           Descripción
           <textarea name="description" value={formData.description} onChange={handleChange} rows={3} />
           {errors.description && <span style={{ color: 'red', fontSize: '0.85em' }}>{errors.description}</span>}
+        </label>
+        <label>
+          Reglas de preservación obligatorias
+          <textarea
+            name="rules"
+            value={formData.rules.join('\n')}
+            onChange={handleRulesChange}
+            rows={4}
+            placeholder={'Ej. Sin plásticos de un solo uso\nUso de protector solar biodegradable\nProhibido pisar los manglares'}
+          />
+          <span style={{ fontSize: '0.8em', fontWeight: 400, color: '#6b7280' }}>
+            Escribe una regla por línea.
+          </span>
+          {errors.rules && <span style={{ color: 'red', fontSize: '0.85em' }}>{errors.rules}</span>}
+        </label>
+        <label>
+          Actividades sustentables permitidas
+          <textarea
+            name="bestActivities"
+            value={formData.bestActivities}
+            onChange={handleChange}
+            rows={3}
+            placeholder="Ej. Kayak suave, paddle board y senderismo por rutas autorizadas."
+          />
+          {errors.bestActivities && <span style={{ color: 'red', fontSize: '0.85em' }}>{errors.bestActivities}</span>}
         </label>
         <label>Imagen Principal</label>
         <ImagePicker 

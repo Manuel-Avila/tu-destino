@@ -5,6 +5,38 @@
   margin: 0 auto;
 }
 
+.edu-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.edu-create-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  flex-shrink: 0;
+  padding: .68rem 1.1rem;
+  border: 0;
+  border-radius: 999px;
+  background: #00695b;
+  color: #fff;
+  font: inherit;
+  font-size: .82rem;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(0, 105, 91, .18);
+  transition: background .2s ease, transform .2s ease;
+}
+
+.edu-create-btn:hover {
+  background: #00564a;
+  transform: translateY(-1px);
+}
+
 /* Guías de Educación */
 .education-content-grid {
   display: grid;
@@ -14,6 +46,10 @@
 }
 
 .edu-guide-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   background: #fff;
   border: 1px solid #d4ede3;
   border-radius: 12px;
@@ -21,9 +57,39 @@
   box-shadow: 0 3px 12px rgba(0, 89, 80, 0.04);
 }
 
-.edu-guide-card__icon {
-  font-size: 2rem;
-  margin-bottom: .8rem;
+.edu-guide-card__media {
+  margin: -1.6rem -1.6rem 1rem;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #e6f4ef;
+}
+
+.edu-guide-card__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.edu-guide-card__media--empty {
+  display: grid;
+  place-items: center;
+  color: #0d9b86;
+  background: linear-gradient(135deg, #e6f4ef 0%, #d3eee6 100%);
+}
+
+.edu-guide-card__category {
+  display: inline-block;
+  align-self: flex-start;
+  margin-bottom: .6rem;
+  padding: .3rem .68rem;
+  border-radius: 999px;
+  background: #e6f4ef;
+  color: #00695b;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
 }
 
 .edu-guide-card h4 {
@@ -37,10 +103,98 @@
   color: #4b6662;
   font-size: .88rem;
   line-height: 1.5;
+  white-space: pre-line;
+}
+
+.edu-guide-card__actions {
+  position: absolute;
+  top: .8rem;
+  right: .8rem;
+  z-index: 2;
+  display: flex;
+  gap: .4rem;
+}
+
+.edu-card-btn {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+  cursor: pointer;
+  transition: background .2s ease, transform .2s ease;
+}
+
+.edu-card-btn:hover {
+  transform: scale(1.06);
+}
+
+.edu-card-btn--edit {
+  color: #e65100;
+}
+
+.edu-card-btn--edit:hover {
+  background: #ffe0b2;
+}
+
+.edu-card-btn--delete {
+  color: #c62828;
+}
+
+.edu-card-btn--delete:hover {
+  background: #ffcdd2;
+}
+
+/* Estados de carga, error y vacío */
+.edu-state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: 1.25rem 1.5rem;
+  border: 1px dashed #b9dcd2;
+  border-radius: 12px;
+  background: #f4fbf8;
+  color: #3d5c56;
+  font-size: .9rem;
+}
+
+.edu-state p {
+  margin: 0;
+}
+
+.edu-state__retry {
+  padding: .55rem .95rem;
+  border: 1px solid #00695b;
+  border-radius: 999px;
+  background: transparent;
+  color: #00695b;
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.edu-state__retry:hover {
+  background: #e6f4ef;
 }
 
 @media (max-width: 760px) {
   .home-education { 
     padding: 2rem 1rem 3rem; 
+  }
+
+  .edu-section-header {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .edu-create-btn {
+    align-self: flex-start;
   }
 }

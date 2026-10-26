@@ -134,7 +134,8 @@ function DestinationDetail({ id }) {
     }
   };
 
-  const mapsUrl = destination.coordinates
+  const hasCoordinates = Array.isArray(destination.coordinates) && destination.coordinates.length === 2;
+  const mapsUrl = hasCoordinates
     ? `https://www.google.com/maps?q=${destination.coordinates[0]},${destination.coordinates[1]}`
     : null;
 
@@ -230,24 +231,28 @@ function DestinationDetail({ id }) {
 
             <section className="detail-section">
               <h2><span className="detail-bar" />Reglas de preservación obligatorias</h2>
-              <div className="detail-rules-grid">
-                {destination.rules.map((rule, idx) => (
-                  <div className="detail-rule-card" key={idx}>
-                    <span className="detail-rule-card__icon">✔</span>
-                    <p>{rule}</p>
-                  </div>
-                ))}
-              </div>
+              {Array.isArray(destination.rules) && destination.rules.length > 0 ? (
+                <div className="detail-rules-grid">
+                  {destination.rules.map((rule, idx) => (
+                    <div className="detail-rule-card" key={idx}>
+                      <span className="detail-rule-card__icon">✔</span>
+                      <p>{rule}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p>Este destino aún no tiene reglas de preservación registradas.</p>
+              )}
             </section>
 
             <section className="detail-section">
               <h2><span className="detail-bar" />Actividades sustentables permitidas</h2>
-              <p>{destination.bestActivities}</p>
+              <p>{destination.bestActivities?.trim() || 'Este destino aún no tiene actividades sustentables registradas.'}</p>
             </section>
           </div>
 
           <aside className="destination-detail__sidebar">
-            {destination.coordinates && (
+            {Array.isArray(destination.coordinates) && destination.coordinates.length === 2 && (
               <div className="detail-card">
                 <h3>📍 Ubicación</h3>
                 <div className="destination-map-container">

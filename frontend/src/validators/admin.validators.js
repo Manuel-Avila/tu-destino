@@ -8,8 +8,22 @@ export const destinationSchema = z.object({
   tag: z.string().min(3, 'La etiqueta corta debe tener al menos 3 caracteres').max(100),
   category: z.string().min(3, 'La categoría debe tener al menos 3 caracteres').max(100),
   description: z.string().min(20, 'La descripción debe tener al menos 20 caracteres'),
+  rules: z
+    .array(z.string().trim().min(3, 'Cada regla debe tener al menos 3 caracteres'))
+    .min(1, 'Agrega al menos una regla de preservación'),
+  bestActivities: z
+    .string()
+    .trim()
+    .min(10, 'Describe al menos una actividad sustentable permitida'),
   image: z.any().optional(),
   coordinates: z.array(z.number()).length(2).optional()
+});
+
+export const educationSchema = z.object({
+  titulo: z.string().trim().min(5, 'El título debe tener al menos 5 caracteres').max(200),
+  categoria: z.string().trim().min(3, 'La categoría debe tener al menos 3 caracteres').max(100),
+  texto: z.string().trim().min(20, 'El texto debe tener al menos 20 caracteres'),
+  imagen: z.any().optional(),
 });
 
 export const eventSchema = z.object({

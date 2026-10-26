@@ -8,6 +8,7 @@ import authRouter from './routes/auth.routes.js';
 import eventosRouter from './routes/eventos.routes.js';
 import resenasRouter from './routes/resenas.routes.js';
 import destinosRouter from './routes/destinos.routes.js';
+import educacionRouter from './routes/educacion.routes.js';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -35,6 +36,9 @@ app.use('/api/eventos', eventosRouter);
 app.use('/api/resenas', resenasRouter);
 
 app.use('/api/destinos', destinosRouter);
+
+// Publicaciones de Educación Ambiental: lectura pública, CRUD solo para admin.
+app.use('/api/educacion', educacionRouter);
 
 // 404 para cualquier ruta de API no encontrada.
 app.use('/api', (req, res) => {
