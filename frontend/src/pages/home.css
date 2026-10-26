@@ -2,9 +2,17 @@
 
 .home-page { 
   --teal: #00796b; 
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
   color: #003f39; 
   background: #fff; 
   font-family: 'DM Sans', Arial, sans-serif; 
+}
+
+.home-page > .home-footer {
+  margin-top: auto;
 }
 
 .home-header { 
@@ -374,7 +382,7 @@
 
 @media (max-width: 760px) {
   .home-header { height: auto; padding: .8rem 1rem; flex-wrap: wrap; }
-  .home-header .dashboard-header__links { order: 3; width: 100%; overflow-x: auto; padding-top: .6rem; gap: 1.2rem; }
+  .home-header .dashboard-header__links { order: 3; width: 100%; overflow-x: auto; padding: .2rem 0 .75rem; gap: 1.2rem; }
   .home-header .dashboard-header__account { margin-left: auto; }
   .home-hero { min-height: 340px; }
   .home-destinations { padding: 2.2rem 1rem 2.8rem; }

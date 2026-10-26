@@ -28,6 +28,8 @@ services:
     depends_on:
       - db
     command: npm run dev
+    volumes:
+      - report_uploads:/app/uploads
     develop:
       watch:
         - action: sync
@@ -51,3 +53,4 @@ services:
 
 volumes:
   pgdata:
+  report_uploads:

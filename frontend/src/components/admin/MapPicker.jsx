@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -12,10 +11,9 @@ L.Icon.Default.mergeOptions({
 });
 
 function LocationMarker({ position, setPosition }) {
-  const map = useMapEvents({
+  useMapEvents({
     click(e) {
       setPosition([e.latlng.lat, e.latlng.lng]);
-      map.flyTo(e.latlng, map.getZoom());
     },
   });
 
@@ -29,12 +27,11 @@ const DEFAULT_CENTER = [24.1422, -110.3108];
 const DEFAULT_ZOOM = 6;
 
 export default function MapPicker({ lat, lng, onChange }) {
-  const position = lat && lng ? [lat, lng] : null;
+  const position = lat != null && lng != null ? [lat, lng] : null;
 
   return (
     <div style={{ height: '300px', width: '100%', borderRadius: '8px', overflow: 'hidden', border: '1px solid #ccc', marginBottom: '1rem' }}>
       <MapContainer 
-        key={`${(position || DEFAULT_CENTER).join(',')}`}
         center={position || DEFAULT_CENTER} 
         zoom={position ? 12 : DEFAULT_ZOOM} 
         style={{ height: '100%', width: '100%' }}

@@ -21,6 +21,7 @@ import AppHomePage from './pages/app/AppHomePage';
 import AppDestinationsPage from './pages/app/AppDestinationsPage';
 import AppEventsPage from './pages/app/AppEventsPage';
 import AppEducationPage from './pages/app/AppEducationPage';
+import EducationDetailPage from './pages/EducationDetailPage';
 import AppAboutPage from './pages/app/AppAboutPage';
 import AppReportsPage from './pages/app/AppReportsPage';
 import ProfilePage from './pages/app/ProfilePage';
@@ -70,6 +71,7 @@ function App() {
         <Route path="eventos" element={<AppEventsPage />} />
         <Route path="eventos/:id" element={<EventDetailPage />} />
         <Route path="educacion" element={<AppEducationPage />} />
+        <Route path="educacion/:id" element={<EducationDetailPage />} />
         <Route path="acerca-de" element={<AppAboutPage />} />
         <Route path="reportes" element={<AppReportsPage />} />
         <Route path="perfil" element={<ProfilePage />} />

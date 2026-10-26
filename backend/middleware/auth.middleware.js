@@ -31,6 +31,21 @@ export function requireAuth(req, res, next) {
   }
 }
 
+/** Permite continuar sin sesión, pero adjunta req.user cuando llega un JWT válido. */
+export function optionalAuth(req, res, next) {
+  const header = req.headers.authorization || '';
+  const [scheme, token] = header.split(' ');
+  if (!token) return next();
+  if (scheme !== 'Bearer') return res.status(401).json({ error: 'Token inválido.' });
+  try {
+    const payload = verifyAuthToken(token);
+    req.user = { id: payload.sub, email: payload.email };
+    return next();
+  } catch (err) {
+    return res.status(401).json({ error: err.name === 'TokenExpiredError' ? 'La sesión expiró.' : 'Token inválido.' });
+  }
+}
+
 import { findUserById } from '../models/user.model.js';
 
 export async function requireAdmin(req, res, next) {

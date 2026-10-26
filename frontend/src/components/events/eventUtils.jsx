@@ -39,12 +39,12 @@ export function normalizar(texto = '') {
 
 // Categorías del filtro (id = valor de eventos.categoria en la BD)
 export const CATEGORIAS = [
-  { id: 'todos', label: 'Todos los eventos', icon: 'grid' },
-  { id: 'limpieza', label: 'Limpieza de Costas y Arrecifes', icon: 'waves', tarjeta: 'Limpieza de Costas' },
-  { id: 'reforestacion', label: 'Reforestación de Manglares', icon: 'sprout', tarjeta: 'Reforestación' },
-  { id: 'fauna', label: 'Monitoreo de Fauna Marina', icon: 'paw', tarjeta: 'Monitoreo de Fauna' },
-  { id: 'educacion', label: 'Educación & Talleres Biológicos', icon: 'book', tarjeta: 'Educación' },
-  { id: 'preservacion', label: 'Preservación de Ecosistemas', icon: 'mountain', tarjeta: 'Preservación Marina' },
+  { id: 'todos', label: 'Todo', icon: 'grid' },
+  { id: 'limpieza', label: 'Limpieza', icon: 'waves', tarjeta: 'Limpieza de Costas' },
+  { id: 'reforestacion', label: 'Reforestación', icon: 'sprout', tarjeta: 'Reforestación' },
+  { id: 'fauna', label: 'Monitoreo', icon: 'paw', tarjeta: 'Monitoreo de Fauna' },
+  { id: 'educacion', label: 'Educación', icon: 'book', tarjeta: 'Educación' },
+  { id: 'preservacion', label: 'Preservación', icon: 'mountain', tarjeta: 'Preservación Marina' },
 ];
 
 export const etiquetaCategoria = (id) => CATEGORIAS.find((c) => c.id === id)?.tarjeta || 'Evento';

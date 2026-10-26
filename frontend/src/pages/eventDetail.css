@@ -125,7 +125,9 @@
   font-size: .82rem; font-weight: 700; text-align: center; text-decoration: none;
   transition: background .2s ease;
 }
-a.evd-cta:hover { background: var(--ev-green-hover); }
+a.evd-cta:hover, button.evd-cta:hover { background: var(--ev-green-hover); }
+button.evd-cta { width: 100%; border: 0; font: inherit; cursor: pointer; }
+.evd-cta.is-enrolled { background: #d6f7ec; color: #0a4d3c; cursor: default; }
 .evd-cta.is-disabled { background: #d9dce8; color: #6b7397; cursor: not-allowed; }
 .evd-convocatoria__hint { margin: .5rem 0 0; text-align: center; font-size: .66rem; color: #6b7397; }
 

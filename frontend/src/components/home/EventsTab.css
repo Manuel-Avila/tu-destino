@@ -141,11 +141,9 @@
 /* Chips de categorÃ­a */
 .ev-chips {
   display: flex;
+  flex-wrap: wrap;
   gap: .5rem;
   margin-bottom: 1.1rem;
-  padding-bottom: .3rem;
-  overflow-x: auto;
-  scrollbar-width: thin;
 }
 .ev-chip {
   display: inline-flex;
@@ -190,8 +188,13 @@
   font-weight: 700;
   line-height: 1.3;
 }
-.ev-card__category { background: rgba(6, 40, 32, .82); color: #fff; }
-.ev-card__flag { background: #0d9b86; color: #fff; }
+/* Misma etiqueta verde oscuro que en Destinos y Educación */
+.ev-card__category {
+  background: rgba(0, 85, 70, .9);
+  color: #fff;
+}
+/* Insignia de fecha / urgencia ("Próximo sábado"): otro tono de verde, claro */
+.ev-card__flag { background: rgba(214, 247, 236, .95); color: #0a4d3c; }
 .ev-card__place-tag { position: absolute; left: .7rem; bottom: .7rem; border-radius: 6px; background: rgba(255, 255, 255, .88); color: var(--ev-ink); letter-spacing: .03em; }
 
 .ev-card__body { position: relative; display: flex; flex-direction: column; gap: .45rem; padding: 1.1rem 1.3rem 1rem; min-width: 0; }

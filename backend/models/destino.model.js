@@ -14,20 +14,35 @@ function toApi(row) {
     rules: row.rules,
     bestActivities: row.best_activities,
     coordinates: row.coordinates,
-    rating: parseFloat(row.rating),
-    reviewCount: row.review_count,
+    // Calificación REAL: promedio y total calculados con las reseñas de usuarios
+    // (tabla destino_resenas). Sin reseñas = 0 / 0. Ya no se usan los valores fijos del seed.
+    rating: row.real_rating != null ? parseFloat(row.real_rating) : 0,
+    reviewCount: row.real_count != null ? Number(row.real_count) : 0,
     ratingBreakdown: row.rating_breakdown,
     reviews: row.reviews,
   };
 }
 
+// Une cada destino con el promedio y el conteo de sus reseñas reales.
+const SELECT_CON_CALIFICACION = `
+  SELECT d.*,
+         COALESCE(r.promedio, 0) AS real_rating,
+         COALESCE(r.total, 0)    AS real_count
+  FROM destinos d
+  LEFT JOIN (
+    SELECT destino_id, ROUND(AVG(rating)::numeric, 1) AS promedio, COUNT(*)::int AS total
+    FROM destino_resenas
+    GROUP BY destino_id
+  ) r ON r.destino_id = d.id
+`;
+
 export async function listDestinos() {
-  const { rows } = await query(`SELECT * FROM destinos ORDER BY created_at DESC`);
+  const { rows } = await query(`${SELECT_CON_CALIFICACION} ORDER BY d.created_at DESC`);
   return rows.map(toApi);
 }
 
 export async function findDestinoById(id) {
-  const { rows } = await query(`SELECT * FROM destinos WHERE id = $1`, [id]);
+  const { rows } = await query(`${SELECT_CON_CALIFICACION} WHERE d.id = $1`, [id]);
   if (!rows[0]) return null;
   return toApi(rows[0]);
 }
@@ -53,7 +68,7 @@ export async function createDestino(data) {
       rating ?? 0, reviewCount ?? 0, ratingBreakdown ? JSON.stringify(ratingBreakdown) : '[]', reviews ? JSON.stringify(reviews) : '[]'
     ]
   );
-  return toApi(rows[0]);
+  return findDestinoById(rows[0].id);
 }
 
 export async function updateDestino(id, data) {
@@ -94,7 +109,7 @@ export async function updateDestino(id, data) {
     ]
   );
   if (!rows[0]) return null;
-  return toApi(rows[0]);
+  return findDestinoById(rows[0].id);
 }
 
 export async function deleteDestino(id) {

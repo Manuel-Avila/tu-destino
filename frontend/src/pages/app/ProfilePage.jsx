@@ -5,21 +5,58 @@ import { useAuthStore } from '../../store/authStore';
 import Icon from '../../components/events/EventIcons'; 
 import { destinationsData } from '../../data/destinations';
 import { eliminarResena, getMisResenas } from '../../services/resenas.service';
-import { getEventos } from '../../services/eventos.service';
+import { getEventos, getMisInscripciones } from '../../services/eventos.service';
+import { axiosInstance } from '../../api/axios';
 import { useSavedEvents } from '../../hooks/useSavedEvents';
+import { useSavedDestinations } from '../../hooks/useSavedDestinations';
+import { parseFecha } from '../../components/events/eventUtils';
 import './profile.css';
+
+// "2026-10-24" -> "24 OCT"
+function badgeFecha(fecha) {
+  if (!fecha) return '';
+  const d = parseFecha(fecha);
+  const mes = d.toLocaleDateString('es-MX', { month: 'short' }).replace('.', '').toUpperCase();
+  return `${d.getDate()} ${mes}`;
+}
 
 function formatDate(value) {
   return new Date(value).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
+// Botones para cambiar entre las dos listas de un panel.
+function PanelTabs({ tabs, active, onChange, label }) {
+  return (
+    <div className="profile-tabs" role="tablist" aria-label={label}>
+      {tabs.map((tab) => (
+        <button
+          key={tab.id}
+          type="button"
+          role="tab"
+          aria-selected={active === tab.id}
+          className={`profile-tab ${active === tab.id ? 'is-active' : ''}`.trim()}
+          onClick={() => onChange(tab.id)}
+        >
+          <Icon name={tab.icon} size={15} /> {tab.label}
+          <span className="profile-tab__count">{tab.count}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export default function ProfilePage() {
   const user = useAuthStore((state) => state.user);
-  const { saved } = useSavedEvents();
+  const { saved, toggle } = useSavedEvents();
+  const { saved: savedDestIds, toggle: toggleDest } = useSavedDestinations();
 
   const [reviews, setReviews] = useState([]);
   const [reviewsStatus, setReviewsStatus] = useState('loading'); // loading | ready | error
-  const [savedEvents, setSavedEvents] = useState([]);
+  const [allEvents, setAllEvents] = useState([]);
+  const [attendingSlugs, setAttendingSlugs] = useState([]);
+  const [allDestinos, setAllDestinos] = useState([]);
+  const [destTab, setDestTab] = useState('guardados'); // guardados | resenas
+  const [eventTab, setEventTab] = useState('guardados'); // guardados | asistire
   const [highContrast, setHighContrast] = useState(false);
 
   useEffect(() => {
@@ -36,18 +73,26 @@ export default function ProfilePage() {
     };
   }, []);
 
+  // Eventos (para guardados y para "Voy a asistir") y destinos (para guardados y nombres de reseñas).
   useEffect(() => {
     let cancelled = false;
-    if (saved.length === 0) return undefined;
-    getEventos()
-      .then((all) => !cancelled && setSavedEvents(all.filter((e) => saved.includes(e.slug))))
-      .catch(() => !cancelled && setSavedEvents([]));
+    getEventos().then((all) => !cancelled && setAllEvents(all)).catch(() => {});
+    getMisInscripciones().then((slugs) => !cancelled && setAttendingSlugs(slugs)).catch(() => {});
+    axiosInstance
+      .get('/api/destinos')
+      .then((res) => !cancelled && setAllDestinos(res.data.destinos || res.data))
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
-  }, [saved]);
+  }, []);
 
-  const destinationName = (id) => destinationsData.find((d) => d.id === id)?.name || id;
+  const savedEvents = allEvents.filter((e) => saved.includes(e.slug));
+  const attendingEvents = allEvents.filter((e) => attendingSlugs.includes(e.slug));
+  const savedDestinos = allDestinos.filter((d) => savedDestIds.includes(d.id));
+
+  const destinationName = (id) =>
+    allDestinos.find((d) => d.id === id)?.name || destinationsData.find((d) => d.id === id)?.name || id;
   const firstName = user?.fullName?.trim().split(' ')[0] || 'Explorador';
   const initial = (user?.fullName || '?').trim().slice(0, 1).toUpperCase();
 
@@ -124,7 +169,7 @@ export default function ProfilePage() {
                   <strong>{reviews.length}</strong><span>Reseñas</span>
                 </div>
                 <div className="stat-box">
-                  <strong className="text-secondary">{saved.length}</strong><span>Guardados</span>
+                  <strong className="text-secondary">{saved.length + savedDestIds.length}</strong><span>Guardados</span>
                 </div>
                 <div className="stat-box">
                   <strong>5</strong><span>Visitados</span>
@@ -199,59 +244,101 @@ export default function ProfilePage() {
           {/* Columna Derecha: Contenido */}
           <div className="profile-col">
             
-            {/* Mis Reseñas */}
+            {/* Destinos: guardados y reseñas */}
             <div className="profile-panel card-surface">
               <div className="panel-header-between">
                 <div className="panel-header-left">
-                  <div className="panel-icon bg-primary-light"><Icon name="chat" size={19} /></div>
+                  <div className="panel-icon bg-primary-light"><Icon name="pin" size={19} /></div>
                   <div>
-                    <h3>Mis reseñas</h3>
-                    <p>Tus opiniones y verificaciones de senderos</p>
+                    <h3>Destinos</h3>
+                    <p>Tus lugares favoritos y tus opiniones</p>
                   </div>
                 </div>
-                <span className="badge-count">{reviews.length} publicadas</span>
+                <Link className="link-action" to="/app/destinos">Ver destinos <Icon name="chevron-right" size={16} /></Link>
               </div>
-              
+
               <div className="panel-body">
-                {reviewsStatus === 'loading' && <p className="status-text">Cargando reseñas...</p>}
-                {reviewsStatus === 'error' && <p className="status-text error">No pudimos cargar tus reseñas.</p>}
-                
-                {reviewsStatus === 'ready' && reviews.length === 0 ? (
-                  <div className="empty-state">
-                    <div className="empty-icon"><Icon name="chat" size={30} /></div>
-                    <h4>Todavía no has publicado reseñas</h4>
-                    <p>Comparte tus observaciones sobre la preservación de reservas, estado de senderos y buenas prácticas ambientales en tu último viaje.</p>
-                    <Link className="btn-primary" to="/app/destinos">
-                      <Icon name="search" size={18} /> Explorar destinos cercanos
-                    </Link>
-                  </div>
-                ) : (
-                  <ul className="review-list">
-                    {reviews.map((review) => (
-                      <li key={review.id} className="review-item">
-                        <div className="review-top">
-                          <Link to={`/app/destinos/${review.destinoId}`}><strong>{destinationName(review.destinoId)}</strong></Link>
-                          <span className="stars" aria-label={`${review.rating} de 5 estrellas`}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span>
-                        </div>
-                        <p>{review.comment}</p>
-                        <div className="review-bottom">
-                          <span className="review-date">Publicada el {formatDate(review.createdAt)}</span>
-                          <button type="button" className="btn-delete" onClick={() => handleDelete(review)}>Eliminar</button>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                <PanelTabs
+                  label="Destinos"
+                  active={destTab}
+                  onChange={setDestTab}
+                  tabs={[
+                    { id: 'guardados', label: 'Destinos guardados', icon: 'heart', count: savedDestinos.length },
+                    { id: 'resenas', label: 'Mis reseñas', icon: 'chat', count: reviews.length },
+                  ]}
+                />
+
+                {destTab === 'guardados' && (
+                  savedDestIds.length === 0 ? (
+                    <div className="empty-state-small">
+                      <p>No has guardado destinos. Toca el corazón en un destino para verlo aquí.</p>
+                    </div>
+                  ) : (
+                    <ul className="event-list">
+                      {savedDestinos.map((destino) => (
+                        <li key={destino.id} className="event-item">
+                          <div className="event-img">
+                            <img src={destino.image || destino.images?.[0] || ''} alt={destino.name} loading="lazy" />
+                          </div>
+                          <div className="event-info">
+                            <div className="event-title-row">
+                              <div>
+                                <span className="badge-tag">{destino.tag || destino.label}</span>
+                                <h4><Link to={`/app/destinos/${destino.id}`}>{destino.name}</Link></h4>
+                              </div>
+                              <button type="button" className="btn-icon-danger" title="Quitar de guardados" aria-label="Quitar de destinos guardados" onClick={() => toggleDest(destino.id)}><Icon name="ban" size={17} /></button>
+                            </div>
+                            <p className="event-location"><Icon name="pin" size={15} /> <span className="event-location__text">{destino.location}</span></p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )
+                )}
+
+                {destTab === 'resenas' && (
+                  <>
+                    {reviewsStatus === 'loading' && <p className="status-text">Cargando reseñas...</p>}
+                    {reviewsStatus === 'error' && <p className="status-text error">No pudimos cargar tus reseñas.</p>}
+
+                    {reviewsStatus === 'ready' && reviews.length === 0 ? (
+                      <div className="empty-state">
+                        <div className="empty-icon"><Icon name="chat" size={30} /></div>
+                        <h4>Todavía no has publicado reseñas</h4>
+                        <p>Comparte tus observaciones sobre la preservación de reservas, estado de senderos y buenas prácticas ambientales en tu último viaje.</p>
+                        <Link className="btn-primary" to="/app/destinos">
+                          <Icon name="search" size={18} /> Explorar destinos cercanos
+                        </Link>
+                      </div>
+                    ) : (
+                      <ul className="review-list">
+                        {reviews.map((review) => (
+                          <li key={review.id} className="review-item">
+                            <div className="review-top">
+                              <Link to={`/app/destinos/${review.destinoId}`}><strong>{destinationName(review.destinoId)}</strong></Link>
+                              <span className="stars" aria-label={`${review.rating} de 5 estrellas`}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span>
+                            </div>
+                            <p>{review.comment}</p>
+                            <div className="review-bottom">
+                              <span className="review-date">Publicada el {formatDate(review.createdAt)}</span>
+                              <button type="button" className="btn-delete" onClick={() => handleDelete(review)}>Eliminar</button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </>
                 )}
               </div>
             </div>
 
-            {/* Eventos Guardados */}
+            {/* Eventos: guardados y a los que asistiré */}
             <div className="profile-panel card-surface">
               <div className="panel-header-between">
                 <div className="panel-header-left">
                   <div className="panel-icon bg-secondary-light"><Icon name="bag" size={19} /></div>
                   <div>
-                    <h3>Mis eventos guardados</h3>
+                    <h3>Eventos</h3>
                     <p>Voluntariados y talleres programados</p>
                   </div>
                 </div>
@@ -259,33 +346,55 @@ export default function ProfilePage() {
               </div>
 
               <div className="panel-body">
-                {saved.length === 0 ? (
-                  <div className="empty-state-small">
-                    <p>No has guardado eventos. Explora la agenda para participar.</p>
-                  </div>
-                ) : (
-                  <ul className="event-list">
-                    {savedEvents.map((evento) => (
-                      <li key={evento.id} className="event-item">
-                        <div className="event-img">
-                          <img src={evento.imagenUrl || 'placeholder.jpg'} alt={evento.tituloEvento} />
-                          <span className="event-date-badge">14 OCT</span> {/* Reemplazar con lógica de fecha real si la tienes */}
-                        </div>
-                        <div className="event-info">
-                          <div className="event-title-row">
-                            <div>
-                              <span className="badge-tag">Evento Ecológico</span>
-                              <h4><Link to={`/app/eventos/${evento.slug}`}>{evento.tituloEvento}</Link></h4>
-                            </div>
-                            <button className="btn-icon-danger" title="Quitar de guardados"><Icon name="ban" size={17} /></button>
+                <PanelTabs
+                  label="Eventos"
+                  active={eventTab}
+                  onChange={setEventTab}
+                  tabs={[
+                    { id: 'guardados', label: 'Eventos guardados', icon: 'heart', count: savedEvents.length },
+                    { id: 'asistire', label: 'Eventos a los que asistiré', icon: 'check', count: attendingEvents.length },
+                  ]}
+                />
+
+                {(() => {
+                  const lista = eventTab === 'guardados' ? savedEvents : attendingEvents;
+                  if (lista.length === 0) {
+                    return (
+                      <div className="empty-state-small">
+                        <p>
+                          {eventTab === 'guardados'
+                            ? 'No has guardado eventos. Explora la agenda para participar.'
+                            : 'Aún no te has inscrito a ningún evento. Abre un evento y llena el formulario de inscripción.'}
+                        </p>
+                      </div>
+                    );
+                  }
+                  return (
+                    <ul className="event-list">
+                      {lista.map((evento) => (
+                        <li key={evento.id} className="event-item">
+                          <div className="event-img">
+                            <img src={evento.imagenes?.[0] || ''} alt={evento.tituloEvento} loading="lazy" />
+                            <span className="event-date-badge">{badgeFecha(evento.fecha)}</span>
                           </div>
-                          <p className="event-location"><Icon name="pin" size={15} /> {evento.lugarEvento}, {evento.localidad}</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                
+                          <div className="event-info">
+                            <div className="event-title-row">
+                              <div>
+                                <span className="badge-tag">{eventTab === 'guardados' ? 'Evento Ecológico' : 'Inscrito ✓'}</span>
+                                <h4><Link to={`/app/eventos/${evento.slug}`}>{evento.tituloEvento}</Link></h4>
+                              </div>
+                              {eventTab === 'guardados' && (
+                                <button type="button" className="btn-icon-danger" title="Quitar de guardados" aria-label="Quitar de guardados" onClick={() => toggle(evento.slug)}><Icon name="ban" size={17} /></button>
+                              )}
+                            </div>
+                            <p className="event-location"><Icon name="pin" size={15} /> <span className="event-location__text">{evento.lugarEvento}, {evento.localidad}</span></p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  );
+                })()}
+
                 <div className="panel-footer">
                   <Link className="btn-block-outline" to="/app/eventos">
                     <Icon name="search" size={16} /> Explorar más eventos ecológicos

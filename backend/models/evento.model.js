@@ -179,6 +179,88 @@ export async function registrarInscripcion(slug, { respuestaId, nombre, correo }
   }
 }
 
+/**
+ * Inscribe a un usuario con sesión desde el formulario de la app.
+ * Guarda nombre y correo de su cuenta + los datos que escribió, y descuenta un lugar.
+ * Devuelve { estado: 'ok' | 'duplicado' | 'lleno', convocatoria } o null si el evento no existe.
+ */
+export async function inscribirUsuario(slug, user, datos) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // FOR UPDATE: si dos personas se inscriben al mismo tiempo, se procesan una tras otra.
+    const ev = await client.query(
+      `SELECT id, cupo_total, cupos_ocupados FROM eventos WHERE slug = $1 AND activo = TRUE FOR UPDATE`,
+      [slug]
+    );
+    if (!ev.rows[0]) {
+      await client.query('ROLLBACK');
+      return null;
+    }
+    const { id, cupo_total } = ev.rows[0];
+    let cuposOcupados = ev.rows[0].cupos_ocupados;
+    const convocatoria = () => ({
+      cupoTotal: cupo_total,
+      cuposOcupados,
+      cuposRestantes: Math.max(0, cupo_total - cuposOcupados),
+      lleno: cuposOcupados >= cupo_total,
+    });
+
+    const yaInscrito = await client.query(
+      `SELECT 1 FROM evento_inscripciones WHERE evento_id = $1 AND user_id = $2`,
+      [id, user.id]
+    );
+    if (yaInscrito.rowCount > 0) {
+      await client.query('ROLLBACK');
+      return { estado: 'duplicado', convocatoria: convocatoria() };
+    }
+
+    if (cuposOcupados >= cupo_total) {
+      await client.query('ROLLBACK');
+      return { estado: 'lleno', convocatoria: convocatoria() };
+    }
+
+    await client.query(
+      `INSERT INTO evento_inscripciones (
+         evento_id, respuesta_id, user_id, nombre, correo,
+         telefono, edad, contacto_emergencia_nombre, contacto_emergencia_telefono, notas
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [
+        id, `app-${user.id}`, user.id, user.full_name, user.email,
+        datos.telefono, datos.edad, datos.contactoEmergenciaNombre, datos.contactoEmergenciaTelefono, datos.notas || null,
+      ]
+    );
+
+    const upd = await client.query(
+      `UPDATE eventos SET cupos_ocupados = cupos_ocupados + 1 WHERE id = $1 RETURNING cupos_ocupados`,
+      [id]
+    );
+    cuposOcupados = upd.rows[0].cupos_ocupados;
+
+    await client.query('COMMIT');
+    return { estado: 'ok', convocatoria: convocatoria() };
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+/** Slugs de los eventos a los que el usuario ya se inscribió. */
+export async function listSlugsInscritos(userId) {
+  const { rows } = await query(
+    `SELECT e.slug
+     FROM evento_inscripciones i
+     JOIN eventos e ON e.id = i.evento_id
+     WHERE i.user_id = $1
+     ORDER BY i.created_at DESC`,
+    [userId]
+  );
+  return rows.map((r) => r.slug);
+}
+
 export async function createEvento(data) {
   const client = await pool.connect();
   try {
