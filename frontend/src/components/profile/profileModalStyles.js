@@ -11,7 +11,6 @@ export const profileModalStyles = {
     overflowY: 'auto',
     overscrollBehavior: 'contain',
     WebkitOverflowScrolling: 'touch',
-    padding: 0,
     border: 'none',
     borderRadius: '20px',
     background: 'var(--profile-panel, #ffffff)',
