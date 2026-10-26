@@ -92,8 +92,7 @@
 }
 
 .ReactModal__Overlay {
-  opacity: 0;
-  transition: opacity 200ms ease-in-out;
+  opacity: 1;
 }
 
 .ReactModal__Overlay--after-open {
@@ -102,6 +101,7 @@
 
 .ReactModal__Overlay--before-close {
   opacity: 0;
+  transition: opacity 200ms ease-in-out;
 }
 
 .swal2-actions { gap: 0.8rem; }

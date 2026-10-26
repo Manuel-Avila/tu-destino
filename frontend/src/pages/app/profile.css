@@ -1090,3 +1090,11 @@
     flex-direction: column-reverse;
   }
 }
+
+/* Comportamiento real de modal: overlay fijo y scroll del fondo bloqueado. */
+body.profile-modal-open {
+  overflow: hidden;
+}
+.ReactModal__Overlay.profile-modal-overlay {
+  opacity: 1;
+}

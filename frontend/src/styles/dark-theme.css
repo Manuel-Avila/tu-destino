@@ -293,6 +293,9 @@ html[data-theme='dark'] .ReactModal__Content {
   /* react-modal aplica background:#fff en estilos inline; se fuerza el tema. */
   background: #16231f !important;
 }
+html[data-theme='dark'] .ReactModal__Content h2 {
+  color: #e6f2ed !important;
+}
 html[data-theme='dark'] .ReactModal__Overlay {
   background-color: rgba(2, 10, 8, 0.78);
 }

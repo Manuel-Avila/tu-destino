@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ReactModal from 'react-modal';
 import Icon from '../events/EventIcons';
 import { profileModalStyles } from './profileModalStyles';
@@ -31,7 +31,35 @@ function validate(form) {
   return errors;
 }
 
+/**
+ * Igual que en el modal de perfil: ReactModal se mantiene montado para limpiar
+ * correctamente overlay, foco, aria-hidden y scroll; el formulario interior se
+ * desmonta al cerrar y no conserva contraseñas entre aperturas.
+ */
 export default function ChangePasswordModal({ isOpen, onClose, onSave }) {
+  const savingRef = useRef(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    document.body.classList.add('profile-modal-open');
+    return () => document.body.classList.remove('profile-modal-open');
+  }, [isOpen]);
+
+  return (
+    <ReactModal
+      isOpen={isOpen}
+      onRequestClose={() => !savingRef.current && onClose()}
+      style={profileModalStyles}
+      className="profile-modal"
+      overlayClassName="profile-modal-overlay"
+      contentLabel="Cambiar contraseña"
+    >
+      <ChangePasswordForm onClose={onClose} onSave={onSave} savingRef={savingRef} />
+    </ReactModal>
+  );
+}
+
+function ChangePasswordForm({ onClose, onSave, savingRef }) {
   const [form, setForm] = useState({
     currentPassword: '',
     newPassword: '',
@@ -58,6 +86,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onSave }) {
     }
 
     setSaving(true);
+    savingRef.current = true;
     setFormError('');
     try {
       await onSave({
@@ -76,6 +105,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onSave }) {
           'No se pudo cambiar la contraseña. Intenta de nuevo.'
       );
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   }
@@ -83,14 +113,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onSave }) {
   const inputType = showPassword ? 'text' : 'password';
 
   return (
-    <ReactModal
-      isOpen={isOpen}
-      onRequestClose={() => !saving && onClose()}
-      style={profileModalStyles}
-      className="profile-modal"
-      overlayClassName="profile-modal-overlay"
-      contentLabel="Cambiar contraseña"
-    >
+    <>
       <div className="profile-modal__header">
         <div className="profile-modal__heading">
           <span className="profile-modal__icon">
@@ -181,6 +204,6 @@ export default function ChangePasswordModal({ isOpen, onClose, onSave }) {
           </button>
         </div>
       </form>
-    </ReactModal>
+    </>
   );
 }

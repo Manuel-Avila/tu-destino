@@ -131,6 +131,14 @@ export default function ProfilePage() {
     }
   }
 
+  function openEditModal() {
+    setEditOpen(true);
+  }
+
+  function openPasswordModal() {
+    setPasswordOpen(true);
+  }
+
   async function handleProfileSave(formData) {
     await updateProfile(formData);
     setEditOpen(false);
@@ -185,7 +193,7 @@ export default function ProfilePage() {
                   aria-label="Cambiar foto de perfil"
                   className="btn-camera"
                   type="button"
-                  onClick={() => setEditOpen(true)}
+                  onClick={openEditModal}
                 >
                   <Icon name="camera" size={16} />
                 </button>
@@ -220,7 +228,7 @@ export default function ProfilePage() {
                   <strong>{visitedCount}</strong><span>Visitados</span>
                 </div>
               </div>
-              <button className="btn-primary" type="button" onClick={() => setEditOpen(true)}>
+              <button className="btn-primary" type="button" onClick={openEditModal}>
                 <Icon name="edit" size={17} /> Editar datos personales
               </button>
             </div>
@@ -285,7 +293,7 @@ export default function ProfilePage() {
                     </div>
                     <small>{passwordStatus}</small>
                   </div>
-                  <button className="btn-outline" type="button" onClick={() => setPasswordOpen(true)}>
+                  <button className="btn-outline" type="button" onClick={openPasswordModal}>
                     <Icon name="lock" size={16} /> Cambiar contraseña
                   </button>
                 </div>
@@ -459,22 +467,18 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {editOpen && (
-        <ProfileEditModal
-          isOpen={editOpen}
-          user={user}
-          onClose={() => setEditOpen(false)}
-          onSave={handleProfileSave}
-        />
-      )}
+      <ProfileEditModal
+        isOpen={editOpen}
+        user={user}
+        onClose={() => setEditOpen(false)}
+        onSave={handleProfileSave}
+      />
 
-      {passwordOpen && (
-        <ChangePasswordModal
-          isOpen={passwordOpen}
-          onClose={() => setPasswordOpen(false)}
-          onSave={handlePasswordSave}
-        />
-      )}
+      <ChangePasswordModal
+        isOpen={passwordOpen}
+        onClose={() => setPasswordOpen(false)}
+        onSave={handlePasswordSave}
+      />
     </main>
   );
 }

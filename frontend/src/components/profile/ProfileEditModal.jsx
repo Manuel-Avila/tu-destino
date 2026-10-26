@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import ReactModal from 'react-modal';
 import Icon from '../events/EventIcons';
 import { profileModalStyles } from './profileModalStyles';
@@ -34,7 +34,40 @@ function validate(form) {
   return errors;
 }
 
+/**
+ * El ReactModal vive en el componente exterior para que se mantenga montado
+ * entre aperturas y pueda limpiar overlay, foco, aria-hidden y scroll.
+ * El formulario interior se desmonta al cerrar, así que cada apertura empieza limpia.
+ */
 export default function ProfileEditModal({ isOpen, user, onClose, onSave }) {
+  const savingRef = useRef(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    document.body.classList.add('profile-modal-open');
+    return () => document.body.classList.remove('profile-modal-open');
+  }, [isOpen]);
+
+  return (
+    <ReactModal
+      isOpen={isOpen}
+      onRequestClose={() => !savingRef.current && onClose()}
+      style={profileModalStyles}
+      className="profile-modal"
+      overlayClassName="profile-modal-overlay"
+      contentLabel="Editar datos personales"
+    >
+      <ProfileEditForm
+        user={user}
+        onClose={onClose}
+        onSave={onSave}
+        savingRef={savingRef}
+      />
+    </ReactModal>
+  );
+}
+
+function ProfileEditForm({ user, onClose, onSave, savingRef }) {
   const [form, setForm] = useState({
     fullName: user?.fullName || '',
     email: user?.email || '',
@@ -95,6 +128,7 @@ export default function ProfileEditModal({ isOpen, user, onClose, onSave }) {
     if (avatarFile) payload.append('avatar', avatarFile);
 
     setSaving(true);
+    savingRef.current = true;
     setFormError('');
     try {
       await onSave(payload);
@@ -110,6 +144,7 @@ export default function ProfileEditModal({ isOpen, user, onClose, onSave }) {
           'No se pudo actualizar el perfil. Intenta de nuevo.'
       );
     } finally {
+      savingRef.current = false;
       setSaving(false);
     }
   }
@@ -117,14 +152,7 @@ export default function ProfileEditModal({ isOpen, user, onClose, onSave }) {
   const initial = (form.fullName || '?').trim().slice(0, 1).toUpperCase();
 
   return (
-    <ReactModal
-      isOpen={isOpen}
-      onRequestClose={() => !saving && onClose()}
-      style={profileModalStyles}
-      className="profile-modal"
-      overlayClassName="profile-modal-overlay"
-      contentLabel="Editar datos personales"
-    >
+    <>
       <div className="profile-modal__header">
         <div className="profile-modal__heading">
           <span className="profile-modal__icon">
@@ -231,6 +259,6 @@ export default function ProfileEditModal({ isOpen, user, onClose, onSave }) {
           </button>
         </div>
       </form>
-    </ReactModal>
+    </>
   );
 }
