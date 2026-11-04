@@ -1,7 +1,6 @@
-import ReportsTab from '../../components/home/ReportsTab';
+import ReportsInfo from '../../components/public/ReportsInfo';
 
-// Versión informativa de Reportes (antes de iniciar sesión). Hoy es el mismo componente
-// que la versión con sesión; edítalo aquí cuando quieras que sean distintos.
+// Versión informativa de Reportes (antes de iniciar sesión): explica la sección e invita a iniciar sesión.
 export default function PublicReportsPage() {
-  return <ReportsTab />;
+  return <ReportsInfo />;
 }

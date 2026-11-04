@@ -1,19 +1,29 @@
-import SectionHeading from '../SectionHeading';
+import { Link } from 'react-router-dom';
+import Icon from '../events/EventIcons';
+import { useAuthStore } from '../../store/authStore';
+import './EventsTab.css';
 import './AboutTab.css';
 
+// Mismo encabezado (migas + div con título y descripción) que Destinos y Eventos, con o sin sesión.
 export default function AboutTab() {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
+
   return (
-    <section className="home-about" id="acerca-de" aria-label="Acerca de TuDestino">
-      <div className="section-header-wrap">
-        <SectionHeading
-          eyebrow="NUESTRA MISIÓN"
-          title="Acerca de TuDestino"
-          className="home-destinations__heading"
-        />
-        <p className="home-destinations__intro">
+    <div className="ev-tab-wrap">
+    <section className="ev-tab about-page" id="acerca-de" aria-label="Acerca de TuDestino">
+      <nav className="ev-breadcrumb" aria-label="Ruta de navegación">
+        <Link to={isAuthenticated ? '/app' : '/'}><Icon name="building" size={13} /> Inicio</Link>
+        <Icon name="chevron-right" size={12} />
+        <span className="is-current">Acerca de</span>
+      </nav>
+
+      <header className="ev-hero">
+        <p className="ev-hero__eyebrow"><Icon name="leaf" size={14} /> NUESTRA MISIÓN</p>
+        <h1>Acerca de TuDestino</h1>
+        <p className="ev-hero__lead">
           Tecnología ciudadana para la conservación de los ecosistemas marinos de Baja California Sur.
         </p>
-      </div>
+      </header>
 
       <div className="about-grid">
         <div className="about-text-card">
@@ -42,5 +52,6 @@ export default function AboutTab() {
         </div>
       </div>
     </section>
+    </div>
   );
 }

@@ -9,6 +9,16 @@ export const resenaSchema = z.object({
     .optional()
     .or(z.literal('')),
   comment: z.string().trim().min(10, 'Cuéntanos un poco más (mínimo 10 caracteres).').max(1500, 'La reseña es demasiado larga (máx. 1500).'),
+}).superRefine((data, ctx) => {
+  // No se puede reseñar una visita que aún no ocurre (la fecha de hoy se toma en horario de B.C.S.).
+  const hoy = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mazatlan' });
+  if (data.visitDate && data.visitDate > hoy) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['visitDate'],
+      message: 'La fecha de la visita no puede ser futura. Reseña el lugar cuando ya lo hayas visitado.',
+    });
+  }
 });
 
 export const destinoIdSchema = z.string().regex(/^[a-z0-9-]{1,60}$/, 'Destino inválido.');

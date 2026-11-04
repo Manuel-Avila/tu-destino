@@ -1,9 +1,5 @@
-/* Acerca de Section */
-.home-about { 
-  padding: 2.75rem 2vw 4rem; 
-  max-width: 1280px;
-  margin: 0 auto;
-}
+/* Acerca de Section (el contenedor y el encabezado vienen de .ev-tab / .ev-hero) */
+.about-page { padding-bottom: 4rem; }
 
 .about-grid {
   display: grid;
@@ -104,7 +100,5 @@
 }
 
 @media (max-width: 760px) {
-  .home-about { 
-    padding: 2rem 1rem 3rem; 
-  }
+  .about-page { padding-bottom: 3rem; }
 }

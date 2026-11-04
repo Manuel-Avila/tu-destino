@@ -1,7 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
-import SectionHeading from '../SectionHeading';
 import Icon from '../events/EventIcons';
-import AuthCallout from '../public/AuthCallout';
+import InfoPage from '../public/InfoPage';
 import { useEffect, useMemo, useState } from 'react';
 import { axiosInstance } from '../../api/axios';
 import Swal from 'sweetalert2';
@@ -324,51 +323,21 @@ export default function DestinationsTab({ locked = false }) {
   }
 
   return (
-    <section className="destinations-tab-section" id="destinos" aria-label="Destinos protegidos de Baja California Sur">
-      <div className="section-header-wrap">
-        <SectionHeading
-          eyebrow="ÁREAS NATURALES PROTEGIDAS"
-          title="Destinos de Baja California Sur"
-          className="home-destinations__heading"
-        />
-        <p className="home-destinations__intro">
-          Lugares impresionantes de alto valor ecológico que requieren nuestra protección y respeto constante.
-        </p>
-      </div>
-
-      {/* Explicador informativo de lo que se puede hacer */}
-      <div className="tab-info-explainer">
-        <div className="info-badge">Información de la sección</div>
-        <h3>¿Qué puedes hacer en la pestaña de Destinos?</h3>
-        <div className="info-steps-grid">
-          <div className="info-step-card">
-            <div className="info-step-card__num">1</div>
-            <h4>Consultar información ecológica oficial</h4>
-            <p>
-              Conoce el estatus de protección de cada destino, su biodiversidad clave y la importancia de sus arrecifes, manglares y dunas.
-            </p>
-          </div>
-          <div className="info-step-card">
-            <div className="info-step-card__num">2</div>
-            <h4>Aprender reglamentos y aforos</h4>
-            <p>
-              Infórmate sobre los turnos de visita en Balandra, boyado de fondeo en Cabo Pulmo y lineamientos para evitar multas o daños al entorno.
-            </p>
-          </div>
-          <div className="info-step-card">
-            <div className="info-step-card__num">3</div>
-            <h4>Turismo de bajo impacto</h4>
-            <p>
-              Descubre las actividades recomendadas (kayak, snorkel responsable, senderismo) para disfrutar las reservas sin alterar los hábitats marinos.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <AuthCallout
-        title="Inicia sesión para ver los destinos"
-        text="Con tu cuenta podrás ver la ficha completa de cada destino, sus reglas de preservación y las reseñas de la comunidad."
-      />
-    </section>
+    <InfoPage
+      id="destinos"
+      breadcrumb="Destinos"
+      icon="pin"
+      eyebrow="ÁREAS NATURALES PROTEGIDAS"
+      title="Destinos de Baja California Sur"
+      lead="Lugares impresionantes de alto valor ecológico que requieren nuestra protección y respeto constante."
+      explainerTitle="¿Qué puedes hacer en la pestaña de Destinos?"
+      steps={[
+        { title: 'Consultar información ecológica oficial', text: 'Conoce el estatus de protección de cada destino, su biodiversidad clave y la importancia de sus arrecifes, manglares y dunas.' },
+        { title: 'Aprender reglamentos y aforos', text: 'Infórmate sobre los turnos de visita en Balandra, boyado de fondeo en Cabo Pulmo y lineamientos para evitar multas o daños al entorno.' },
+        { title: 'Turismo de bajo impacto', text: 'Descubre las actividades recomendadas (kayak, snorkel responsable, senderismo) para disfrutar las reservas sin alterar los hábitats marinos.' },
+      ]}
+      calloutTitle="Inicia sesión para ver los destinos"
+      calloutText="Con tu cuenta podrás ver la ficha completa de cada destino, sus reglas de preservación y las reseñas de la comunidad."
+    />
   );
 }

@@ -108,11 +108,19 @@ export async function updateProfile(req, res) {
 
     let avatarUrl = null;
     if (req.file) {
-      avatarUrl = await uploadBufferToCloudinary(
-        req.file.buffer,
-        'tudestino/avatars',
-        req.file.mimetype || 'image/jpeg'
-      );
+      try {
+        avatarUrl = await uploadBufferToCloudinary(
+          req.file.buffer,
+          'tudestino/avatars',
+          req.file.mimetype || 'image/jpeg'
+        );
+      } catch (uploadErr) {
+        console.error('[auth.updateProfile] no se pudo subir la foto:', uploadErr?.message || uploadErr);
+        return res.status(502).json({
+          error: 'No se pudo subir la foto de perfil. Revisa la configuración de Cloudinary o guarda sin foto.',
+          errors: { avatar: 'No se pudo subir la foto de perfil. Intenta con otra imagen o guarda sin foto.' },
+        });
+      }
     }
 
     const user = await updateUserProfile(req.user.id, {

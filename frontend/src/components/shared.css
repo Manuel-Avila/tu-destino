@@ -72,6 +72,9 @@
   box-shadow: 0 2px 14px rgba(0, 70, 58, .09);
 }
 
+/* Las ventanas de confirmación (SweetAlert) siempre quedan por encima de cualquier otra ventana */
+.swal2-container { z-index: 3000 !important; }
+
 /* Los controles de los mapas (z-index 1000) no deben pasar por encima del menú fijo */
 .leaflet-container { z-index: 0; }
 html { scroll-padding-top: 96px; }

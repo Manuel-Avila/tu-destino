@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { useAuthStore } from '../../store/authStore';
@@ -14,6 +14,8 @@ import { axiosInstance } from '../../api/axios';
 import { useSavedEvents } from '../../hooks/useSavedEvents';
 import { useSavedDestinations } from '../../hooks/useSavedDestinations';
 import { parseFecha } from '../../components/events/eventUtils';
+import { confirmAction, notifyError, notifySuccess } from '../../utils/confirmAction';
+import '../../components/home/EventsTab.css';
 import './profile.css';
 
 // "2026-10-24" -> "24 OCT"
@@ -35,6 +37,47 @@ const Toast = Swal.mixin({
   timer: 3200,
   timerProgressBar: true,
 });
+
+/**
+ * Lista que muestra hasta `limit` elementos y, si hay más, agrega una barra de scroll
+ * (así el panel no se hace cada vez más grande). La altura se mide con los elementos reales.
+ */
+function LimitedList({ className, limit = 3, children }) {
+  const ref = useRef(null);
+  const [maxHeight, setMaxHeight] = useState(null);
+
+  useLayoutEffect(() => {
+    const list = ref.current;
+    if (!list) return undefined;
+
+    const measure = () => {
+      const items = Array.from(list.children);
+      if (items.length <= limit) {
+        setMaxHeight(null);
+        return;
+      }
+      const gap = parseFloat(getComputedStyle(list).rowGap) || 0;
+      const visible = items.slice(0, limit).reduce((sum, item) => sum + item.offsetHeight, 0);
+      setMaxHeight(Math.ceil(visible + gap * (limit - 1) + 2));
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [limit, children]);
+
+  return (
+    <ul
+      ref={ref}
+      className={`${className} ${maxHeight ? 'profile-scroll-list' : ''}`.trim()}
+      style={maxHeight ? { maxHeight } : undefined}
+      tabIndex={maxHeight ? 0 : undefined}
+    >
+      {children}
+    </ul>
+  );
+}
 
 // Botones para cambiar entre las dos listas de un panel.
 function PanelTabs({ tabs, active, onChange, label }) {
@@ -115,20 +158,45 @@ export default function ProfilePage() {
   const memberSince = user?.createdAt ? formatDate(user.createdAt) : '—';
   const userLocation = user?.location?.trim();
   const avatarUrl = user?.avatarUrl;
-  const visitedCount = new Set(reviews.map((review) => review.destinoId)).size;
+  const enrolledCount = attendingSlugs.length; // eventos a los que se ha inscrito
   const explorerBadge = reviews.length > 0 ? 'Eco-Explorador' : 'Nuevo explorador';
   const passwordStatus = user?.passwordUpdatedAt
     ? `Actualizada el ${formatDate(user.passwordUpdatedAt)}`
     : 'Aún no has cambiado tu contraseña';
 
   async function handleDelete(review) {
-    if (!window.confirm('¿Eliminar esta reseña? Esta acción no se puede deshacer.')) return;
+    const ok = await confirmAction({
+      text: 'Se eliminará tu reseña. Esta acción no se puede deshacer.',
+      confirmText: 'Sí, eliminar',
+    });
+    if (!ok) return;
     try {
       await eliminarResena(review.id);
       setReviews((prev) => prev.filter((r) => r.id !== review.id));
-    } catch {
-      window.alert('No se pudo eliminar la reseña. Intenta de nuevo.');
+      notifySuccess('Reseña eliminada', 'Tu reseña se eliminó correctamente.');
+    } catch (err) {
+      notifyError('No se pudo eliminar la reseña', err.message || 'Intenta de nuevo.');
     }
+  }
+
+  async function handleUnsaveDestino(destino) {
+    const ok = await confirmAction({
+      text: `"${destino.name}" dejará de aparecer en tus destinos guardados.`,
+      confirmText: 'Sí, quitar',
+    });
+    if (!ok) return;
+    toggleDest(destino.id);
+    notifySuccess('Destino quitado', 'Ya no está en tus destinos guardados.');
+  }
+
+  async function handleUnsaveEvento(evento) {
+    const ok = await confirmAction({
+      text: `"${evento.tituloEvento}" dejará de aparecer en tus eventos guardados.`,
+      confirmText: 'Sí, quitar',
+    });
+    if (!ok) return;
+    toggle(evento.slug);
+    notifySuccess('Evento quitado', 'Ya no está en tus eventos guardados.');
   }
 
   function openEditModal() {
@@ -142,7 +210,7 @@ export default function ProfilePage() {
   async function handleProfileSave(formData) {
     await updateProfile(formData);
     setEditOpen(false);
-    Toast.fire({ icon: 'success', title: 'Perfil actualizado correctamente' });
+    notifySuccess('Datos actualizados', 'Tus datos personales se guardaron correctamente.');
   }
 
   async function handlePasswordSave(payload) {
@@ -152,29 +220,26 @@ export default function ProfilePage() {
   }
 
   return (
+    <div className="ev-tab-wrap">
+    <section className="ev-tab profile-shell" aria-label="Mi perfil y configuración">
+      <nav className="ev-breadcrumb" aria-label="Ruta de navegación">
+        <Link to="/app"><Icon name="building" size={13} /> Inicio</Link>
+        <Icon name="chevron-right" size={12} />
+        <span className="is-current">Mi perfil</span>
+      </nav>
+
+      <header className="ev-hero">
+        <div>
+          <p className="ev-hero__eyebrow"><Icon name="user" size={14} /> PANEL PERSONAL</p>
+          <h1>Mi perfil</h1>
+        </div>
+        <p className="ev-hero__lead">
+          Gestiona tu información personal, preferencias de visualización y protocolos de seguridad ambiental y de tu cuenta.
+        </p>
+      </header>
+
     <main className="profile-page bg-surface text-on-surface">
       <div className="profile-container">
-        
-        {/* Navegación y Encabezado */}
-        <nav aria-label="Ruta de navegación" className="profile-breadcrumb">
-          <Link to="/app" className="breadcrumb-link">
-            <Icon name="home" size={16} /> Inicio
-          </Link>
-          <Icon name="chevron-right" size={14} className="divider" />
-          <span className="breadcrumb-current">Mi perfil y Configuración</span>
-        </nav>
-
-        <div className="profile-header">
-          <div className="profile-header-text">
-            <div className="profile-eyebrow-container">
-              <span className="profile-eyebrow">Panel Personal</span>
-              <span className="dot"></span>
-              <span className="profile-subtitle">Baja California & Ecoturismo</span>
-            </div>
-            <h1>Mi perfil</h1>
-            <p>Gestiona tu información personal, preferencias de visualización y protocolos de seguridad ambiental y de tu cuenta.</p>
-          </div>
-        </div>
 
         {/* Tarjeta de Identidad (Hero) */}
         <section className="profile-hero card-surface">
@@ -225,7 +290,7 @@ export default function ProfilePage() {
                   <strong className="text-secondary">{saved.length + savedDestIds.length}</strong><span>Guardados</span>
                 </div>
                 <div className="stat-box">
-                  <strong>{visitedCount}</strong><span>Visitados</span>
+                  <strong>{enrolledCount}</strong><span>Eventos</span>
                 </div>
               </div>
               <button className="btn-primary" type="button" onClick={openEditModal}>
@@ -331,10 +396,10 @@ export default function ProfilePage() {
                 {destTab === 'guardados' && (
                   savedDestIds.length === 0 ? (
                     <div className="empty-state-small">
-                      <p>No has guardado destinos. Toca el corazón en un destino para verlo aquí.</p>
+                      <p>No has guardado destinos. Explora la lista y toca el corazón para guardarlos.</p>
                     </div>
                   ) : (
-                    <ul className="event-list">
+                    <LimitedList className="event-list">
                       {savedDestinos.map((destino) => (
                         <li key={destino.id} className="event-item">
                           <div className="event-img">
@@ -346,13 +411,13 @@ export default function ProfilePage() {
                                 <span className="badge-tag">{destino.tag || destino.label}</span>
                                 <h4><Link to={`/app/destinos/${destino.id}`}>{destino.name}</Link></h4>
                               </div>
-                              <button type="button" className="btn-icon-danger" title="Quitar de guardados" aria-label="Quitar de destinos guardados" onClick={() => toggleDest(destino.id)}><Icon name="ban" size={17} /></button>
+                              <button type="button" className="btn-icon-danger" title="Quitar de guardados" aria-label="Quitar de destinos guardados" onClick={() => handleUnsaveDestino(destino)}><Icon name="ban" size={17} /></button>
                             </div>
                             <p className="event-location"><Icon name="pin" size={15} /> <span className="event-location__text">{destino.location}</span></p>
                           </div>
                         </li>
                       ))}
-                    </ul>
+                    </LimitedList>
                   )
                 )}
 
@@ -362,16 +427,11 @@ export default function ProfilePage() {
                     {reviewsStatus === 'error' && <p className="status-text error">No pudimos cargar tus reseñas.</p>}
 
                     {reviewsStatus === 'ready' && reviews.length === 0 ? (
-                      <div className="empty-state">
-                        <div className="empty-icon"><Icon name="chat" size={30} /></div>
-                        <h4>Todavía no has publicado reseñas</h4>
-                        <p>Comparte tus observaciones sobre la preservación de reservas, estado de senderos y buenas prácticas ambientales en tu último viaje.</p>
-                        <Link className="btn-primary" to="/app/destinos">
-                          <Icon name="search" size={18} /> Explorar destinos cercanos
-                        </Link>
+                      <div className="empty-state-small">
+                        <p>Aún no has publicado reseñas. Explora los destinos y comparte tu experiencia.</p>
                       </div>
                     ) : (
-                      <ul className="review-list">
+                      <LimitedList className="review-list">
                         {reviews.map((review) => (
                           <li key={review.id} className="review-item">
                             <div className="review-top">
@@ -385,10 +445,16 @@ export default function ProfilePage() {
                             </div>
                           </li>
                         ))}
-                      </ul>
+                      </LimitedList>
                     )}
                   </>
                 )}
+
+                <div className="panel-footer">
+                  <Link className="btn-block-outline" to="/app/destinos">
+                    <Icon name="search" size={16} /> Explorar más destinos
+                  </Link>
+                </div>
               </div>
             </div>
 
@@ -430,7 +496,7 @@ export default function ProfilePage() {
                     );
                   }
                   return (
-                    <ul className="event-list">
+                    <LimitedList className="event-list">
                       {lista.map((evento) => (
                         <li key={evento.id} className="event-item">
                           <div className="event-img">
@@ -444,14 +510,14 @@ export default function ProfilePage() {
                                 <h4><Link to={`/app/eventos/${evento.slug}`}>{evento.tituloEvento}</Link></h4>
                               </div>
                               {eventTab === 'guardados' && (
-                                <button type="button" className="btn-icon-danger" title="Quitar de guardados" aria-label="Quitar de guardados" onClick={() => toggle(evento.slug)}><Icon name="ban" size={17} /></button>
+                                <button type="button" className="btn-icon-danger" title="Quitar de guardados" aria-label="Quitar de guardados" onClick={() => handleUnsaveEvento(evento)}><Icon name="ban" size={17} /></button>
                               )}
                             </div>
                             <p className="event-location"><Icon name="pin" size={15} /> <span className="event-location__text">{evento.lugarEvento}, {evento.localidad}</span></p>
                           </div>
                         </li>
                       ))}
-                    </ul>
+                    </LimitedList>
                   );
                 })()}
 
@@ -480,5 +546,7 @@ export default function ProfilePage() {
         onSave={handlePasswordSave}
       />
     </main>
+    </section>
+    </div>
   );
 }

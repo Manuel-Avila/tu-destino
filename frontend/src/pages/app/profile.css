@@ -725,8 +725,18 @@
   }
   .profile-hero-identity {
     flex-direction: row;
-    align-items: flex-end;
+    align-items: flex-start;
     text-align: left;
+  }
+  /* Nombre + insignia sobre el banner verde; correo, ubicación y bio sobre el blanco. */
+  .profile-user-info {
+    padding-top: 0.5rem;
+  }
+  .profile-name-row {
+    min-height: 2rem;
+  }
+  .profile-user-info .user-email {
+    margin-top: 1.25rem !important;
   }
   .profile-name-row,
   .user-email,
@@ -1097,4 +1107,26 @@ body.profile-modal-open {
 }
 .ReactModal__Overlay.profile-modal-overlay {
   opacity: 1;
+}
+
+/* Listas del perfil: después de 3 elementos aparece una barra de scroll en vez de crecer sin fin */
+.profile-scroll-list {
+  overflow-y: auto;
+  padding-right: 0.4rem;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #9fd3c2 transparent;
+}
+.profile-scroll-list::-webkit-scrollbar { width: 8px; }
+.profile-scroll-list::-webkit-scrollbar-thumb { border-radius: 999px; background: #9fd3c2; }
+.profile-scroll-list:focus-visible { outline: 2px solid #70bca9; outline-offset: 2px; }
+
+/* Misma estructura de página que Eventos y Destinos (ev-tab / ev-hero) */
+.ev-tab.profile-shell main.profile-page {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+}
+.ev-tab.profile-shell .profile-container {
+  max-width: none;
 }

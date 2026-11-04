@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import ReactModal from 'react-modal';
 import Icon from '../events/EventIcons';
 import { profileModalStyles } from './profileModalStyles';
+import { confirmAction } from '../../utils/confirmAction';
 
 ReactModal.setAppElement('#root');
 
@@ -120,6 +121,15 @@ function ProfileEditForm({ user, onClose, onSave, savingRef }) {
       return;
     }
 
+    // Antes de guardar se pide confirmación; si cancela, el formulario se queda abierto con sus datos.
+    const confirmed = await confirmAction({
+      title: '¿Estás seguro de cambiar tus datos personales?',
+      text: 'Se actualizará la información de tu perfil.',
+      confirmText: 'Sí, guardar cambios',
+      danger: false,
+    });
+    if (!confirmed) return;
+
     const payload = new FormData();
     payload.append('fullName', form.fullName.trim());
     payload.append('email', form.email.trim());
@@ -133,14 +143,16 @@ function ProfileEditForm({ user, onClose, onSave, savingRef }) {
     try {
       await onSave(payload);
     } catch (err) {
-      const apiErrors = err?.response?.data?.errors;
+      // El interceptor de axios ya convierte la respuesta en un Error con message y fieldErrors.
+      const apiErrors = err?.fieldErrors || err?.response?.data?.errors;
       if (apiErrors) {
         setErrors((prev) => ({ ...prev, ...apiErrors }));
-        setFormError('');
+        setFormError(Object.values(apiErrors)[0] || '');
         return;
       }
       setFormError(
-        err?.response?.data?.error ||
+        err?.message ||
+          err?.response?.data?.error ||
           'No se pudo actualizar el perfil. Intenta de nuevo.'
       );
     } finally {

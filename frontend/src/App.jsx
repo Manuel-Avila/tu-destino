@@ -56,7 +56,7 @@ function App() {
         <Route path="/destinos" element={<PublicDestinationsPage />} />
         <Route path="/eventos" element={<PublicEventsPage />} />
         <Route path="/educacion" element={<PublicEducationPage />} />
-        <Route path="/educacion/:id" element={<EducationDetailPage variant="public" />} />
+        <Route path="/educacion/:id" element={<Navigate to="/educacion" replace />} />
         <Route path="/reportes" element={<PublicReportsPage />} />
         <Route path="/acerca-de" element={<PublicAboutPage />} />
       </Route>

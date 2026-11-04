@@ -9,6 +9,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { crearResena, eliminarResena, getResenasDestino } from '../services/resenas.service';
 import ImageCarousel from '../components/ImageCarousel';
 import { useSavedDestinations } from '../hooks/useSavedDestinations';
+import { confirmAction, notifyError, notifySuccess } from '../utils/confirmAction';
 import { axiosInstance } from '../api/axios';
 import './destinationDetail.css';
 
@@ -40,6 +41,9 @@ function ratingLabel(rating) {
 }
 
 const emptyForm = { rating: 5, activity: '', date: '', comment: '' };
+
+// Fecha de hoy (yyyy-mm-dd, hora local): una visita futura no se puede reseñar.
+const todayISO = () => new Date().toLocaleDateString('en-CA');
 
 function monthYear(dateStr) {
   return new Date(`${dateStr.slice(0, 10)}T00:00:00`).toLocaleDateString('es-MX', { month: 'long', year: 'numeric' });
@@ -149,6 +153,10 @@ function DestinationDetail({ id }) {
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
     if (!form.comment.trim() || submitting) return;
+    if (form.date && form.date > todayISO()) {
+      setFormError('La fecha de tu visita no puede ser futura. Podrás reseñar este lugar cuando ya lo hayas visitado.');
+      return;
+    }
     setFormError('');
     setSubmitting(true);
     try {
@@ -170,13 +178,18 @@ function DestinationDetail({ id }) {
   };
 
   const handleDeleteReview = async (review) => {
-    if (!window.confirm('¿Eliminar tu reseña? Esta acción no se puede deshacer.')) return;
+    const ok = await confirmAction({
+      text: 'Se eliminará tu reseña. Esta acción no se puede deshacer.',
+      confirmText: 'Sí, eliminar',
+    });
+    if (!ok) return;
     try {
       await eliminarResena(review.id);
       setDbReviews((prev) => prev.filter((r) => r.id !== review.id));
       setStats((prev) => ({ total: Math.max(0, prev.total - 1), suma: Math.max(0, prev.suma - review.rating) }));
+      notifySuccess('Reseña eliminada', 'Tu reseña se eliminó correctamente.');
     } catch (err) {
-      setFormError(err.message || 'No se pudo eliminar la reseña.');
+      notifyError('No se pudo eliminar la reseña', err.message || 'Intenta de nuevo.');
     }
   };
 
@@ -359,6 +372,7 @@ function DestinationDetail({ id }) {
                 ¿Cuándo visitaste?
                 <input
                   type="date"
+                  max={todayISO()}
                   value={form.date}
                   onChange={(e) => setForm((prev) => ({ ...prev, date: e.target.value }))}
                 />
