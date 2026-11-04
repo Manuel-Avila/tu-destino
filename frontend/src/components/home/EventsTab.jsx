@@ -245,7 +245,7 @@ export default function EventsTab() {
       cargar();
     } catch (err) {
       console.error(err);
-      Toast.fire({ icon: 'error', title: 'Error al guardar el evento' });
+      Toast.fire({ icon: 'error', title: err.message || 'Error al guardar el evento' });
     }
   };
 

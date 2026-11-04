@@ -43,13 +43,24 @@ const emptyForm = {
   coordinates: [24.1422, -110.3108] // Default BCS
 };
 
+const DESTINATION_TAGS = ['Área Protegida', 'Reserva', 'Parque Nacional', 'Parque Marino'];
+const DESTINATION_LABELS = [
+  'Área de Protección de Flora y Fauna',
+  'Reserva de la Biósfera UNESCO',
+  'Parque Nacional',
+  'Santuario de Cetáceos y Parque Marino',
+  'Arrecife Vivo'
+];
+
 export default function DestinationModal({ isOpen, onClose, destination, onSave }) {
   const [formData, setFormData] = useState(emptyForm);
   const [errors, setErrors] = useState({});
   const [isUploading, setIsUploading] = useState(false);
+  const [step, setStep] = useState(1);
 
   useEffect(() => {
     setErrors({});
+    setStep(1);
     if (destination) {
       setFormData({
         id: destination.id || '',
@@ -86,6 +97,18 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
     if (errors.rules) {
       setErrors(prev => ({ ...prev, rules: null }));
     }
+  };
+
+  const validateStep = () => {
+    const fields = step === 1 ? ['id', 'name', 'location', 'tag', 'label', 'category'] : ['description', 'rules', 'bestActivities'];
+    const values = { ...formData, rules: formData.rules.map((rule) => rule.trim()).filter(Boolean) };
+    const nextErrors = {};
+    fields.forEach((field) => {
+      const result = destinationSchema.shape[field].safeParse(values[field]);
+      if (!result.success) nextErrors[field] = result.error.issues[0].message;
+    });
+    setErrors((current) => ({ ...current, ...nextErrors }));
+    return Object.keys(nextErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
@@ -135,8 +158,10 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
 
   return (
     <ReactModal isOpen={isOpen} onRequestClose={onClose} style={customStyles} contentLabel={destination ? 'Editar Destino' : 'Crear Destino'} closeTimeoutMS={200}>
-      <h2 style={{ marginTop: 0, color: '#00695b' }}>{destination ? 'Editar Destino' : 'Crear Destino'}</h2>
+      <div className="admin-modal-heading"><h2>{destination ? 'Editar Destino' : 'Crear Destino'}</h2><button type="button" className="admin-modal-close" onClick={onClose} aria-label="Cerrar formulario">×</button></div>
+      <div className="admin-form-stepper" aria-label={`Paso ${step} de 2`}><span className={step === 1 ? 'is-active' : 'is-complete'}>1 · Datos y categoría</span><span className={step === 2 ? 'is-active' : ''}>2 · Información y mapa</span></div>
       <form className="admin-form" onSubmit={handleSubmit}>
+        {step === 1 ? <>
         <label>
           Slug (URL)
           <input name="id" value={formData.id} onChange={handleChange} disabled={!!destination} />
@@ -154,19 +179,32 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
         </label>
         <label>
           Etiqueta Corta (Ej. Área Protegida)
-          <input name="tag" value={formData.tag} onChange={handleChange} />
+          <select name="tag" value={formData.tag} onChange={handleChange}>
+            <option value="">Selecciona una etiqueta</option>
+            {DESTINATION_TAGS.map((tag) => <option key={tag} value={tag}>{tag}</option>)}
+            {formData.tag && !DESTINATION_TAGS.includes(formData.tag) && <option value={formData.tag}>{formData.tag}</option>}
+          </select>
           {errors.tag && <span style={{ color: 'red', fontSize: '0.85em' }}>{errors.tag}</span>}
         </label>
         <label>
           Etiqueta Larga (Ej. Área de Protección de Flora y Fauna)
-          <input name="label" value={formData.label} onChange={handleChange} />
+          <select name="label" value={formData.label} onChange={handleChange}>
+            <option value="">Selecciona una etiqueta</option>
+            {DESTINATION_LABELS.map((label) => <option key={label} value={label}>{label}</option>)}
+            {formData.label && !DESTINATION_LABELS.includes(formData.label) && <option value={formData.label}>{formData.label}</option>}
+          </select>
           {errors.label && <span style={{ color: 'red', fontSize: '0.85em' }}>{errors.label}</span>}
         </label>
         <label>
           Categoría
-          <input name="category" value={formData.category} onChange={handleChange} />
+          <select name="category" value={formData.category} onChange={handleChange}>
+            <option value="">Selecciona una categoría</option>
+            {['kayak', 'snorkel', 'senderismo', 'playa', 'observación de fauna', 'buceo', 'campismo'].map((category) => <option key={category} value={category}>{category.replace(/^./, (letter) => letter.toLocaleUpperCase('es-MX'))}</option>)}
+            {formData.category && !['kayak', 'snorkel', 'senderismo', 'playa', 'observación de fauna', 'buceo', 'campismo'].includes(formData.category) && <option value={formData.category}>{formData.category}</option>}
+          </select>
           {errors.category && <span style={{ color: 'red', fontSize: '0.85em' }}>{errors.category}</span>}
         </label>
+        </> : <>
         <label>
           Descripción
           <textarea name="description" value={formData.description} onChange={handleChange} rows={3} />
@@ -210,10 +248,14 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
           lng={formData.coordinates?.[1]} 
           onChange={(lat, lng) => setFormData(prev => ({ ...prev, coordinates: [lat, lng] }))}
         />
+        </>}
 
         <div className="admin-form-actions">
           <button type="button" className="admin-btn admin-btn--secondary" onClick={onClose}>Cancelar</button>
-          <button type="submit" className="admin-btn admin-btn--primary" disabled={isUploading}>{isUploading ? "Subiendo..." : "Guardar"}</button>
+          {step === 2 && <button type="button" className="admin-btn admin-btn--secondary" onClick={() => setStep(1)}>Anterior</button>}
+          {step === 1
+            ? <button type="button" className="admin-btn admin-btn--primary" onClick={() => { if (validateStep()) setStep(2); }}>Siguiente</button>
+            : <button type="submit" className="admin-btn admin-btn--primary" disabled={isUploading}>{isUploading ? "Subiendo..." : "Guardar destino"}</button>}
         </div>
       </form>
     </ReactModal>

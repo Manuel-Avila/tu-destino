@@ -8,7 +8,7 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import Icon from '../components/events/EventIcons';
 import { useSavedEvents } from '../hooks/useSavedEvents';
-import { getEvento, getMisInscripciones } from '../services/eventos.service';
+import { getEvento, getMisInscripciones, getParticipantesEvento } from '../services/eventos.service';
 import { useAuthStore } from '../store/authStore';
 import EnrollModal from '../components/events/EnrollModal';
 import {
@@ -57,7 +57,7 @@ function Gallery({ imagenes, titulo }) {
   );
 }
 
-function Convocatoria({ convocatoria, inscrito, onEnroll }) {
+function Convocatoria({ convocatoria, inscrito, isAdmin, onEnroll, onViewParticipants, participantsOpen, participants, participantsLoading, participantsError }) {
   const { cupoTotal, cuposOcupados, cuposRestantes, lleno } = convocatoria;
   const porcentaje = Math.min(100, Math.round((cuposOcupados / cupoTotal) * 100));
   // Se avisa "últimos espacios" cuando queda el 30 % o menos del cupo.
@@ -66,8 +66,8 @@ function Convocatoria({ convocatoria, inscrito, onEnroll }) {
   return (
     <div className="evd-card evd-convocatoria">
       <div className="evd-convocatoria__top">
-        <span className="evd-eyebrow">{lleno ? 'CONVOCATORIA CERRADA' : 'CONVOCATORIA ABIERTA'}</span>
-        {ultimos && (
+        <span className="evd-eyebrow">{isAdmin ? 'ADMINISTRACIÓN DE PARTICIPANTES' : lleno ? 'CONVOCATORIA CERRADA' : 'CONVOCATORIA ABIERTA'}</span>
+        {!isAdmin && ultimos && (
           <span className="evd-alert">¡Últimos {cuposRestantes} {cuposRestantes === 1 ? 'espacio' : 'espacios'}!</span>
         )}
       </div>
@@ -83,7 +83,12 @@ function Convocatoria({ convocatoria, inscrito, onEnroll }) {
         <Icon name="shield" size={14} /> Cupo regulado para salvaguardar la capacidad de carga del ecosistema.
       </p>
 
-      {inscrito ? (
+      {isAdmin ? (
+        <button type="button" className="evd-cta" onClick={onViewParticipants} aria-expanded={participantsOpen}>
+          {participantsLoading ? 'Consultando…' : participantsOpen ? 'Ocultar participantes' : 'Consultar participantes'}
+          <Icon name={participantsOpen ? 'chevron-down' : 'arrow'} size={15} />
+        </button>
+      ) : inscrito ? (
         <span className="evd-cta is-enrolled" aria-live="polite">
           <Icon name="check" size={16} /> Ya estás inscrito
         </span>
@@ -95,8 +100,26 @@ function Convocatoria({ convocatoria, inscrito, onEnroll }) {
         </button>
       )}
       <p className="evd-convocatoria__hint">
-        {inscrito ? 'Encuentra este evento en tu perfil, en "Voy a asistir".' : 'Tus datos se guardan de forma segura con tu cuenta.'}
+        {isAdmin ? 'Consulta los datos de las personas inscritas en esta jornada.' : inscrito ? 'Encuentra este evento en tu perfil, en "Voy a asistir".' : 'Tus datos se guardan de forma segura con tu cuenta.'}
       </p>
+      {isAdmin && participantsOpen && (
+        <div className="evd-participants" aria-live="polite">
+          {participantsLoading ? <p>Consultando participantes…</p>
+            : participantsError ? <p className="evd-participants__error">{participantsError}</p>
+              : participants.length === 0 ? <p>Aún no hay participantes inscritos.</p>
+                : <ul>{participants.map((participant, index) => (
+                  <li key={`${participant.correo || participant.nombre || 'participante'}-${index}`}>
+                    <strong>{participant.nombre || 'Participante'}</strong>
+                    {participant.correo && <span>{participant.correo}</span>}
+                    {participant.telefono && <span>Teléfono: {participant.telefono}</span>}
+                    {participant.edad && <span>Edad: {participant.edad}</span>}
+                    {participant.contactoEmergenciaNombre && <span>Contacto de emergencia: {participant.contactoEmergenciaNombre}{participant.contactoEmergenciaTelefono ? ` · ${participant.contactoEmergenciaTelefono}` : ''}</span>}
+                    {participant.notas && <span>Nota: {participant.notas}</span>}
+                    {participant.fechaRegistro && <small>Inscripción: {participant.fechaRegistro}</small>}
+                  </li>
+                ))}</ul>}
+        </div>
+      )}
     </div>
   );
 }
@@ -106,8 +129,30 @@ function EventDetail({ slug }) {
   const [status, setStatus] = useState('loading'); // loading | ready | notfound | error
   const { isSaved, toggle } = useSavedEvents();
   const user = useAuthStore((state) => state.user);
+  const isAdmin = Boolean(user?.isAdmin);
   const [inscrito, setInscrito] = useState(false);
   const [formAbierto, setFormAbierto] = useState(false);
+  const [participantsOpen, setParticipantsOpen] = useState(false);
+  const [participants, setParticipants] = useState([]);
+  const [participantsLoading, setParticipantsLoading] = useState(false);
+  const [participantsError, setParticipantsError] = useState('');
+
+  const handleViewParticipants = async () => {
+    if (participantsOpen) {
+      setParticipantsOpen(false);
+      return;
+    }
+    setParticipantsOpen(true);
+    setParticipantsLoading(true);
+    setParticipantsError('');
+    try {
+      setParticipants(await getParticipantesEvento(slug));
+    } catch {
+      setParticipantsError('No se pudieron cargar las personas inscritas. Inténtalo de nuevo.');
+    } finally {
+      setParticipantsLoading(false);
+    }
+  };
 
   // ¿Esta persona ya está inscrita en el evento?
   useEffect(() => {
@@ -343,8 +388,18 @@ function EventDetail({ slug }) {
           </div>
 
           <aside className="evd-side">
-            <Convocatoria convocatoria={e.convocatoria} inscrito={inscrito} onEnroll={() => setFormAbierto(true)} />
-            {formAbierto && !inscrito && !e.convocatoria.lleno && (
+            <Convocatoria
+              convocatoria={e.convocatoria}
+              inscrito={inscrito}
+              isAdmin={isAdmin}
+              onEnroll={() => setFormAbierto(true)}
+              onViewParticipants={handleViewParticipants}
+              participantsOpen={participantsOpen}
+              participants={participants}
+              participantsLoading={participantsLoading}
+              participantsError={participantsError}
+            />
+            {formAbierto && !isAdmin && !inscrito && !e.convocatoria.lleno && (
               <EnrollModal evento={e} user={user} onClose={() => setFormAbierto(false)} onSuccess={handleInscrito} />
             )}
 

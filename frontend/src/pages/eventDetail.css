@@ -130,6 +130,14 @@ button.evd-cta { width: 100%; border: 0; font: inherit; cursor: pointer; }
 .evd-cta.is-enrolled { background: #d6f7ec; color: #0a4d3c; cursor: default; }
 .evd-cta.is-disabled { background: #d9dce8; color: #6b7397; cursor: not-allowed; }
 .evd-convocatoria__hint { margin: .5rem 0 0; text-align: center; font-size: .66rem; color: #6b7397; }
+.evd-participants { margin-top: .9rem; padding-top: .8rem; border-top: 1px solid var(--ev-line); }
+.evd-participants > p { margin: 0; font-size: .76rem; line-height: 1.45; color: var(--ev-text); }
+.evd-participants__error { color: #b42318 !important; }
+.evd-participants ul { display: grid; gap: .6rem; max-height: 22rem; overflow-y: auto; margin: 0; padding: 0; list-style: none; }
+.evd-participants li { display: grid; gap: .2rem; padding: .65rem .7rem; border-radius: 10px; background: var(--ev-page); overflow-wrap: anywhere; }
+.evd-participants li strong { font-size: .78rem; color: var(--ev-ink); }
+.evd-participants li span,
+.evd-participants li small { font-size: .68rem; line-height: 1.4; color: var(--ev-text); }
 
 /* Sidebar: comité */
 .evd-orgs { display: grid; gap: .75rem; margin: .4rem 0 1.1rem; padding: 0; list-style: none; }

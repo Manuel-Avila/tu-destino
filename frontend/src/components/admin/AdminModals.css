@@ -5,6 +5,186 @@
   margin-top: 1rem;
 }
 
+.admin-form-stepper {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0 1.25rem;
+}
+
+.admin-form-stepper--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-form-stepper--four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-modal-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.admin-modal-heading h2 {
+  margin: 0;
+  color: #00695b;
+}
+
+.admin-modal-close {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  margin: -0.35rem -0.35rem 0 0;
+  border: 0;
+  border-radius: 50%;
+  color: #4b5b57;
+  background: #f1f5f4;
+  font: inherit;
+  font-size: 1.65rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.admin-modal-close:hover {
+  color: #004f45;
+  background: #e2eeeb;
+}
+
+.admin-event-datetime {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.admin-event-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1rem;
+  border: 1px solid #e3eae7;
+  border-radius: 12px;
+  background: #fbfdfc;
+}
+
+.admin-event-options h3 {
+  margin: 0;
+  color: #145c50;
+  font-size: 1.05rem;
+}
+
+.admin-event-options > p {
+  margin: 0;
+  color: #66736f;
+  font-size: 0.88rem;
+  font-weight: 400;
+}
+
+.admin-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.admin-form .admin-checkbox-option {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.7rem;
+  border: 1px solid #e4ebe8;
+  border-radius: 9px;
+  background: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.admin-form .admin-checkbox-option input[type='checkbox'] {
+  flex: 0 0 auto;
+  width: 1rem;
+  height: 1rem;
+  margin: 0.1rem 0 0;
+  padding: 0;
+  accent-color: #087a69;
+  box-shadow: none;
+}
+
+.admin-checkbox-option span,
+.admin-checkbox-option small {
+  display: block;
+}
+
+.admin-checkbox-option small {
+  margin-top: 0.25rem;
+  color: #6b7773;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.admin-add-option,
+.admin-custom-rule {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.admin-add-option input,
+.admin-custom-rule input {
+  min-width: 0;
+  flex: 1;
+}
+
+.admin-itinerary-row {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: end;
+  padding: 0.8rem;
+  border: 1px solid #e4ebe8;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.admin-itinerary-row label:nth-child(3) {
+  grid-column: 1 / -1;
+}
+
+.admin-itinerary-row > button {
+  justify-self: start;
+}
+
+.admin-add-itinerary {
+  align-self: flex-start;
+}
+
+.admin-field-error {
+  color: #b42318;
+  font-size: 0.85rem;
+}
+
+.admin-form-stepper span {
+  padding: 0.7rem 0.85rem;
+  border: 1px solid #e0e5e3;
+  border-radius: 10px;
+  color: #64716e;
+  background: #f7f9f8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.admin-form-stepper span.is-active {
+  color: #00695b;
+  border-color: #0d9b86;
+  background: #eaf7f4;
+}
+
+.admin-form-stepper span.is-complete {
+  color: #27665d;
+}
+
 .admin-form label {
   display: flex;
   flex-direction: column;
@@ -105,3 +285,16 @@
 }
 
 .swal2-actions { gap: 0.8rem; }
+
+@media (max-width: 560px) {
+  .admin-form-stepper span { padding: 0.6rem 0.4rem; font-size: 0.75rem; }
+  .admin-form-actions { flex-wrap: wrap; }
+  .admin-form-actions .admin-btn { flex: 1 1 auto; }
+  .admin-event-datetime { grid-template-columns: 1fr; }
+  .admin-form-stepper--four span { font-size: 0.66rem; }
+  .admin-checkbox-grid { grid-template-columns: 1fr; }
+  .admin-add-option,
+  .admin-custom-rule { align-items: stretch; flex-direction: column; }
+  .admin-itinerary-row { grid-template-columns: 1fr; }
+  .admin-itinerary-row label:nth-child(3) { grid-column: auto; }
+}

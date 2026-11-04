@@ -29,6 +29,18 @@ const LINEAS_SUBQUERY = `
     FROM evento_lineas_impacto l WHERE l.evento_id = e.id
   ), '[]'::json) AS lineas_impacto`;
 
+const ITINERARIO_SUBQUERY = `
+  COALESCE((
+    SELECT json_agg(json_build_object('titulo', i.titulo, 'hora', to_char(i.hora, 'HH24:MI'), 'descripcion', i.descripcion) ORDER BY i.orden)
+    FROM evento_itinerario i WHERE i.evento_id = e.id
+  ), '[]'::json) AS itinerario`;
+
+const INCLUYE_SUBQUERY = `
+  COALESCE((SELECT json_agg(i.texto ORDER BY i.orden) FROM evento_incluye i WHERE i.evento_id = e.id), '[]'::json) AS incluye`;
+
+const LLEVAR_SUBQUERY = `
+  COALESCE((SELECT json_agg(l.texto ORDER BY l.orden) FROM evento_llevar l WHERE l.evento_id = e.id), '[]'::json) AS llevar`;
+
 // La tarjeta reutiliza la descripción del evento: solo toma la primera oración del primer párrafo.
 function resumenDe(descripcion) {
   const primerParrafo = descripcion.split(/\n{2,}/)[0].trim();
@@ -81,6 +93,9 @@ function toApi(row) {
     reglasIntro: row.reglas_intro,
     reglas: row.reglas,
     preguntasFrecuentes: row.preguntas_frecuentes,
+    itinerario: row.itinerario || [],
+    incluye: row.incluye || [],
+    llevar: row.llevar || [],
     organizadores: row.organizadores,
     lineasImpacto: row.lineas_impacto,
   };
@@ -88,7 +103,7 @@ function toApi(row) {
 
 export async function listEventos() {
   const { rows } = await query(
-    `SELECT ${BASE_SELECT}, ${ORGS_SUBQUERY}, ${LINEAS_SUBQUERY}
+    `SELECT ${BASE_SELECT}, ${ORGS_SUBQUERY}, ${LINEAS_SUBQUERY}, ${ITINERARIO_SUBQUERY}, ${INCLUYE_SUBQUERY}, ${LLEVAR_SUBQUERY}
      FROM eventos e
      WHERE e.activo = TRUE
      ORDER BY e.fecha_evento, e.hora_inicio`
@@ -259,6 +274,29 @@ export async function listSlugsInscritos(userId) {
     [userId]
   );
   return rows.map((r) => r.slug);
+}
+
+export async function listParticipantesEvento(slug) {
+  const evento = await query('SELECT id FROM eventos WHERE slug = $1', [slug]);
+  if (!evento.rows[0]) return null;
+  const { rows } = await query(
+    `SELECT nombre, correo, telefono, edad, contacto_emergencia_nombre, contacto_emergencia_telefono, notas,
+            to_char(created_at AT TIME ZONE 'America/Mazatlan', 'YYYY-MM-DD HH24:MI') AS fecha_registro
+     FROM evento_inscripciones
+     WHERE evento_id = $1
+     ORDER BY created_at DESC`,
+    [evento.rows[0].id]
+  );
+  return rows.map((row) => ({
+    nombre: row.nombre,
+    correo: row.correo,
+    telefono: row.telefono,
+    edad: row.edad,
+    contactoEmergenciaNombre: row.contacto_emergencia_nombre,
+    contactoEmergenciaTelefono: row.contacto_emergencia_telefono,
+    notas: row.notas,
+    fechaRegistro: row.fecha_registro
+  }));
 }
 
 export async function createEvento(data) {

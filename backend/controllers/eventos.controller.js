@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { uploadBufferToCloudinary } from '../utils/cloudinary.js';
 import { findUserById } from '../models/user.model.js';
-import { listEventos, findEventoBySlug, registrarInscripcion, inscribirUsuario, listSlugsInscritos, createEvento as createEventoModel, updateEvento as updateEventoModel, deleteEvento as deleteEventoModel } from '../models/evento.model.js';
+import { listEventos, findEventoBySlug, registrarInscripcion, inscribirUsuario, listSlugsInscritos, listParticipantesEvento as listParticipantesEventoModel, createEvento as createEventoModel, updateEvento as updateEventoModel, deleteEvento as deleteEventoModel } from '../models/evento.model.js';
 
 
 export async function getEventos(req, res) {
@@ -21,6 +21,17 @@ export async function getEvento(req, res) {
   } catch (err) {
     console.error('[eventos] detalle:', err);
     res.status(500).json({ error: 'No se pudo cargar el evento.' });
+  }
+}
+
+export async function getParticipantesEvento(req, res) {
+  try {
+    const participantes = await listParticipantesEventoModel(req.params.slug);
+    if (!participantes) return res.status(404).json({ error: 'Evento no encontrado.' });
+    res.json({ participantes });
+  } catch (err) {
+    console.error('[eventos] participantes:', err);
+    res.status(500).json({ error: 'No se pudieron cargar las personas inscritas.' });
   }
 }
 
@@ -51,6 +62,19 @@ export async function confirmarAsistencia(req, res) {
 }
 
 const telefonoRegex = /^[0-9+()\-\s]{8,20}$/;
+
+function parseJsonFields(data) {
+  for (const field of ['itinerario', 'incluye', 'llevar', 'reglas']) {
+    if (typeof data[field] === 'string') {
+      try {
+        data[field] = JSON.parse(data[field]);
+      } catch {
+        data[field] = [];
+      }
+    }
+  }
+  return data;
+}
 
 const inscripcionAppSchema = z.object({
   telefono: z.string().trim().regex(telefonoRegex, 'Escribe un teléfono válido (8 a 20 dígitos).'),
@@ -100,7 +124,7 @@ export async function misInscripciones(req, res) {
 
 export async function createEvento(req, res) {
   try {
-    const data = { ...req.body };
+    const data = parseJsonFields({ ...req.body });
     if (data.duracion_horas) data.duracion_horas = Number(data.duracion_horas);
     if (data.latitud) data.latitud = Number(data.latitud);
     if (data.longitud) data.longitud = Number(data.longitud);
@@ -133,7 +157,7 @@ export async function createEvento(req, res) {
 
 export async function updateEvento(req, res) {
   try {
-    const data = { ...req.body };
+    const data = parseJsonFields({ ...req.body });
     if (data.duracion_horas) data.duracion_horas = Number(data.duracion_horas);
     if (data.latitud) data.latitud = Number(data.latitud);
     if (data.longitud) data.longitud = Number(data.longitud);

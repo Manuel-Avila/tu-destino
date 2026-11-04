@@ -22,3 +22,8 @@ export async function getEvento(slug) {
   const { data } = await axiosInstance.get(`/api/eventos/${encodeURIComponent(slug)}`);
   return data.evento;
 }
+
+export async function getParticipantesEvento(slug) {
+  const { data } = await axiosInstance.get(`/api/eventos/${encodeURIComponent(slug)}/participantes`);
+  return data.participantes;
+}
