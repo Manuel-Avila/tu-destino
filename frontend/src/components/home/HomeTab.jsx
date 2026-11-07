@@ -30,11 +30,11 @@ export default function HomeTab() {
       <section className="home-hero" aria-labelledby="home-title">
         <div className="home-hero__content">
           <h1 id="home-title">
-            Descubre Baja California Sur.<br />
+            Descubre Baja California Sur.{' '}
             Protege lo que amas.
           </h1>
           <p>
-            Únete a nuestra comunidad de viajeros conscientes y guardianes del océano.<br />
+            Únete a nuestra comunidad de viajeros conscientes y guardianes del océano.{' '}
             Explora destinos increíbles mientras contribuyes a la conservación marina.
           </p>
           <div className="home-hero__actions">

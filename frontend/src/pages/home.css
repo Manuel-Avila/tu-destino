@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap');
 
+/* ── Page shell ────────────────────────────────────────────────── */
 .home-page { 
   --teal: #00796b; 
   display: flex;
@@ -8,22 +9,25 @@
   min-height: 100dvh;
   color: #003f39; 
   background: #fff; 
-  font-family: 'DM Sans', Arial, sans-serif; 
+  font-family: 'DM Sans', Arial, sans-serif;
+  overflow-x: hidden;   /* prevent horizontal scroll on any resize */
 }
 
 .home-page > .home-footer {
   margin-top: auto;
 }
 
+/* ── Header ────────────────────────────────────────────────────── */
 .home-header { 
   height: 80px; 
-  padding: 0 2vw; 
+  padding: 0 clamp(1rem, 3vw, 2.5rem); 
   color: #006d62; 
   background: #e6fff3; 
 }
 
 .home-header .app-brand { 
-  font-size: .98rem; 
+  font-size: .98rem;
+  flex-shrink: 0;
 }
 
 .home-header .app-brand img { 
@@ -32,14 +36,15 @@
 }
 
 .home-header .dashboard-header__links { 
-  gap: clamp(1rem, 3vw, 3.4rem); 
+  gap: clamp(.6rem, 2vw, 3.4rem); 
 }
 
 .home-header .dashboard-header__links a { 
   color: #003f39; 
-  font-size: .90rem; 
+  font-size: clamp(.78rem, 1vw, .90rem); 
   opacity: 1; 
   transition: color .2s ease, opacity .2s ease;
+  white-space: nowrap;
 }
 
 .home-header .dashboard-header__links a.is-active { 
@@ -62,6 +67,7 @@
   gap: .5rem; 
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .home-header .dashboard-header__welcome { 
@@ -74,7 +80,8 @@
   color: #fff; 
   border-color: #00796b; 
   background: #00796b; 
-  font-size: .80rem; 
+  font-size: .80rem;
+  white-space: nowrap;
 }
 
 .home-header .dashboard-header__btn-reg {
@@ -83,39 +90,45 @@
   background: transparent !important;
   padding: .38rem .85rem !important;
   font-size: .80rem !important;
+  white-space: nowrap;
 }
 
 .home-header .dashboard-header__btn-reg:hover {
   background: rgba(0, 121, 107, 0.08) !important;
 }
 
-/* Original Hero Styles */
+/* ── Hero ──────────────────────────────────────────────────────── */
 .home-hero { 
-  min-height: 700px; 
+  min-height: clamp(340px, 55vw, 700px); 
   display: grid; 
   place-items: center; 
-  padding: 3rem 1.5rem; 
+  padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 4vw, 1.5rem); 
   color: #fff; 
   text-align: center; 
-  background: linear-gradient(90deg, rgba(17, 26, 25, .45), rgba(17, 26, 25, .29)), url('../assets/playa-main.webp') center 52% / cover; 
+  background: linear-gradient(90deg, rgba(17, 26, 25, .45), rgba(17, 26, 25, .29)),
+              url('../assets/playa-main.webp') center 52% / cover no-repeat; 
 }
 
 .home-hero__content { 
-  max-width: 650px; 
+  max-width: 650px;
+  width: 100%;
+  padding: 0 1rem;
 }
 
 .home-hero h1 { 
   margin: 0; 
   font-family: Montserrat, Arial, sans-serif; 
-  font-size: clamp(1.7rem, 3vw, 2.75rem); 
+  font-size: clamp(1.5rem, 4vw, 2.75rem); 
   font-weight: 700; 
   letter-spacing: -.04em; 
-  line-height: 1.07; 
+  line-height: 1.12;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .home-hero p { 
   margin: 1.15rem 0 1.7rem; 
-  font-size: clamp(.72rem, 1.2vw, .95rem); 
+  font-size: clamp(.82rem, 1.4vw, .95rem); 
   line-height: 1.55; 
   color: rgba(255,255,255,.95); 
 }
@@ -142,9 +155,9 @@
   border-color: #b6f2e1; 
 }
 
-/* Original Destinations Styles */
+/* ── Destinations ──────────────────────────────────────────────── */
 .home-destinations { 
-  padding: 2.75rem 2vw 3.6rem; 
+  padding: clamp(1.8rem, 4vw, 2.75rem) clamp(1rem, 3vw, 2vw) clamp(2rem, 4vw, 3.6rem); 
 }
 
 .home-destinations__heading h2 { 
@@ -157,7 +170,7 @@
 .home-destinations__intro { 
   margin: .5rem 0 2.2rem; 
   color: #334a47; 
-  font-size: 1.10rem; 
+  font-size: clamp(.92rem, 1.2vw, 1.10rem); 
 }
 
 .home-destination-grid { 
@@ -168,7 +181,7 @@
 .destination-card { 
   flex: 1 1 0; 
   min-width: 0; 
-  min-height: 420px; 
+  min-height: clamp(220px, 30vw, 420px); 
   cursor: pointer; 
   transition: flex-grow .5s ease, box-shadow .5s ease; 
   position: relative; 
@@ -182,7 +195,7 @@
   isolation: isolate; 
 }
 
-/* Al pasar el cursor, la tarjeta ocupa más espacio y la otra se achica. */
+/* Hover: the hovered card grows, the others shrink */
 .home-destination-grid:hover .destination-card { flex-grow: 1; }
 .home-destination-grid .destination-card:hover { 
   flex-grow: 1.7; 
@@ -207,7 +220,7 @@
 }
 
 .destination-card__content { 
-  padding: 1.1rem 1rem; 
+  padding: clamp(.8rem, 1.5vw, 1.1rem) clamp(.8rem, 1.5vw, 1rem); 
 }
 
 .destination-card__label { 
@@ -216,28 +229,28 @@
   border-radius: 999px; 
   color: #d5fff1; 
   background: rgba(0, 105, 91, .85); 
-  font-size: 1rem; 
+  font-size: clamp(.8rem, 1vw, 1rem); 
   font-weight: 600; 
 }
 
 .destination-card h3 { 
   margin: .5rem 0 .35rem; 
   font-family: Montserrat, Arial, sans-serif; 
-  font-size: 1.5rem; 
+  font-size: clamp(1.1rem, 1.6vw, 1.5rem); 
   letter-spacing: -.04em; 
 }
 
 .destination-card p { 
   margin: 0; 
   max-width: 520px; 
-  font-size: .95rem; 
+  font-size: clamp(.82rem, 1vw, .95rem); 
   line-height: 1.45; 
 }
 
-/* Original Footer Styles */
+/* ── Footer ────────────────────────────────────────────────────── */
 .home-footer { 
   min-height: 112px; 
-  padding: 1.5rem 2vw; 
+  padding: 1.5rem clamp(1rem, 3vw, 2vw); 
   color: #1c4c46; 
   background: #d8f0e5; 
 }
@@ -257,19 +270,20 @@
 }
 
 .home-footer .app-footer__legal { 
-  max-width: 160px; 
+  max-width: 200px; 
   text-align: right; 
 }
 
+/* ── Auth prompt banner ────────────────────────────────────────── */
 .auth-prompt-banner {
   background: linear-gradient(135deg, #005f54 0%, #00796b 100%);
   color: #fff;
   border-radius: 14px;
-  padding: 2rem 2.2rem;
+  padding: clamp(1.2rem, 3vw, 2rem) clamp(1.2rem, 3vw, 2.2rem);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 2rem;
+  gap: clamp(1rem, 2vw, 2rem);
   box-shadow: 0 8px 24px rgba(0, 77, 64, 0.16);
   margin: 2rem 0;
 }
@@ -278,13 +292,13 @@
 .auth-prompt-banner__content h4 {
   margin: 0 0 .5rem;
   color: #fff;
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
 }
 
 .auth-prompt-banner__content p {
   margin: 0;
   color: #e0f2f1;
-  font-size: .95rem;
+  font-size: clamp(.85rem, 1vw, .95rem);
   line-height: 1.5;
   max-width: 650px;
 }
@@ -305,11 +319,12 @@
   color: #fff;
 }
 
+/* ── Info explainer ────────────────────────────────────────────── */
 .tab-info-explainer {
   background: #f0faf6;
   border: 1px solid #bce6d7;
   border-radius: 12px;
-  padding: 1.8rem 2rem;
+  padding: clamp(1.2rem, 2vw, 1.8rem) clamp(1.2rem, 2vw, 2rem);
   margin: 2rem 0;
 }
 
@@ -329,20 +344,20 @@
 .tab-info-explainer h3 {
   margin: 0 0 1.2rem;
   color: #004d40;
-  font-size: 1.35rem;
+  font-size: clamp(1.1rem, 1.5vw, 1.35rem);
   font-family: Montserrat, Arial, sans-serif;
 }
 
 .info-desc-lead {
   color: #274743;
   margin-bottom: 1.5rem;
-  font-size: 1.02rem;
+  font-size: clamp(.9rem, 1.1vw, 1.02rem);
   line-height: 1.5;
 }
 
 .info-steps-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
   gap: 1.2rem;
 }
 
@@ -380,15 +395,73 @@
   line-height: 1.45;
 }
 
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE – Tablet  (≤ 1024px)
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 1024px) {
+  .home-header { padding: 0 1.2rem; }
+
+  .home-header .dashboard-header__links { gap: clamp(.5rem, 1.5vw, 1.2rem); }
+  .home-header .dashboard-header__links a { font-size: .82rem; }
+
+  .home-header .app-button--ghost,
+  .home-header .dashboard-header__btn-reg { font-size: .75rem !important; padding: .32rem .65rem !important; }
+
+  .home-hero { min-height: clamp(300px, 50vw, 520px); }
+
+  .home-destinations { padding: 2rem 1.2rem 2.5rem; }
+
+  .destination-card { min-height: 300px; }
+  .destination-card h3 { font-size: 1.25rem; }
+  .destination-card p { font-size: .88rem; }
+
+  .home-footer .app-footer__legal { max-width: 180px; }
+
+  .auth-prompt-banner { flex-wrap: wrap; }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE – Mobile  (≤ 760px)
+   ════════════════════════════════════════════════════════════════ */
 @media (max-width: 760px) {
-  .home-header { height: auto; padding: .8rem 1rem; flex-wrap: wrap; }
-  .home-header .dashboard-header__links { order: 3; width: 100%; overflow-x: auto; padding: .2rem 0 .75rem; gap: 1.2rem; }
+  .home-header { height: auto; padding: .8rem 1rem; }
   .home-header .dashboard-header__account { margin-left: auto; }
-  .home-hero { min-height: 340px; }
-  .home-destinations { padding: 2.2rem 1rem 2.8rem; }
+
+  .home-hero { min-height: 300px; padding: 2rem 1rem; }
+  .home-hero h1 { font-size: clamp(1.35rem, 5.5vw, 2rem); line-height: 1.18; }
+  .home-hero p { font-size: clamp(.8rem, 2.5vw, .92rem); margin: .8rem 0 1.2rem; }
+  .home-hero__content { padding: 0 .5rem; }
+  .home-hero__actions .app-button { min-width: 140px; padding: .6rem .9rem; font-size: .85rem; }
+
+  .home-destinations { padding: 1.8rem 1rem 2.2rem; }
+  .home-destinations__intro { font-size: .95rem; margin: .5rem 0 1.5rem; }
+
   .home-destination-grid { flex-direction: column; }
   .home-destination-grid .destination-card:hover { flex-grow: 1; }
   .destination-card { min-height: 200px; }
-  .home-footer .app-footer__legal { text-align: left; }
-  .auth-prompt-banner { flex-direction: column; align-items: flex-start; }
+
+  .home-footer { min-height: 0; }
+  .home-footer .app-footer__legal { text-align: left; max-width: none; }
+  .home-footer .app-footer__links { max-width: none; }
+
+  .auth-prompt-banner { flex-direction: column; align-items: flex-start; padding: 1.2rem; }
+  .auth-prompt-banner__actions { width: 100%; flex-wrap: wrap; }
+  .auth-prompt-banner__actions .app-button { flex: 1 1 auto; min-width: 0; text-align: center; }
+
+  .tab-info-explainer { padding: 1.2rem; }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE – Small phones  (≤ 480px)
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  .home-hero { min-height: 260px; padding: 1.5rem .8rem; }
+  .home-hero h1 { font-size: 1.3rem; }
+  .home-hero p { font-size: .8rem; }
+  .home-hero__actions .app-button { min-width: 120px; font-size: .8rem; padding: .55rem .75rem; }
+
+  .destination-card { min-height: 180px; }
+  .destination-card__label { font-size: .78rem; }
+  .destination-card h3 { font-size: 1rem; }
+  .destination-card p { font-size: .8rem; }
 }

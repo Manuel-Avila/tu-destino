@@ -48,6 +48,48 @@ html[data-theme='dark'] .home-header .dashboard-header__links a.is-active {
 html[data-theme='dark'] .home-header .dashboard-header__links a.is-active::after {
   background: #7ee0c8;
 }
+@media (max-width: 1024px) {
+  html[data-theme='dark'] .home-header .dashboard-header__links {
+    background: #12211d;
+  }
+  html[data-theme='dark'] .home-header .dashboard-header__links a {
+    color: #d7eee6;
+  }
+  html[data-theme='dark'] .home-header .dashboard-header__links a:hover,
+  html[data-theme='dark'] .home-header .dashboard-header__links a.is-active {
+    color: #7ee0c8;
+  }
+  html[data-theme='dark'] .home-header .dashboard-header__links a.is-active {
+    border-bottom-color: #7ee0c8;
+  }
+  html[data-theme='dark'] .home-header .dashboard-header__menu-close {
+    color: #7ee0c8;
+    border-color: #7ee0c8;
+  }
+  html[data-theme='dark'] .home-header .dashboard-header__menu-close:hover {
+    color: #9be8d4;
+    background: rgba(126, 224, 200, 0.12);
+  }
+  html[data-theme='dark'] .home-header .dashboard-header__links a:hover {
+    color: #9be8d4;
+    background: rgba(126, 224, 200, 0.12);
+  }
+  html[data-theme='dark'] .home-header .dashboard-header__links a.is-active {
+    background: rgba(126, 224, 200, 0.14);
+  }
+  html[data-theme='dark'] .home-header .dashboard-header__menu-account {
+    border-top-color: rgba(126, 224, 200, 0.22);
+  }
+  html[data-theme='dark'] .home-header .dashboard-header__menu-account a,
+  html[data-theme='dark'] .home-header .dashboard-header__menu-account button {
+    color: #d7eee6;
+  }
+  html[data-theme='dark'] .home-header .dashboard-header__menu-account a:hover,
+  html[data-theme='dark'] .home-header .dashboard-header__menu-account button:hover {
+    color: #9be8d4;
+    background: rgba(126, 224, 200, 0.12);
+  }
+}
 html[data-theme='dark'] .home-header .dashboard-header__welcome {
   color: #d7eee6;
 }
