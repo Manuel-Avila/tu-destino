@@ -99,6 +99,9 @@ export async function inscribirse(req, res) {
 
     const result = await inscribirUsuario(req.params.slug, user, parsed.data);
     if (!result) return res.status(404).json({ error: 'Evento no encontrado.' });
+    if (result.estado === 'finalizado') {
+      return res.status(409).json({ error: 'Este evento ya finalizó: las inscripciones están cerradas.', convocatoria: result.convocatoria });
+    }
     if (result.estado === 'duplicado') {
       return res.status(409).json({ error: 'Ya estás inscrito en este evento.', convocatoria: result.convocatoria });
     }

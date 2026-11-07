@@ -1,30 +1,22 @@
+import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import Button from '../Button';
 import SectionHeading from '../SectionHeading';
-import balandraImage from '../../assets/balandra-playa.jpg';
-import caboImage from '../../assets/cabo-pulmo.jpg';
+import ImmersionMap from '../immersion/ImmersionMap';
+import { IMMERSION_PLACES } from '../../data/immersion';
+import conchalitoImage from '../../assets/conchalito-card.png';
 import './HomeTab.css';
 
-const destinations = [
-  {
-    name: 'Playa Balandra',
-    label: 'Área Protegida',
-    description: 'Reconocida como una de las playas más hermosas de México, su ecosistema frágil de manglares necesita tu cuidado constante.',
-    className: 'destination-card--balandra',
-    image: balandraImage,
-  },
-  {
-    name: 'Cabo Pulmo',
-    label: 'Área Natural Protegida',
-    description: 'El arrecife de coral más exitoso en recuperación del mundo.',
-    className: 'destination-card--pulmo',
-    image: caboImage,
-  },
-];
+// Tarjetas de Inmersión BCS: cada una lleva a su recorrido 360°.
+const CARD_STYLE = {
+  'malecon-la-paz': { className: 'destination-card--malecon', image: null },
+  'playa-conchalito': { className: 'destination-card--conchalito', image: conchalitoImage },
+};
 
 // El Inicio es igual con y sin sesión; solo cambia a dónde llevan los botones.
 export default function HomeTab() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated());
+  const basePath = isAuthenticated ? '/app' : '';
   return (
     <div className="tab-view tab-view--inicio">
       <section className="home-hero" aria-labelledby="home-title">
@@ -45,25 +37,31 @@ export default function HomeTab() {
         </div>
       </section>
 
-      <section className="home-destinations" id="destinos" aria-label="Destinos destacados">
-        <SectionHeading eyebrow={null} title="Destinos Destacados" className="home-destinations__heading" />
-        <p className="home-destinations__intro">Lugares impresionantes que requieren nuestra protección y respeto.</p>
+      <section className="home-destinations" id="inmersion" aria-label="Inmersión BCS">
+        <SectionHeading eyebrow={null} title="Inmersión BCS" className="home-destinations__heading" />
+        <p className="home-destinations__intro">Recorre en 360° los lugares que nos toca cuidar.</p>
 
         <div className="home-destination-grid">
-          {destinations.map((destination) => (
-            <article
-              className={`destination-card ${destination.className}`}
-              key={destination.name}
-              style={{ backgroundImage: `url(${destination.image})` }}
-            >
-              <div className="destination-card__content">
-                <span className="destination-card__label">{destination.label}</span>
-                <h3>{destination.name}</h3>
-                <p>{destination.description}</p>
-              </div>
-            </article>
-          ))}
+          {IMMERSION_PLACES.map((place) => {
+            const style = CARD_STYLE[place.id] || {};
+            return (
+              <Link
+                className={`destination-card ${style.className || ''}`.trim()}
+                key={place.id}
+                to={`${basePath}/inmersion/${place.id}`}
+                style={style.image ? { backgroundImage: `url(${style.image})` } : undefined}
+              >
+                <div className="destination-card__content">
+                  <span className="destination-card__label">{place.label}</span>
+                  <h3>{place.name}</h3>
+                  <p>{place.description}</p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
+
+        <ImmersionMap basePath={basePath} />
       </section>
     </div>
   );

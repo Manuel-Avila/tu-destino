@@ -28,6 +28,7 @@ import AppReportsPage from './pages/app/AppReportsPage';
 import ProfilePage from './pages/app/ProfilePage';
 import DestinationDetailPage from './pages/DestinationDetailPage';
 import EventDetailPage from './pages/EventDetailPage';
+import ImmersionPage from './pages/ImmersionPage';
 
 function App() {
   const loadCurrentUser = useAuthStore((state) => state.loadCurrentUser);
@@ -59,6 +60,7 @@ function App() {
         <Route path="/educacion/:id" element={<Navigate to="/educacion" replace />} />
         <Route path="/reportes" element={<PublicReportsPage />} />
         <Route path="/acerca-de" element={<PublicAboutPage />} />
+        <Route path="/inmersion/:id" element={<ImmersionPage />} />
       </Route>
 
       <Route path="/register" element={<RegisterPage />} />
@@ -83,6 +85,7 @@ function App() {
         <Route path="acerca-de" element={<AppAboutPage />} />
         <Route path="reportes" element={<AppReportsPage />} />
         <Route path="perfil" element={<ProfilePage />} />
+        <Route path="inmersion/:id" element={<ImmersionPage />} />
       </Route>
 
       {/* Rutas viejas */}

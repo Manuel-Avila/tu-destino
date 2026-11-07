@@ -303,3 +303,31 @@
     display: none;
   }
 }
+
+/* Botón "Regresar al inicio" (login y registro) */
+.auth-back {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 1rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid #14453a;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: #14453a;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.auth-back:hover {
+  background: rgba(20, 69, 58, 0.08);
+}
+html[data-theme='dark'] .auth-back {
+  border-color: #7ee0c8;
+  color: #7ee0c8;
+}
+html[data-theme='dark'] .auth-back:hover {
+  background: rgba(126, 224, 200, 0.12);
+}

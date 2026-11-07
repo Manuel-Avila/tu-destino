@@ -16,6 +16,31 @@ export function formatHora12(hhmm) {
   return `${String(h12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${suffix}`;
 }
 
+// Baja California Sur usa la hora de la montaña (UTC−7, sin horario de verano).
+const ZONA_BCS = 'America/Mazatlan';
+
+/** Fecha ('YYYY-MM-DD') y hora ('HH:MM') actuales en BCS, sin importar la zona horaria del dispositivo. */
+export function ahoraBCS() {
+  const partes = new Intl.DateTimeFormat('en-CA', {
+    timeZone: ZONA_BCS,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(new Date());
+  const dato = (tipo) => partes.find((p) => p.type === tipo).value;
+  return { fecha: `${dato('year')}-${dato('month')}-${dato('day')}`, hora: `${dato('hour')}:${dato('minute')}` };
+}
+
+/** true si el evento ya terminó (fecha y hora de fin del evento contra la fecha y hora actuales de BCS). */
+export function eventoYaPaso({ fecha, horaFin }) {
+  const hoy = ahoraBCS();
+  if (fecha !== hoy.fecha) return fecha < hoy.fecha;
+  return hoy.hora >= horaFin;
+}
+
 export const formatDuracion = (h) => `${Number.isInteger(h) ? h : h.toFixed(1)}h`;
 
 /** "Sáb 24 Oct" */
