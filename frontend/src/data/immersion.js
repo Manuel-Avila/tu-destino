@@ -12,11 +12,42 @@ export const IMMERSION_PLACES = [
   {
     id: 'malecon-la-paz',
     name: 'Malecón de La Paz',
-    label: 'Próximamente 360°',
-    description: 'El paseo frente a la bahía, muy pronto en recorrido inmersivo.',
+    label: 'Recorrido 360°',
+    description: 'Recorre el malecón de La Paz y disfruta la vista de la bahía en un recorrido inmersivo.',
     lat: 24.1635,
     lng: -110.3166,
-    scenes: [],
+    scenes: [
+      {
+        id: 'm1',
+        src: `${BASE}360/malecon/M1.JPG`,
+        html: `
+          <a-image class="adelante" spot="linkto: m2" position="0.6 -1.7 -7.0"></a-image>
+        `,
+      },
+      {
+        id: 'm2',
+        src: `${BASE}360/malecon/M2.JPG`,
+        html: `
+          <a-image class="adelante" spot="linkto: m3" position="1.2 -1.6 7.6"></a-image>
+          <a-image class="atras" spot="linkto: m1" position="-1 -1.3 -7.8"></a-image>
+        `,
+      },
+      {
+        id: 'm3',
+        src: `${BASE}360/malecon/M3.JPG`,
+        html: `
+          <a-image class="adelante" spot="linkto: m4" position="0 -2 -7.8"></a-image>
+          <a-image class="atras" spot="linkto: m2" position="0.5 -1.3 8"></a-image>
+        `,
+      },
+      {
+        id: 'm4',
+        src: `${BASE}360/malecon/M4.JPG`,
+        html: `
+          <a-image class="atras" spot="linkto: m3" position="-1.5 -2 7"></a-image>
+        `,
+      },
+    ],
   },
   {
     id: 'playa-conchalito',

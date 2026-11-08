@@ -99,8 +99,8 @@ const destinosData = [
     tag: 'Reserva UNESCO',
     category: 'senderismo',
     description: 'Joya insular de contrastes desérticos y caletas turquesas, hogar de una colonia protegida de lobos marinos y aves marinas protegidas.',
-    image: '/src/assets/coast-hero.jpg',
-    images: ['/src/assets/coast-hero.jpg'],
+    image: '/src/assets/espiritu-santo.jpg',
+    images: ['/src/assets/espiritu-santo.jpg'],
     rules: [
       'Distancia mínima reglamentaria con los lobos marinos',
       'Todo residuo generado debe regresar a tierra continental',

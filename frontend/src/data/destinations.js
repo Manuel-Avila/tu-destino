@@ -1,6 +1,6 @@
 import balandraImage from '../assets/balandra-playa.jpg';
 import caboImage from '../assets/cabo-pulmo.jpg';
-import espirituImage from '../assets/coast-hero.jpg';
+import espirituImage from '../assets/espiritu-santo.jpg';
 import loretoImage from '../assets/playa.jpg';
 import balandraAerea1 from '../assets/playa-main.webp';
 import balandraAerea2 from '../assets/playa.jpg';

@@ -5,11 +5,12 @@ import SectionHeading from '../SectionHeading';
 import ImmersionMap from '../immersion/ImmersionMap';
 import { IMMERSION_PLACES } from '../../data/immersion';
 import conchalitoImage from '../../assets/conchalito-card.png';
+import maleconImage from '../../assets/malecon-card.jpg';
 import './HomeTab.css';
 
 // Tarjetas de Inmersión BCS: cada una lleva a su recorrido 360°.
 const CARD_STYLE = {
-  'malecon-la-paz': { className: 'destination-card--malecon', image: null },
+  'malecon-la-paz': { className: 'destination-card--malecon', image: maleconImage },
   'playa-conchalito': { className: 'destination-card--conchalito', image: conchalitoImage },
 };
 

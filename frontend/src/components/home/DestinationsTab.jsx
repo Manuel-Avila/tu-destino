@@ -9,6 +9,7 @@ import DestinationModal from '../admin/DestinationModal';
 import './EventsTab.css';
 import { normalizar } from '../events/eventUtils';
 import { useSavedDestinations } from '../../hooks/useSavedDestinations';
+import { destinationsData } from '../../data/destinations';
 import './DestinationsTab.css';
 
 const Toast = Swal.mixin({
@@ -60,7 +61,7 @@ function CatalogGrid({ destinations, isAdmin, onEdit, onDelete }) {
           role="link"
           tabIndex={0}
           aria-label={`Ver destino: ${destination.name}`}
-          style={{ backgroundImage: `url(${destination.image})` }}
+          style={{ backgroundImage: `url(${destination.id === 'espiritu' ? destinationsData.find((item) => item.id === 'espiritu')?.image || destination.image : destination.image})` }}
           onClick={() => navigate(`/app/destinos/${destination.id}`)}
           onKeyDown={(e) => {
             if (e.target !== e.currentTarget) return;

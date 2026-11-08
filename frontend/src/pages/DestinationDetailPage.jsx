@@ -11,6 +11,7 @@ import ImageCarousel from '../components/ImageCarousel';
 import { useSavedDestinations } from '../hooks/useSavedDestinations';
 import { confirmAction, notifyError, notifySuccess } from '../utils/confirmAction';
 import { axiosInstance } from '../api/axios';
+import { destinationsData } from '../data/destinations';
 import './destinationDetail.css';
 
 // Fix para el icono por default de Leaflet en React/Vite
@@ -84,7 +85,13 @@ function DestinationDetail({ id }) {
     setLoadingDest(true);
     axiosInstance.get(`/api/destinos/${id}`)
       .then(res => {
-        setDestination(res.data.destino);
+        const apiDestination = res.data.destino;
+        const localDestination = apiDestination.id === 'espiritu'
+          ? destinationsData.find((item) => item.id === 'espiritu')
+          : null;
+        setDestination(localDestination
+          ? { ...apiDestination, image: localDestination.image, images: localDestination.images }
+          : apiDestination);
         setLoadingDest(false);
       })
       .catch(err => {
