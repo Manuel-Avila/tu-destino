@@ -61,7 +61,9 @@ export async function confirmarAsistencia(req, res) {
   }
 }
 
-const telefonoRegex = /^[0-9+()\-\s]{8,20}$/;
+const telefonoRegex = /^\d{10}$/;
+const telefonoValido = (telefono) => telefonoRegex.test(telefono);
+const telefonoInscripcion = (message) => z.string().trim().refine(telefonoValido, message);
 
 function parseJsonFields(data) {
   for (const field of ['itinerario', 'incluye', 'llevar', 'reglas']) {
@@ -77,10 +79,10 @@ function parseJsonFields(data) {
 }
 
 const inscripcionAppSchema = z.object({
-  telefono: z.string().trim().regex(telefonoRegex, 'Escribe un teléfono válido (8 a 20 dígitos).'),
+  telefono: telefonoInscripcion('Escribe un teléfono de exactamente 10 dígitos.'),
   edad: z.coerce.number().int().min(5, 'La edad mínima es 5 años.').max(99, 'Escribe una edad válida.'),
   contactoEmergenciaNombre: z.string().trim().min(2, 'Escribe el nombre del contacto de emergencia.').max(150),
-  contactoEmergenciaTelefono: z.string().trim().regex(telefonoRegex, 'Escribe un teléfono de emergencia válido.'),
+  contactoEmergenciaTelefono: telefonoInscripcion('Escribe un teléfono de emergencia de exactamente 10 dígitos.'),
   notas: z.string().trim().max(500, 'Máximo 500 caracteres.').optional().or(z.literal('')),
 });
 

@@ -5,7 +5,9 @@ import Icon from './EventIcons';
 import { inscribirseEvento } from '../../services/eventos.service';
 import './EnrollModal.css';
 
-const TEL_REGEX = /^[0-9+()\-\s]{8,20}$/;
+const PHONE_INPUT_REGEX = /^\d*$/;
+const PHONE_VALID_REGEX = /^\d{10}$/;
+const MAX_PHONE_DIGITS = 10;
 
 const EMPTY = {
   telefono: '',
@@ -15,13 +17,17 @@ const EMPTY = {
   notas: '',
 };
 
+function telefonoValido(value) {
+  return PHONE_VALID_REGEX.test(value.trim());
+}
+
 function validar(form) {
   const errors = {};
-  if (!TEL_REGEX.test(form.telefono.trim())) errors.telefono = 'Escribe un teléfono válido (8 a 20 dígitos).';
+  if (!telefonoValido(form.telefono)) errors.telefono = 'Escribe un teléfono de exactamente 10 dígitos.';
   const edad = Number(form.edad);
   if (!form.edad || !Number.isInteger(edad) || edad < 5 || edad > 99) errors.edad = 'Escribe una edad entre 5 y 99 años.';
   if (form.contactoEmergenciaNombre.trim().length < 2) errors.contactoEmergenciaNombre = 'Escribe el nombre del contacto de emergencia.';
-  if (!TEL_REGEX.test(form.contactoEmergenciaTelefono.trim())) errors.contactoEmergenciaTelefono = 'Escribe un teléfono de emergencia válido.';
+  if (!telefonoValido(form.contactoEmergenciaTelefono)) errors.contactoEmergenciaTelefono = 'Escribe un teléfono de emergencia de exactamente 10 dígitos.';
   if (form.notas.length > 500) errors.notas = 'Máximo 500 caracteres.';
   return errors;
 }
@@ -51,7 +57,11 @@ export default function EnrollModal({ evento, user, onClose, onSuccess }) {
   }, [onClose, submitting]);
 
   const update = (field) => (e) => {
-    setForm((current) => ({ ...current, [field]: e.target.value }));
+    const value = e.target.value;
+    const isPhone = field === 'telefono' || field === 'contactoEmergenciaTelefono';
+    if (isPhone && (value.length > MAX_PHONE_DIGITS || !PHONE_INPUT_REGEX.test(value))) return;
+    if (field === 'edad' && (!/^\d*$/.test(value) || value.length > 2)) return;
+    setForm((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field]: undefined, submit: undefined }));
   };
 
@@ -125,12 +135,12 @@ export default function EnrollModal({ evento, user, onClose, onSuccess }) {
 
             <label className="enroll-field">
               <span>Teléfono / WhatsApp</span>
-              <input type="tel" inputMode="tel" value={form.telefono} onChange={update('telefono')} placeholder="Ej. 612 123 4567" aria-invalid={Boolean(errors.telefono)} />
+              <input type="tel" inputMode="tel" maxLength={10} value={form.telefono} onChange={update('telefono')} placeholder="Ej. 6121234567" aria-invalid={Boolean(errors.telefono)} />
               {errors.telefono && <small className="enroll-error">{errors.telefono}</small>}
             </label>
             <label className="enroll-field">
               <span>Edad</span>
-              <input type="number" inputMode="numeric" min="5" max="99" value={form.edad} onChange={update('edad')} placeholder="Ej. 28" aria-invalid={Boolean(errors.edad)} />
+              <input type="text" inputMode="numeric" pattern="[0-9]*" maxLength={2} value={form.edad} onChange={update('edad')} placeholder="Ej. 28" aria-invalid={Boolean(errors.edad)} />
               {errors.edad && <small className="enroll-error">{errors.edad}</small>}
             </label>
 
@@ -141,7 +151,7 @@ export default function EnrollModal({ evento, user, onClose, onSuccess }) {
             </label>
             <label className="enroll-field">
               <span>Teléfono de emergencia</span>
-              <input type="tel" inputMode="tel" value={form.contactoEmergenciaTelefono} onChange={update('contactoEmergenciaTelefono')} placeholder="Ej. 612 765 4321" aria-invalid={Boolean(errors.contactoEmergenciaTelefono)} />
+              <input type="tel" inputMode="tel" maxLength={10} value={form.contactoEmergenciaTelefono} onChange={update('contactoEmergenciaTelefono')} placeholder="Ej. 6127654321" aria-invalid={Boolean(errors.contactoEmergenciaTelefono)} />
               {errors.contactoEmergenciaTelefono && <small className="enroll-error">{errors.contactoEmergenciaTelefono}</small>}
             </label>
           </div>
