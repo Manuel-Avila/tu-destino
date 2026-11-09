@@ -38,7 +38,7 @@ function uploadEvidence(req, res, next) {
 }
 
 router.post('/', reportRateLimiter, optionalAuth, uploadEvidence, validateRequest(createReporteSchema), createReporte);
-router.get('/folio/:folio', reportRateLimiter, getReporteByFolio);
+router.get('/folio/:folio', reportRateLimiter, optionalAuth, getReporteByFolio);
 router.post('/consulta', reportRateLimiter, consultarFolios);
 router.get('/mios', requireAuth, getMisReportes);
 router.get('/', requireAdmin, getReportes);

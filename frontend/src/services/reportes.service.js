@@ -36,14 +36,15 @@ export async function createReporte(data) {
   return response.reporte;
 }
 
-export async function getReporteByFolio(folio) {
-  const { data } = await axiosInstance.get(`/api/reportes/folio/${encodeURIComponent(folio.trim())}`);
+export async function getReporteByFolio(folio, trackingToken = '') {
+  const headers = trackingToken ? { 'x-report-access-token': trackingToken } : undefined;
+  const { data } = await axiosInstance.get(`/api/reportes/folio/${encodeURIComponent(folio.trim())}`, { headers });
   return data.reporte;
 }
 
 /** Estado de varios reportes a la vez (folios guardados en este navegador). */
-export async function consultarFolios(folios) {
-  const { data } = await axiosInstance.post('/api/reportes/consulta', { folios });
+export async function consultarFolios(accesses) {
+  const { data } = await axiosInstance.post('/api/reportes/consulta', { accesses });
   return data.reportes;
 }
 

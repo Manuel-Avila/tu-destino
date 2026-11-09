@@ -21,14 +21,15 @@ export async function createReporte(data) {
     await client.query('BEGIN');
     const { rows } = await client.query(
       `INSERT INTO reportes (
-        folio, user_id, is_anonymous, reporter_name, reporter_email,
+        folio, user_id, is_anonymous, tracking_token_hash, reporter_name, reporter_email,
         incident_type, description, latitude, longitude
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING *`,
       [
         data.folio,
         data.userId,
         data.isAnonymous,
+        data.trackingTokenHash,
         data.reporterName,
         data.reporterEmail,
         data.incidentType,
@@ -78,6 +79,9 @@ export async function findReporteByFolio(folio) {
   );
   const row = rows[0];
   return {
+    userId: row.user_id,
+    isAnonymous: row.is_anonymous,
+    trackingTokenHash: row.tracking_token_hash,
     folio: row.folio,
     incidentType: row.incident_type,
     description: row.description,
@@ -101,13 +105,18 @@ function toMine(row) {
   };
 }
 
-/** Resumen de varios reportes a partir de sus folios (los reportes anónimos solo se pueden consultar así). */
-export async function findReportesByFolios(folios) {
+/** Resumen de reportes anónimos usando sus tokens privados de seguimiento. */
+export async function findReportesByFolios(accesses) {
+  if (accesses.length === 0) return [];
   const { rows } = await query(
-    `SELECT folio, incident_type, description, status, created_at
-     FROM reportes WHERE UPPER(folio) = ANY($1::text[])
-     ORDER BY created_at DESC`,
-    [folios.map((f) => String(f).trim().toUpperCase())]
+    `SELECT r.folio, r.incident_type, r.description, r.status, r.created_at
+     FROM reportes r
+     JOIN unnest($1::text[], $2::text[]) AS requested(folio, token_hash)
+       ON UPPER(r.folio) = requested.folio
+       AND r.tracking_token_hash = requested.token_hash
+     WHERE r.is_anonymous = TRUE
+     ORDER BY r.created_at DESC`,
+    [accesses.map((item) => item.folio), accesses.map((item) => item.tokenHash)]
   );
   return rows.map(toMine);
 }

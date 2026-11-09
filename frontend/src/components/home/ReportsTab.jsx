@@ -18,22 +18,25 @@ function formatDate(value) {
   return new Date(value).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
 }
 
-// Los reportes anónimos no se asocian a la cuenta, así que sus folios se recuerdan solo en este navegador.
-const folioKey = (userId) => `tudestino:mis-reportes:${userId ?? 'anon'}`;
+// Los reportes anónimos usan un token privado guardado solo en este navegador.
+const accessKey = (userId) => `tudestino:accesos-reportes:${userId ?? 'anon'}`;
 
-function readFolios(userId) {
+function readReportAccesses(userId) {
   try {
-    const parsed = JSON.parse(window.localStorage.getItem(folioKey(userId)) || '[]');
-    return Array.isArray(parsed) ? parsed.filter((f) => typeof f === 'string') : [];
+    const parsed = JSON.parse(window.localStorage.getItem(accessKey(userId)) || '{}');
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
   } catch {
-    return [];
+    return {};
   }
 }
 
-function saveFolio(userId, folio) {
+function saveReportAccess(userId, folio, token) {
+  if (!token) return;
   try {
-    const next = [folio, ...readFolios(userId).filter((f) => f !== folio)].slice(0, 50);
-    window.localStorage.setItem(folioKey(userId), JSON.stringify(next));
+    const current = readReportAccesses(userId);
+    const next = { [folio]: token, ...current };
+    const limited = Object.fromEntries(Object.entries(next).slice(0, 50));
+    window.localStorage.setItem(accessKey(userId), JSON.stringify(limited));
   } catch {
     // almacenamiento no disponible: el folio solo se muestra en la pantalla de confirmación
   }
@@ -55,9 +58,9 @@ export default function ReportsTab() {
   // Lista de reportes de la persona: los de su cuenta + los folios guardados en este navegador.
   useEffect(() => {
     let cancelled = false;
-    const folios = readFolios(user?.id);
+    const accesses = Object.entries(readReportAccesses(user?.id)).map(([folio, token]) => ({ folio, token }));
     Promise.all([
-      folios.length ? consultarFolios(folios).catch(() => []) : [],
+      accesses.length ? consultarFolios(accesses).catch(() => []) : [],
       user ? getMisReportes().catch(() => []) : [],
     ]).then(([porFolio, porCuenta]) => {
       if (cancelled) return;
@@ -108,7 +111,7 @@ export default function ReportsTab() {
     setSubmitting(true);
     try {
       const report = await createReporte(form);
-      saveFolio(user?.id, report.folio);
+      saveReportAccess(user?.id, report.folio, report.trackingToken);
       setMine((current) => ({
         status: 'ready',
         items: [report, ...current.items.filter((item) => item.folio !== report.folio)],
@@ -127,7 +130,8 @@ export default function ReportsTab() {
     if (!folio.trim()) return;
     setLookup({ status: 'loading', report: null, error: '' });
     try {
-      const report = await getReporteByFolio(folio);
+      const trackingToken = readReportAccesses(user?.id)[folio.trim().toUpperCase()] || '';
+      const report = await getReporteByFolio(folio, trackingToken);
       setLookup({ status: 'ready', report, error: '' });
     } catch (err) {
       setLookup({ status: 'error', report: null, error: err.message || 'No encontramos ese folio.' });

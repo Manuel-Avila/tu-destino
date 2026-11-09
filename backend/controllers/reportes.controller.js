@@ -16,12 +16,22 @@ function createFolio() {
   return `TD-${year}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 }
 
+function hashTrackingToken(token) {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+function publicReportByFolio(reporte) {
+  const { userId, isAnonymous, trackingTokenHash, ...publicReporte } = reporte;
+  return publicReporte;
+}
+
 export async function createReporte(req, res) {
   try {
     const isAnonymous = req.body.isAnonymous;
     let reporterName = null;
     let reporterEmail = null;
     let userId = null;
+    const trackingToken = isAnonymous ? crypto.randomBytes(32).toString('hex') : null;
 
     if (!isAnonymous) {
       if (req.user?.id) {
@@ -46,6 +56,7 @@ export async function createReporte(req, res) {
       folio: createFolio(),
       userId,
       isAnonymous,
+      trackingTokenHash: trackingToken ? hashTrackingToken(trackingToken) : null,
       reporterName,
       reporterEmail,
       incidentType: req.body.incidentType,
@@ -55,7 +66,9 @@ export async function createReporte(req, res) {
       evidencias,
     });
 
-    return res.status(201).json({ reporte });
+    return res.status(201).json({
+      reporte: trackingToken ? { ...reporte, trackingToken } : reporte,
+    });
   } catch (err) {
     console.error('[reportes.create] error:', err);
     return res.status(500).json({ error: 'No se pudo enviar el reporte. Intenta de nuevo.' });
@@ -66,7 +79,23 @@ export async function getReporteByFolio(req, res) {
   try {
     const reporte = await findReporteByFolio(req.params.folio);
     if (!reporte) return res.status(404).json({ error: 'No encontramos un reporte con ese folio.' });
-    return res.json({ reporte });
+
+    const user = req.user ? await findUserById(req.user.id) : null;
+    const isAdmin = Boolean(user?.is_admin);
+    const trackingToken = req.get('x-report-access-token') || '';
+    const hasValidTrackingToken = reporte.trackingTokenHash
+      && trackingToken
+      && hashTrackingToken(trackingToken) === reporte.trackingTokenHash;
+
+    if (reporte.isAnonymous) {
+      if (!isAdmin && !hasValidTrackingToken) {
+        return res.status(404).json({ error: 'No encontramos un reporte con ese folio.' });
+      }
+    } else if (!isAdmin && (!req.user || reporte.userId !== req.user.id)) {
+      return res.status(404).json({ error: 'No encontramos un reporte con ese folio.' });
+    }
+
+    return res.json({ reporte: publicReportByFolio(reporte) });
   } catch (err) {
     console.error('[reportes.folio] error:', err);
     return res.status(500).json({ error: 'No se pudo consultar el reporte.' });
@@ -75,13 +104,22 @@ export async function getReporteByFolio(req, res) {
 
 /** Estado de varios reportes a la vez, a partir de los folios guardados en el navegador. */
 export async function consultarFolios(req, res) {
-  const folios = Array.isArray(req.body?.folios) ? req.body.folios : [];
-  const limpios = [...new Set(
-    folios.filter((f) => typeof f === 'string').map((f) => f.trim().toUpperCase()).filter((f) => /^TD-\d{4}-[0-9A-F]{8}$/.test(f))
-  )].slice(0, 50);
+  const accesos = Array.isArray(req.body?.accesses) ? req.body.accesses : [];
+  const limpios = [...new Map(
+    accesos
+      .filter((item) => item && typeof item.folio === 'string' && typeof item.token === 'string')
+      .map((item) => ({ folio: item.folio.trim().toUpperCase(), token: item.token.trim() }))
+      .filter((item) => /^TD-\d{4}-[0-9A-F]{8}$/.test(item.folio) && /^[a-f0-9]{64}$/i.test(item.token))
+      .map((item) => [item.folio, item])
+  ).values()].slice(0, 50);
   if (limpios.length === 0) return res.json({ reportes: [] });
   try {
-    return res.json({ reportes: await findReportesByFolios(limpios) });
+    return res.json({
+      reportes: await findReportesByFolios(limpios.map((item) => ({
+        folio: item.folio,
+        tokenHash: hashTrackingToken(item.token),
+      }))),
+    });
   } catch (err) {
     console.error('[reportes.consulta] error:', err);
     return res.status(500).json({ error: 'No se pudieron consultar los reportes.' });

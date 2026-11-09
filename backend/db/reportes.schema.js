@@ -7,6 +7,7 @@ export async function createReportesTables() {
       folio VARCHAR(30) NOT NULL UNIQUE,
       user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
       is_anonymous BOOLEAN NOT NULL DEFAULT TRUE,
+      tracking_token_hash VARCHAR(64),
       reporter_name VARCHAR(150),
       reporter_email VARCHAR(255),
       incident_type VARCHAR(60) NOT NULL,
@@ -19,6 +20,9 @@ export async function createReportesTables() {
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     );
   `);
+
+  // Los reportes anónimos usan un token privado de seguimiento, no el folio como credencial.
+  await query(`ALTER TABLE reportes ADD COLUMN IF NOT EXISTS tracking_token_hash VARCHAR(64);`);
 
   await query(`
     CREATE TABLE IF NOT EXISTS reporte_evidencias (
