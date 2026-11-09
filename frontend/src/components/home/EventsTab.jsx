@@ -6,6 +6,7 @@ import { getEventos } from '../../services/eventos.service';
 import {
   CATEGORIAS,
   claveMes,
+  duracionEntreHoras,
   etiquetaCategoria,
   formatDuracion,
   formatFechaCorta,
@@ -56,7 +57,7 @@ function EventCard({ evento, saved, onToggleSaved, isAdmin, onEdit, onDelete }) 
             <span><Icon name="pin" size={13} /> {evento.lugarEvento}, {evento.localidad}</span>
             <span className="ev-card__dot" aria-hidden="true">·</span>
             <span>
-              <Icon name="clock" size={13} /> {formatFechaCorta(evento.fecha)} · {formatHora12(evento.horaInicio)} ({formatDuracion(evento.duracionHoras)})
+              <Icon name="clock" size={13} /> {formatFechaCorta(evento.fecha)} · {formatHora12(evento.horaInicio)} ({formatDuracion(duracionEntreHoras(evento.horaInicio, evento.horaFin))})
             </span>
           </p>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

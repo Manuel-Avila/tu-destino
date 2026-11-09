@@ -4,6 +4,7 @@ import { eventSchema } from '../../validators/admin.validators';
 import MapPicker from './MapPicker';
 import ImagePicker from './ImagePicker';
 import { CATEGORIAS } from '../events/eventUtils';
+import { sanitizeSlug } from '../../utils/slug';
 import './AdminModals.css';
 
 const INCLUYE_OPTIONS = [
@@ -66,7 +67,6 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
     fecha: '',
     horaInicio: '',
     horaFin: '',
-    duracionHoras: '',
     lugarEvento: '',
     localidad: '',
     latitud: 24.1422,
@@ -109,7 +109,6 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
         fecha: evento.fecha || '',
         horaInicio: evento.horaInicio || '',
         horaFin: evento.horaFin || '',
-        duracionHoras: evento.duracionHoras || '',
         lugarEvento: evento.lugarEvento || '',
         localidad: evento.localidad || '',
         latitud: evento.coordenadas?.[0] || evento.puntoEncuentro?.coordenadas?.[0] || 24.1422,
@@ -135,7 +134,6 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
         fecha: '',
         horaInicio: '',
         horaFin: '',
-        duracionHoras: '',
         lugarEvento: '',
         localidad: '',
         latitud: 24.1422,
@@ -161,23 +159,43 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // El slug solo admite letras y guiones, sin guiones al inicio ni repetidos.
+    // Mientras se escribe se permite un guion final para poder separar palabras.
+    const nextValue = name === 'slug'
+      ? sanitizeSlug(value, { allowTrailingHyphen: true })
+      : value;
+    setFormData((prev) => ({ ...prev, [name]: nextValue }));
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: null }));
     }
   };
 
+  // Al salir del campo se elimina cualquier guion final.
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    if (name === 'slug') {
+      setFormData((prev) => ({ ...prev, slug: sanitizeSlug(value) }));
+    }
+  };
+
   const validateStep = () => {
+    // Asegura que el slug no termine en guion antes de validar.
+    const cleanSlug = sanitizeSlug(formData.slug);
+    if (cleanSlug !== formData.slug) {
+      setFormData((prev) => ({ ...prev, slug: cleanSlug }));
+    }
+
     const fieldsByStep = {
       1: ['slug', 'tituloEvento', 'descripcionEvento', 'categoria'],
-      2: ['fecha', 'horaInicio', 'horaFin', 'duracionHoras', 'lugarEvento', 'localidad', 'latitud', 'longitud'],
+      2: ['fecha', 'horaInicio', 'horaFin', 'lugarEvento', 'localidad', 'latitud', 'longitud'],
       3: [],
       4: ['responsableNombre', 'responsableCorreo', 'responsableTelefono', 'cupoTotal']
     };
     const fields = fieldsByStep[step];
     const nextErrors = {};
     fields.forEach((field) => {
-      const result = eventSchema.shape[field].safeParse(formData[field]);
+      const value = field === 'slug' ? cleanSlug : formData[field];
+      const result = eventSchema.shape[field].safeParse(value);
       if (!result.success) nextErrors[field] = result.error.issues[0].message;
     });
     setErrors(nextErrors);
@@ -223,7 +241,11 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
       if (validateStep()) setStep((current) => current + 1);
       return;
     }
-    const result = eventSchema.safeParse(formData);
+    const cleanSlug = sanitizeSlug(formData.slug);
+    if (cleanSlug !== formData.slug) {
+      setFormData((prev) => ({ ...prev, slug: cleanSlug }));
+    }
+    const result = eventSchema.safeParse({ ...formData, slug: cleanSlug });
     if (!result.success) {
       const fieldErrors = {};
       result.error.issues.forEach(issue => {
@@ -247,14 +269,13 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
     try {
       const payload = new FormData();
       
-      payload.append('slug', formData.slug);
+      payload.append('slug', cleanSlug);
       payload.append('titulo_evento', formData.tituloEvento);
       payload.append('descripcion_evento', formData.descripcionEvento);
       payload.append('categoria', formData.categoria);
       payload.append('fecha_evento', formData.fecha);
       payload.append('hora_inicio', formData.horaInicio);
       payload.append('hora_fin', formData.horaFin);
-      payload.append('duracion_horas', formData.duracionHoras);
       payload.append('lugar_evento', formData.lugarEvento);
       payload.append('localidad', formData.localidad);
       payload.append('latitud', formData.latitud);
@@ -307,7 +328,7 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
         {step === 1 ? <>
         <label>
           Slug (URL)
-          <input name="slug" value={formData.slug} onChange={handleChange} disabled={!!evento} />
+          <input name="slug" value={formData.slug} onChange={handleChange} onBlur={handleBlur} disabled={!!evento} maxLength={120} pattern="[A-Za-z]+(-[A-Za-z]+)*" title="Solo letras y guiones, sin guiones al inicio, al final ni repetidos" />
           {errors.slug && <span style={{ color: "red", fontSize: "0.85em" }}>{errors.slug}</span>}
         </label>
         <label>
@@ -335,8 +356,6 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
             {errors.horaInicio && <span style={{ color: "red", fontSize: "0.85em" }}>{errors.horaInicio}</span>}</label>
           <label style={{ flex: 1 }}>Hora Fin<input type="time" name="horaFin" value={formData.horaFin} onChange={handleChange} />
             {errors.horaFin && <span style={{ color: "red", fontSize: "0.85em" }}>{errors.horaFin}</span>}</label>
-          <label style={{ flex: 1 }}>Duración (hrs)<input type="number" step="0.5" name="duracionHoras" value={formData.duracionHoras} onChange={handleChange} />
-            {errors.duracionHoras && <span style={{ color: "red", fontSize: "0.85em" }}>{errors.duracionHoras}</span>}</label>
         </div>
         <label>
           Lugar

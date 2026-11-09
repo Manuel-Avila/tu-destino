@@ -3,6 +3,7 @@ import ReactModal from 'react-modal';
 import { destinationSchema } from '../../validators/admin.validators';
 import MapPicker from './MapPicker';
 import ImagePicker from './ImagePicker';
+import { sanitizeSlug } from '../../utils/slug';
 import './AdminModals.css';
 
 // Estilos básicos para el modal de react-modal
@@ -84,10 +85,23 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    // El ID (slug) solo admite letras y guiones, sin guiones al inicio ni repetidos.
+    // Mientras se escribe se permite un guion final para poder separar palabras.
+    const nextValue = name === 'id'
+      ? sanitizeSlug(value, { allowTrailingHyphen: true })
+      : value;
+    setFormData((prev) => ({ ...prev, [name]: nextValue }));
     // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: null }));
+    }
+  };
+
+  // Al salir del campo se elimina cualquier guion final.
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    if (name === 'id') {
+      setFormData((prev) => ({ ...prev, id: sanitizeSlug(value) }));
     }
   };
 
@@ -100,8 +114,14 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
   };
 
   const validateStep = () => {
+    // Asegura que el ID no termine en guion antes de validar.
+    const cleanId = sanitizeSlug(formData.id);
+    if (cleanId !== formData.id) {
+      setFormData((prev) => ({ ...prev, id: cleanId }));
+    }
+
     const fields = step === 1 ? ['id', 'name', 'location', 'tag', 'label', 'category'] : ['description', 'rules', 'bestActivities'];
-    const values = { ...formData, rules: formData.rules.map((rule) => rule.trim()).filter(Boolean) };
+    const values = { ...formData, id: cleanId, rules: formData.rules.map((rule) => rule.trim()).filter(Boolean) };
     const nextErrors = {};
     fields.forEach((field) => {
       const result = destinationSchema.shape[field].safeParse(values[field]);
@@ -113,8 +133,13 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const cleanId = sanitizeSlug(formData.id);
+    if (cleanId !== formData.id) {
+      setFormData((prev) => ({ ...prev, id: cleanId }));
+    }
     const dataToValidate = {
       ...formData,
+      id: cleanId,
       rules: formData.rules.map(rule => rule.trim()).filter(Boolean)
     };
     const result = destinationSchema.safeParse(dataToValidate);
@@ -164,7 +189,7 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
         {step === 1 ? <>
         <label>
           Slug (URL)
-          <input name="id" value={formData.id} onChange={handleChange} disabled={!!destination} />
+          <input name="id" value={formData.id} onChange={handleChange} onBlur={handleBlur} disabled={!!destination} maxLength={50} pattern="[A-Za-z]+(-[A-Za-z]+)*" title="Solo letras y guiones, sin guiones al inicio, al final ni repetidos" />
           {errors.id && <span style={{ color: 'red', fontSize: '0.85em' }}>{errors.id}</span>}
         </label>
         <label>

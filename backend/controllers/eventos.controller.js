@@ -63,6 +63,13 @@ export async function confirmarAsistencia(req, res) {
 
 const telefonoRegex = /^[0-9+()\-\s]{8,20}$/;
 
+// El slug es el identificador de la URL; el largo máximo coincide con la columna (VARCHAR 120).
+const slugSchema = z
+  .string()
+  .trim()
+  .min(3, 'El slug debe tener al menos 3 caracteres.')
+  .max(120, 'El slug no puede superar los 120 caracteres.');
+
 function parseJsonFields(data) {
   for (const field of ['itinerario', 'incluye', 'llevar', 'reglas']) {
     if (typeof data[field] === 'string') {
@@ -125,7 +132,13 @@ export async function misInscripciones(req, res) {
 export async function createEvento(req, res) {
   try {
     const data = parseJsonFields({ ...req.body });
-    if (data.duracion_horas) data.duracion_horas = Number(data.duracion_horas);
+
+    const slug = slugSchema.safeParse(data.slug);
+    if (!slug.success) {
+      return res.status(400).json({ error: slug.error.issues[0].message });
+    }
+    data.slug = slug.data;
+
     if (data.latitud) data.latitud = Number(data.latitud);
     if (data.longitud) data.longitud = Number(data.longitud);
     if (data.cupo_total) data.cupo_total = Number(data.cupo_total);
@@ -158,7 +171,15 @@ export async function createEvento(req, res) {
 export async function updateEvento(req, res) {
   try {
     const data = parseJsonFields({ ...req.body });
-    if (data.duracion_horas) data.duracion_horas = Number(data.duracion_horas);
+
+    if (data.slug !== undefined) {
+      const slug = slugSchema.safeParse(data.slug);
+      if (!slug.success) {
+        return res.status(400).json({ error: slug.error.issues[0].message });
+      }
+      data.slug = slug.data;
+    }
+
     if (data.latitud) data.latitud = Number(data.latitud);
     if (data.longitud) data.longitud = Number(data.longitud);
     if (data.cupo_total) data.cupo_total = Number(data.cupo_total);

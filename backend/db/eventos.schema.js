@@ -35,7 +35,6 @@ export async function createEventosTables() {
       fecha_evento DATE NOT NULL,
       hora_inicio TIME NOT NULL,
       hora_fin TIME NOT NULL,
-      duracion_horas NUMERIC(4,1) NOT NULL,
 
       -- Dónde será
       lugar_evento VARCHAR(200) NOT NULL,
@@ -69,6 +68,13 @@ export async function createEventosTables() {
       CHECK (cupos_ocupados <= cupo_total)
     );
   `);
+
+  // Migración: la duración ya no se guarda; se calcula con hora_inicio y hora_fin.
+  await query(`ALTER TABLE eventos DROP COLUMN IF EXISTS duracion_horas;`);
+
+  // Las reglas de formato del slug (letras y guiones) se validan solo en el frontend.
+  // Por si una versión anterior creó la restricción, se elimina.
+  await query(`ALTER TABLE eventos DROP CONSTRAINT IF EXISTS eventos_slug_formato_chk;`);
 
   await query(`
     CREATE TABLE IF NOT EXISTS evento_itinerario (

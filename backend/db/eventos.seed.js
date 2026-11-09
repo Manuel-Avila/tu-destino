@@ -28,7 +28,6 @@ const eventos = [
     fecha_evento: '2026-10-24',
     hora_inicio: '07:30',
     hora_fin: '11:30',
-    duracion_horas: 4,
     lugar_evento: 'Bahía Balandra',
     localidad: 'La Paz',
     punto_encuentro_nombre: 'Estacionamiento Principal y Caseta de Guardaparques CONANP',
@@ -111,7 +110,6 @@ const eventos = [
     fecha_evento: '2026-11-08',
     hora_inicio: '08:00',
     hora_fin: '12:00',
-    duracion_horas: 4,
     lugar_evento: 'Estero El Mogote',
     localidad: 'La Paz',
     punto_encuentro_nombre: 'Acceso principal al Estero El Mogote',
@@ -188,7 +186,6 @@ const eventos = [
     fecha_evento: '2026-11-13',
     hora_inicio: '19:00',
     hora_fin: '22:30',
-    duracion_horas: 3.5,
     lugar_evento: 'Playa San Cristóbal',
     localidad: 'Todos Santos',
     punto_encuentro_nombre: 'Campamento Las Playitas',
@@ -264,7 +261,6 @@ const eventos = [
     fecha_evento: '2026-11-21',
     hora_inicio: '08:30',
     hora_fin: '13:30',
-    duracion_horas: 5,
     lugar_evento: 'Parque Nacional Cabo Pulmo',
     localidad: 'Los Cabos',
     punto_encuentro_nombre: 'Muelle y Caseta de Guardaparques de Cabo Pulmo',
@@ -337,18 +333,18 @@ export async function seedEventosIfEmpty() {
         `INSERT INTO eventos (
            slug, titulo_evento, subtitulo_evento, descripcion_evento, categoria, etiqueta_imagen,
            insignia_tarjeta, badges, fase_evento, imagenes, fecha_evento, hora_inicio, hora_fin,
-           duracion_horas, lugar_evento, localidad, punto_encuentro_nombre, punto_encuentro_direccion,
+           lugar_evento, localidad, punto_encuentro_nombre, punto_encuentro_direccion,
            latitud, longitud, responsable_nombre, responsable_cargo, responsable_correo,
            responsable_telefono, responsable_cita, cupo_total, cupos_ocupados, forms_url,
            metricas, reglas_titulo, reglas_intro, reglas, preguntas_frecuentes
          ) VALUES (
-           $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,
-           $19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33
+           $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,
+           $17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32
          ) RETURNING id`,
         [
           e.slug, e.titulo_evento, e.subtitulo_evento, e.descripcion_evento, e.categoria, e.etiqueta_imagen,
           e.insignia_tarjeta, e.badges, e.fase_evento, e.imagenes, e.fecha_evento, e.hora_inicio, e.hora_fin,
-          e.duracion_horas, e.lugar_evento, e.localidad, e.punto_encuentro_nombre, e.punto_encuentro_direccion,
+          e.lugar_evento, e.localidad, e.punto_encuentro_nombre, e.punto_encuentro_direccion,
           e.latitud, e.longitud, e.responsable_nombre, e.responsable_cargo, e.responsable_correo,
           e.responsable_telefono, e.responsable_cita, e.cupo_total, e.cupos_ocupados, e.forms_url,
           JSON.stringify(e.metricas), e.reglas_titulo, e.reglas_intro,

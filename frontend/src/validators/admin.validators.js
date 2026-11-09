@@ -1,8 +1,10 @@
 import { z } from 'zod';
 import { EDUCATION_CATEGORY_NAMES } from '../data/educationCategories';
+import { SLUG_PATTERN } from '../utils/slug';
 
 export const destinationSchema = z.object({
-  id: z.string().min(3, 'El ID debe tener al menos 3 caracteres').max(50),
+  id: z.string().min(3, 'El ID debe tener al menos 3 caracteres').max(50, 'El ID no puede superar los 50 caracteres')
+    .regex(SLUG_PATTERN, 'Solo letras y guiones, sin guiones al inicio, al final ni repetidos'),
   name: z.string().min(5, 'El nombre debe tener al menos 5 caracteres').max(200),
   location: z.string().min(5, 'La ubicación debe tener al menos 5 caracteres').max(200),
   label: z.string().min(3, 'La etiqueta larga debe tener al menos 3 caracteres').max(200),
@@ -30,14 +32,14 @@ export const educationSchema = z.object({
 });
 
 export const eventSchema = z.object({
-  slug: z.string().min(3, 'El slug debe tener al menos 3 caracteres').max(120),
+  slug: z.string().min(3, 'El slug debe tener al menos 3 caracteres').max(120, 'El slug no puede superar los 120 caracteres')
+    .regex(SLUG_PATTERN, 'Solo letras y guiones, sin guiones al inicio, al final ni repetidos'),
   tituloEvento: z.string().min(5, 'El título debe tener al menos 5 caracteres').max(200),
   descripcionEvento: z.string().min(20, 'La descripción debe tener al menos 20 caracteres'),
   categoria: z.string().min(1, 'Selecciona una categoría'),
   fecha: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)'),
   horaInicio: z.string().regex(/^\d{2}:\d{2}$/, 'Formato de hora inválido (HH:MM)'),
   horaFin: z.string().regex(/^\d{2}:\d{2}$/, 'Formato de hora inválido (HH:MM)'),
-  duracionHoras: z.union([z.string(), z.number()]).refine(val => Number(val) > 0, 'La duración debe ser mayor a 0'),
   lugarEvento: z.string().min(3, 'El lugar debe tener al menos 3 caracteres').max(200),
   localidad: z.string().min(3, 'La localidad debe tener al menos 3 caracteres').max(120),
   latitud: z.union([z.string(), z.number()]).refine(val => !isNaN(Number(val)), 'Debe ser un número válido'),

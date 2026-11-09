@@ -7,7 +7,6 @@ const BASE_SELECT = `
   to_char(e.fecha_evento, 'YYYY-MM-DD') AS fecha,
   to_char(e.hora_inicio, 'HH24:MI') AS hora_inicio,
   to_char(e.hora_fin, 'HH24:MI') AS hora_fin,
-  e.duracion_horas::float AS duracion_horas,
   e.lugar_evento, e.localidad, e.punto_encuentro_nombre, e.punto_encuentro_direccion,
   e.latitud, e.longitud,
   e.responsable_nombre, e.responsable_cargo, e.responsable_correo, e.responsable_telefono, e.responsable_cita,
@@ -66,7 +65,6 @@ function toApi(row) {
     fecha: row.fecha,
     horaInicio: row.hora_inicio,
     horaFin: row.hora_fin,
-    duracionHoras: row.duracion_horas,
     lugarEvento: row.lugar_evento,
     localidad: row.localidad,
     puntoEncuentro: {
@@ -307,7 +305,7 @@ export async function createEvento(data) {
       INSERT INTO eventos (
         slug, titulo_evento, subtitulo_evento, descripcion_evento,
         categoria, etiqueta_imagen, insignia_tarjeta, badges, fase_evento, imagenes,
-        fecha_evento, hora_inicio, hora_fin, duracion_horas,
+        fecha_evento, hora_inicio, hora_fin,
         lugar_evento, localidad, punto_encuentro_nombre, punto_encuentro_direccion,
         latitud, longitud,
         responsable_nombre, responsable_cargo, responsable_correo, responsable_telefono, responsable_cita,
@@ -317,12 +315,12 @@ export async function createEvento(data) {
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
         $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,
-        $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, COALESCE($34, TRUE)
+        $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, COALESCE($33, TRUE)
       ) RETURNING *
     `, [
       data.slug ?? null, data.titulo_evento ?? null, data.subtitulo_evento ?? null, data.descripcion_evento ?? null,
       data.categoria ?? null, data.etiqueta_imagen ?? null, data.insignia_tarjeta ?? null, data.badges || [], data.fase_evento ?? null, data.imagenes || [],
-      data.fecha_evento ?? null, data.hora_inicio ?? null, data.hora_fin ?? null, data.duracion_horas ?? null,
+      data.fecha_evento ?? null, data.hora_inicio ?? null, data.hora_fin ?? null,
       data.lugar_evento ?? null, data.localidad ?? null, data.punto_encuentro_nombre ?? null, data.punto_encuentro_direccion ?? null,
       data.latitud ?? null, data.longitud ?? null,
       data.responsable_nombre ?? null, data.responsable_cargo ?? null, data.responsable_correo ?? null, data.responsable_telefono ?? null, data.responsable_cita ?? null,
@@ -395,18 +393,18 @@ export async function updateEvento(slug, data) {
       UPDATE eventos SET
         titulo_evento = COALESCE($1, titulo_evento), subtitulo_evento = COALESCE($2, subtitulo_evento), descripcion_evento = COALESCE($3, descripcion_evento),
         categoria = COALESCE($4, categoria), etiqueta_imagen = COALESCE($5, etiqueta_imagen), insignia_tarjeta = COALESCE($6, insignia_tarjeta), badges = COALESCE($7, badges), fase_evento = COALESCE($8, fase_evento), imagenes = COALESCE($9, imagenes),
-        fecha_evento = COALESCE($10, fecha_evento), hora_inicio = COALESCE($11, hora_inicio), hora_fin = COALESCE($12, hora_fin), duracion_horas = COALESCE($13, duracion_horas),
-        lugar_evento = COALESCE($14, lugar_evento), localidad = COALESCE($15, localidad), punto_encuentro_nombre = COALESCE($16, punto_encuentro_nombre), punto_encuentro_direccion = COALESCE($17, punto_encuentro_direccion),
-        latitud = COALESCE($18, latitud), longitud = COALESCE($19, longitud),
-        responsable_nombre = COALESCE($20, responsable_nombre), responsable_cargo = COALESCE($21, responsable_cargo), responsable_correo = COALESCE($22, responsable_correo), responsable_telefono = COALESCE($23, responsable_telefono), responsable_cita = COALESCE($24, responsable_cita),
-        cupo_total = COALESCE($25, cupo_total), cupos_ocupados = COALESCE($26, cupos_ocupados), forms_url = COALESCE($27, forms_url),
-        metricas = COALESCE($28, metricas), reglas_titulo = COALESCE($29, reglas_titulo), reglas_intro = COALESCE($30, reglas_intro), reglas = COALESCE($31, reglas), preguntas_frecuentes = COALESCE($32, preguntas_frecuentes),
-        activo = COALESCE($33, activo), slug = COALESCE($34, slug)
-      WHERE slug = $35 RETURNING id
+        fecha_evento = COALESCE($10, fecha_evento), hora_inicio = COALESCE($11, hora_inicio), hora_fin = COALESCE($12, hora_fin),
+        lugar_evento = COALESCE($13, lugar_evento), localidad = COALESCE($14, localidad), punto_encuentro_nombre = COALESCE($15, punto_encuentro_nombre), punto_encuentro_direccion = COALESCE($16, punto_encuentro_direccion),
+        latitud = COALESCE($17, latitud), longitud = COALESCE($18, longitud),
+        responsable_nombre = COALESCE($19, responsable_nombre), responsable_cargo = COALESCE($20, responsable_cargo), responsable_correo = COALESCE($21, responsable_correo), responsable_telefono = COALESCE($22, responsable_telefono), responsable_cita = COALESCE($23, responsable_cita),
+        cupo_total = COALESCE($24, cupo_total), cupos_ocupados = COALESCE($25, cupos_ocupados), forms_url = COALESCE($26, forms_url),
+        metricas = COALESCE($27, metricas), reglas_titulo = COALESCE($28, reglas_titulo), reglas_intro = COALESCE($29, reglas_intro), reglas = COALESCE($30, reglas), preguntas_frecuentes = COALESCE($31, preguntas_frecuentes),
+        activo = COALESCE($32, activo), slug = COALESCE($33, slug)
+      WHERE slug = $34 RETURNING id
     `, [
       data.titulo_evento ?? null, data.subtitulo_evento ?? null, data.descripcion_evento ?? null,
       data.categoria ?? null, data.etiqueta_imagen ?? null, data.insignia_tarjeta ?? null, data.badges ?? null, data.fase_evento ?? null, data.imagenes ?? null,
-      data.fecha_evento ?? null, data.hora_inicio ?? null, data.hora_fin ?? null, data.duracion_horas ?? null,
+      data.fecha_evento ?? null, data.hora_inicio ?? null, data.hora_fin ?? null,
       data.lugar_evento ?? null, data.localidad ?? null, data.punto_encuentro_nombre ?? null, data.punto_encuentro_direccion ?? null,
       data.latitud ?? null, data.longitud ?? null,
       data.responsable_nombre ?? null, data.responsable_cargo ?? null, data.responsable_correo ?? null, data.responsable_telefono ?? null, data.responsable_cita ?? null,

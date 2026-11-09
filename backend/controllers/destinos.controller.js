@@ -1,7 +1,15 @@
 import { uploadBufferToCloudinary } from '../utils/cloudinary.js';
+import { z } from 'zod';
 import {
   listDestinos, findDestinoById, createDestino, updateDestino, deleteDestino
 } from '../models/destino.model.js';
+
+// El ID es el identificador de la URL; el largo máximo coincide con la columna (VARCHAR 50).
+const destinoIdSchema = z
+  .string()
+  .trim()
+  .min(3, 'El ID debe tener al menos 3 caracteres.')
+  .max(50, 'El ID no puede superar los 50 caracteres.');
 
 export async function getAll(req, res) {
   try {
@@ -27,6 +35,13 @@ export async function getOne(req, res) {
 export async function create(req, res) {
   try {
     const data = { ...req.body };
+
+    const id = destinoIdSchema.safeParse(data.id);
+    if (!id.success) {
+      return res.status(400).json({ error: id.error.issues[0].message });
+    }
+    data.id = id.data;
+
     if (data.rating) data.rating = Number(data.rating);
     if (data.reviewCount) data.reviewCount = Number(data.reviewCount);
     

@@ -22,4 +22,8 @@ export async function createDestinosTables() {
       created_at TIMESTAMPTZ DEFAULT NOW()
     );
   `);
+
+  // Las reglas de formato del ID (letras y guiones) se validan solo en el frontend.
+  // Por si una versión anterior creó la restricción, se elimina.
+  await query(`ALTER TABLE destinos DROP CONSTRAINT IF EXISTS destinos_id_formato_chk;`);
 }

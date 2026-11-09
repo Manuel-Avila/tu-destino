@@ -12,6 +12,7 @@ import { getEvento, getMisInscripciones, getParticipantesEvento } from '../servi
 import { useAuthStore } from '../store/authStore';
 import EnrollModal from '../components/events/EnrollModal';
 import {
+  duracionEntreHoras,
   formatDuracion,
   formatFechaLarga,
   formatHora12,
@@ -272,7 +273,7 @@ function EventDetail({ slug }) {
             <p className="evd-meta">
               <span><Icon name="calendar" size={15} /> {formatFechaLarga(e.fecha)}</span>
               <span>
-                <Icon name="clock" size={15} /> {formatHora12(e.horaInicio)} – {formatHora12(e.horaFin)} ({formatDuracion(e.duracionHoras)} de campo)
+                <Icon name="clock" size={15} /> {formatHora12(e.horaInicio)} – {formatHora12(e.horaFin)} ({formatDuracion(duracionEntreHoras(e.horaInicio, e.horaFin))} de campo)
               </span>
               <span><Icon name="pin" size={15} /> {e.lugarEvento}, {e.localidad}, B.C.S.</span>
             </p>
@@ -321,7 +322,7 @@ function EventDetail({ slug }) {
                   <p className="evd-eyebrow">CRONOGRAMA OPERATIVO</p>
                   <h2 id="evd-programa" className="evd-title">Programa de la Jornada</h2>
                 </div>
-                <span className="evd-pill"><Icon name="clock" size={13} /> {formatDuracion(e.duracionHoras)} continuas de actividad</span>
+                <span className="evd-pill"><Icon name="clock" size={13} /> {formatDuracion(duracionEntreHoras(e.horaInicio, e.horaFin))} continuas de actividad</span>
               </div>
 
               {/* Un bloque por paso: la cantidad depende de las filas de evento_itinerario */}

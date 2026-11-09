@@ -18,6 +18,16 @@ export function formatHora12(hhmm) {
 
 export const formatDuracion = (h) => `${Number.isInteger(h) ? h : h.toFixed(1)}h`;
 
+/** Duración en horas calculada a partir de las horas de inicio y fin ('HH:MM'). */
+export function duracionEntreHoras(horaInicio, horaFin) {
+  if (!horaInicio || !horaFin) return 0;
+  const [hInicio, mInicio] = horaInicio.split(':').map(Number);
+  const [hFin, mFin] = horaFin.split(':').map(Number);
+  let minutos = (hFin * 60 + mFin) - (hInicio * 60 + mInicio);
+  if (minutos < 0) minutos += 24 * 60;
+  return Math.round((minutos / 60) * 10) / 10;
+}
+
 /** "Sáb 24 Oct" */
 export function formatFechaCorta(fecha) {
   const d = parseFecha(fecha);
