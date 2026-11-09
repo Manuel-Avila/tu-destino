@@ -1130,3 +1130,244 @@ body.profile-modal-open {
 .ev-tab.profile-shell .profile-container {
   max-width: none;
 }
+
+/* Ajustes responsive del perfil */
+.profile-shell,
+.profile-shell .profile-page,
+.profile-shell .profile-container,
+.profile-shell .profile-grid,
+.profile-shell .profile-col,
+.profile-shell .profile-panel {
+  min-width: 0;
+  width: 100%;
+}
+
+.profile-shell .profile-panel,
+.profile-shell .profile-hero {
+  overflow: hidden;
+}
+
+.profile-shell img,
+.profile-shell input,
+.profile-shell textarea,
+.profile-shell button,
+.profile-shell a {
+  max-width: 100%;
+}
+
+@media (max-width: 767px) {
+  .ev-tab.profile-shell {
+    padding: 1rem 1rem 2.5rem;
+  }
+
+  .ev-tab.profile-shell .ev-breadcrumb {
+    margin-bottom: .75rem;
+  }
+
+  .ev-tab.profile-shell .ev-hero {
+    padding: 1.15rem;
+    margin-bottom: 1rem;
+    border-radius: 14px;
+  }
+
+  .ev-tab.profile-shell .ev-hero__lead {
+    font-size: .85rem;
+  }
+
+  .profile-page {
+    padding: 0;
+  }
+
+  .profile-hero-bg {
+    height: 5rem;
+  }
+
+  .hero-verified {
+    right: .85rem;
+    max-width: calc(100% - 1.7rem);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .profile-hero-content {
+    gap: 1rem;
+    padding: 0 1rem 1rem;
+    margin-top: -2.35rem;
+  }
+
+  .profile-avatar {
+    width: 5.5rem;
+    height: 5.5rem;
+    font-size: 2rem;
+  }
+
+  .profile-name-row h2 {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    font-size: 1.2rem;
+  }
+
+  .user-email,
+  .user-meta,
+  .profile-bio {
+    overflow-wrap: anywhere;
+  }
+
+  .profile-stats {
+    gap: .35rem;
+  }
+
+  .stat-box {
+    min-width: 0;
+    padding: .45rem .25rem;
+  }
+
+  .stat-box span {
+    display: block;
+    overflow-wrap: anywhere;
+    font-size: .58rem;
+  }
+
+  .panel-header,
+  .panel-header-left {
+    min-width: 0;
+  }
+
+  .panel-header h3,
+  .panel-header-left h3,
+  .panel-header p,
+  .panel-header-left p {
+    overflow-wrap: anywhere;
+  }
+
+  .panel-header-between {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .panel-header-between .link-action {
+    width: 100%;
+    white-space: normal;
+  }
+
+  .setting-row,
+  .security-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    padding: .8rem;
+  }
+
+  .setting-info {
+    min-width: 0;
+    flex: 1 1 12rem;
+  }
+
+  .setting-info small,
+  .security-row small {
+    display: block;
+    overflow-wrap: anywhere;
+  }
+
+  .security-title {
+    flex-wrap: wrap;
+  }
+
+  .profile-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-tab {
+    min-width: 0;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .event-item,
+  .review-item {
+    min-width: 0;
+  }
+
+  .event-info,
+  .event-title-row > div:first-child {
+    min-width: 0;
+  }
+
+  .event-title-row h4 {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+
+  .event-location__text {
+    overflow-wrap: anywhere;
+    white-space: normal;
+  }
+}
+
+@media (max-width: 480px) {
+  .ev-tab.profile-shell {
+    padding-inline: .75rem;
+  }
+
+  .ev-tab.profile-shell .ev-hero {
+    padding: 1rem;
+  }
+
+  .profile-panel {
+    padding: .85rem;
+  }
+
+  .profile-hero-content {
+    padding-inline: .85rem;
+  }
+
+  .panel-header,
+  .panel-header-left {
+    align-items: flex-start;
+  }
+
+  .panel-icon {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .profile-tabs {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-tab {
+    width: 100%;
+  }
+
+  .event-item {
+    padding: .65rem;
+  }
+
+  .event-img {
+    width: 4.25rem;
+    height: 4.25rem;
+  }
+
+  .event-title-row {
+    align-items: flex-start;
+  }
+
+  .badge-tag {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .profile-modal {
+    width: 100%;
+    max-height: calc(100vh - 1rem);
+    padding: 1rem;
+    border-radius: 14px;
+  }
+
+  .ReactModal__Overlay.profile-modal-overlay {
+    padding: .5rem;
+  }
+}

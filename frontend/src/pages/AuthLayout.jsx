@@ -29,7 +29,10 @@ export default function AuthLayout({ headline, children }) {
       </aside>
 
       <main className="auth-form-panel">
-        <div className="auth-form-panel__inner">{children}</div>
+        <div className="auth-form-panel__inner">
+          {children}
+          <Link to="/" className="auth-back">Regresar al inicio</Link>
+        </div>
       </main>
     </div>
   );

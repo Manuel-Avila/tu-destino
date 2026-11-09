@@ -131,12 +131,21 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
     return Object.keys(nextErrors).length === 0;
   };
 
+  const handleNextStep = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (validateStep()) setStep(2);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (step !== 2) return;
+
     const cleanId = sanitizeSlug(formData.id);
     if (cleanId !== formData.id) {
       setFormData((prev) => ({ ...prev, id: cleanId }));
     }
+
     const dataToValidate = {
       ...formData,
       id: cleanId,
@@ -185,7 +194,7 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
     <ReactModal isOpen={isOpen} onRequestClose={onClose} style={customStyles} contentLabel={destination ? 'Editar Destino' : 'Crear Destino'} closeTimeoutMS={200}>
       <div className="admin-modal-heading"><h2>{destination ? 'Editar Destino' : 'Crear Destino'}</h2><button type="button" className="admin-modal-close" onClick={onClose} aria-label="Cerrar formulario">×</button></div>
       <div className="admin-form-stepper" aria-label={`Paso ${step} de 2`}><span className={step === 1 ? 'is-active' : 'is-complete'}>1 · Datos y categoría</span><span className={step === 2 ? 'is-active' : ''}>2 · Información y mapa</span></div>
-      <form className="admin-form" onSubmit={handleSubmit}>
+      <form className="admin-form" onSubmit={step === 2 ? handleSubmit : (e) => e.preventDefault()}>
         {step === 1 ? <>
         <label>
           Slug (URL)
@@ -279,7 +288,7 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
           <button type="button" className="admin-btn admin-btn--secondary" onClick={onClose}>Cancelar</button>
           {step === 2 && <button type="button" className="admin-btn admin-btn--secondary" onClick={() => setStep(1)}>Anterior</button>}
           {step === 1
-            ? <button type="button" className="admin-btn admin-btn--primary" onClick={() => { if (validateStep()) setStep(2); }}>Siguiente</button>
+            ? <button type="button" className="admin-btn admin-btn--primary" onClick={handleNextStep}>Siguiente</button>
             : <button type="submit" className="admin-btn admin-btn--primary" disabled={isUploading}>{isUploading ? "Subiendo..." : "Guardar destino"}</button>}
         </div>
       </form>

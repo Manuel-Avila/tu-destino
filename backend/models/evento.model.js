@@ -7,6 +7,8 @@ const BASE_SELECT = `
   to_char(e.fecha_evento, 'YYYY-MM-DD') AS fecha,
   to_char(e.hora_inicio, 'HH24:MI') AS hora_inicio,
   to_char(e.hora_fin, 'HH24:MI') AS hora_fin,
+  -- true cuando el evento ya terminó, con fecha y hora de BCS (UTC−7, sin horario de verano)
+  ((NOW() AT TIME ZONE 'America/Mazatlan') >= (e.fecha_evento + e.hora_fin)) AS pasado,
   e.lugar_evento, e.localidad, e.punto_encuentro_nombre, e.punto_encuentro_direccion,
   e.latitud, e.longitud,
   e.responsable_nombre, e.responsable_cargo, e.responsable_correo, e.responsable_telefono, e.responsable_cita,
@@ -84,6 +86,7 @@ function toApi(row) {
       cuposOcupados: row.cupos_ocupados,
       cuposRestantes: restantes,
       lleno: restantes <= 0,
+      pasado: Boolean(row.pasado),
       formsUrl: row.forms_url,
     },
     metricas: row.metricas,
@@ -204,7 +207,9 @@ export async function inscribirUsuario(slug, user, datos) {
 
     // FOR UPDATE: si dos personas se inscriben al mismo tiempo, se procesan una tras otra.
     const ev = await client.query(
-      `SELECT id, cupo_total, cupos_ocupados FROM eventos WHERE slug = $1 AND activo = TRUE FOR UPDATE`,
+      `SELECT id, cupo_total, cupos_ocupados,
+              ((NOW() AT TIME ZONE 'America/Mazatlan') >= (fecha_evento + hora_fin)) AS pasado
+       FROM eventos WHERE slug = $1 AND activo = TRUE FOR UPDATE`,
       [slug]
     );
     if (!ev.rows[0]) {
@@ -218,7 +223,14 @@ export async function inscribirUsuario(slug, user, datos) {
       cuposOcupados,
       cuposRestantes: Math.max(0, cupo_total - cuposOcupados),
       lleno: cuposOcupados >= cupo_total,
+      pasado: Boolean(ev.rows[0].pasado),
     });
+
+    // Eventos que ya terminaron (hora de BCS): no se aceptan inscripciones.
+    if (ev.rows[0].pasado) {
+      await client.query('ROLLBACK');
+      return { estado: 'finalizado', convocatoria: convocatoria() };
+    }
 
     const yaInscrito = await client.query(
       `SELECT 1 FROM evento_inscripciones WHERE evento_id = $1 AND user_id = $2`,

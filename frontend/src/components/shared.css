@@ -72,6 +72,54 @@
   box-shadow: 0 2px 14px rgba(0, 70, 58, .09);
 }
 
+.dashboard-header__menu-toggle {
+  display: none;
+  width: 42px;
+  height: 42px;
+  padding: .65rem;
+  border: 1px solid currentColor;
+  border-radius: .6rem;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  transition: color .2s ease, background .2s ease, border-color .2s ease;
+}
+
+.dashboard-header__menu-toggle:hover {
+  color: #00796b;
+  background: rgba(0, 121, 107, .1);
+  border-color: #00796b;
+}
+
+.dashboard-header__menu-toggle span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  margin: 4px 0;
+  background: currentColor;
+  transition: transform .2s ease, opacity .2s ease;
+}
+
+.dashboard-header__menu-toggle.is-open span:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.dashboard-header__menu-toggle.is-open span:nth-child(2) {
+  opacity: 0;
+}
+
+.dashboard-header__menu-toggle.is-open span:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+.dashboard-header__menu-close {
+  display: none;
+}
+
+.dashboard-header__menu-account {
+  display: none;
+}
+
 /* Las ventanas de confirmación (SweetAlert) siempre quedan por encima de cualquier otra ventana */
 .swal2-container { z-index: 3000 !important; }
 
@@ -162,23 +210,163 @@ html { scroll-padding-top: 96px; }
 }
 
 
-@media (max-width: 760px) {
-  .dashboard-header { flex-wrap: wrap; gap: .6rem 1rem; }
-
-  /* El menú ya no desaparece: pasa a una segunda fila que se desliza con el dedo, sin barra visible */
-  .dashboard-header__links {
-    display: flex;
-    order: 3;
-    width: 100%;
-    gap: 1.3rem;
-    overflow-x: auto;
-    padding: .1rem 0 .45rem;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+/* ── Tablet: switch to hamburger menu ─────────────────────────── */
+@media (max-width: 1024px) {
+  .dashboard-header {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .6rem;
   }
-  .dashboard-header__links::-webkit-scrollbar { display: none; }
-  .dashboard-header__links a { flex-shrink: 0; white-space: nowrap; }
 
+  .dashboard-header__brand {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .dashboard-header__menu-toggle {
+    display: block;
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    margin-left: 0;
+  }
+
+  .dashboard-header__account {
+    display: none;
+  }
+
+  .home-header .dashboard-header__account {
+    display: none !important;
+  }
+
+  .dashboard-header__links {
+    display: none;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(86vw, 340px);
+    z-index: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: .25rem;
+    padding: 5.75rem 1.25rem 2rem;
+    background: #e6fff3;
+    box-shadow: 12px 0 30px rgba(0, 70, 58, .18);
+  }
+
+  .dashboard-header__links.is-open {
+    display: flex;
+  }
+
+  .dashboard-header__menu-close {
+    display: block;
+    position: absolute;
+    top: 18px;
+    left: 2vw;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 1px solid #00796b;
+    border-radius: .6rem;
+    color: #00796b;
+    background: transparent;
+    cursor: pointer;
+    transition: color .2s ease, background .2s ease, border-color .2s ease, transform .2s ease;
+  }
+
+  .dashboard-header__menu-close span {
+    position: absolute;
+    top: 20px;
+    left: 10px;
+    width: 22px;
+    height: 2px;
+    background: currentColor;
+  }
+
+  .dashboard-header__menu-close span:first-child {
+    transform: rotate(45deg);
+  }
+
+  .dashboard-header__menu-close span:last-child {
+    transform: rotate(-45deg);
+  }
+
+  .dashboard-header__menu-close:hover {
+    color: #005950;
+    background: rgba(0, 121, 107, .1);
+    border-color: #005950;
+    transform: scale(1.05);
+  }
+
+  .dashboard-header__links a {
+    width: 100%;
+    max-width: 24rem;
+    padding: .8rem 1rem;
+    border: 0;
+    border-radius: 0;
+    color: #005950;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: .01em;
+    white-space: nowrap;
+    transition: color .2s ease, background .2s ease, padding-left .2s ease;
+  }
+
+  .dashboard-header__links a:hover {
+    color: #00796b;
+    padding-left: 1.35rem;
+    background: rgba(0, 121, 107, .1);
+  }
+
+  .dashboard-header__links a.is-active::after {
+    display: none !important;
+  }
+
+  .dashboard-header__links a.is-active {
+    position: relative;
+    color: #00796b;
+    background: rgba(0, 121, 107, .12);
+  }
+
+  .dashboard-header__menu-account {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: .25rem;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(0, 121, 107, .22);
+  }
+
+  .dashboard-header__menu-account a,
+  .dashboard-header__menu-account button {
+    width: 100%;
+    padding: .8rem 1rem;
+    border: 0;
+    color: #005950;
+    background: transparent;
+    cursor: pointer;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    text-align: left;
+    text-decoration: none;
+    transition: color .2s ease, background .2s ease, padding-left .2s ease;
+  }
+
+  .dashboard-header__menu-account a:hover,
+  .dashboard-header__menu-account button:hover {
+    padding-left: 1.35rem;
+    color: #00796b;
+    background: rgba(0, 121, 107, .1);
+  }
+}
+
+/* ── Mobile: additional refinements ───────────────────────────── */
+@media (max-width: 760px) {
   /* En móvil solo se ve el icono de perfil, sin "Hola, nombre" */
   .dashboard-header__welcome-text { display: none; }
   a.dashboard-header__welcome {

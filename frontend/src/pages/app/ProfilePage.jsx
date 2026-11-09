@@ -379,7 +379,6 @@ export default function ProfilePage() {
                     <p>Tus lugares favoritos y tus opiniones</p>
                   </div>
                 </div>
-                <Link className="link-action" to="/app/destinos">Ver destinos <Icon name="chevron-right" size={16} /></Link>
               </div>
 
               <div className="panel-body">
@@ -468,7 +467,6 @@ export default function ProfilePage() {
                     <p>Voluntariados y talleres programados</p>
                   </div>
                 </div>
-                <Link className="link-action" to="/app/eventos">Ver agenda completa <Icon name="chevron-right" size={16} /></Link>
               </div>
 
               <div className="panel-body">

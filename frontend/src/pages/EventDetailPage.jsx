@@ -13,6 +13,7 @@ import { useAuthStore } from '../store/authStore';
 import EnrollModal from '../components/events/EnrollModal';
 import {
   duracionEntreHoras,
+  eventoYaPaso,
   formatDuracion,
   formatFechaLarga,
   formatHora12,
@@ -58,16 +59,16 @@ function Gallery({ imagenes, titulo }) {
   );
 }
 
-function Convocatoria({ convocatoria, inscrito, isAdmin, onEnroll, onViewParticipants, participantsOpen, participants, participantsLoading, participantsError }) {
+function Convocatoria({ convocatoria, finalizado, inscrito, isAdmin, onEnroll, onViewParticipants, participantsOpen, participants, participantsLoading, participantsError }) {
   const { cupoTotal, cuposOcupados, cuposRestantes, lleno } = convocatoria;
   const porcentaje = Math.min(100, Math.round((cuposOcupados / cupoTotal) * 100));
   // Se avisa "últimos espacios" cuando queda el 30 % o menos del cupo.
-  const ultimos = !lleno && cuposRestantes <= Math.ceil(cupoTotal * 0.3);
+  const ultimos = !lleno && !finalizado && cuposRestantes <= Math.ceil(cupoTotal * 0.3);
 
   return (
     <div className="evd-card evd-convocatoria">
       <div className="evd-convocatoria__top">
-        <span className="evd-eyebrow">{isAdmin ? 'ADMINISTRACIÓN DE PARTICIPANTES' : lleno ? 'CONVOCATORIA CERRADA' : 'CONVOCATORIA ABIERTA'}</span>
+        <span className="evd-eyebrow">{isAdmin ? 'ADMINISTRACIÓN DE PARTICIPANTES' : finalizado ? 'EVENTO FINALIZADO' : lleno ? 'CONVOCATORIA CERRADA' : 'CONVOCATORIA ABIERTA'}</span>
         {!isAdmin && ultimos && (
           <span className="evd-alert">¡Últimos {cuposRestantes} {cuposRestantes === 1 ? 'espacio' : 'espacios'}!</span>
         )}
@@ -75,7 +76,7 @@ function Convocatoria({ convocatoria, inscrito, isAdmin, onEnroll, onViewPartici
 
       <p className="evd-convocatoria__count" aria-live="polite">
         <strong>{cuposOcupados} de {cupoTotal}</strong> lugares ocupados ({porcentaje}%)
-        {!lleno && <> · <strong>{cuposRestantes}</strong> {cuposRestantes === 1 ? 'disponible' : 'disponibles'}</>}
+        {!lleno && !finalizado && <> · <strong>{cuposRestantes}</strong> {cuposRestantes === 1 ? 'disponible' : 'disponibles'}</>}
       </p>
       <div className="evd-bar" role="progressbar" aria-valuemin={0} aria-valuemax={cupoTotal} aria-valuenow={cuposOcupados} aria-label="Lugares ocupados">
         <span style={{ width: `${porcentaje}%` }} />
@@ -93,6 +94,8 @@ function Convocatoria({ convocatoria, inscrito, isAdmin, onEnroll, onViewPartici
         <span className="evd-cta is-enrolled" aria-live="polite">
           <Icon name="check" size={16} /> Ya estás inscrito
         </span>
+      ) : finalizado ? (
+        <span className="evd-cta is-disabled" aria-disabled="true">Evento finalizado</span>
       ) : lleno ? (
         <span className="evd-cta is-disabled" aria-disabled="true">Cupo lleno</span>
       ) : (
@@ -101,7 +104,7 @@ function Convocatoria({ convocatoria, inscrito, isAdmin, onEnroll, onViewPartici
         </button>
       )}
       <p className="evd-convocatoria__hint">
-        {isAdmin ? 'Consulta los datos de las personas inscritas en esta jornada.' : inscrito ? 'Encuentra este evento en tu perfil, en "Voy a asistir".' : 'Tus datos se guardan de forma segura con tu cuenta.'}
+        {isAdmin ? 'Consulta los datos de las personas inscritas en esta jornada.' : inscrito ? 'Encuentra este evento en tu perfil, en "Voy a asistir".' : finalizado ? 'Este evento ya pasó, por eso las inscripciones están cerradas.' : 'Tus datos se guardan de forma segura con tu cuenta.'}
       </p>
       {isAdmin && participantsOpen && (
         <div className="evd-participants" aria-live="polite">
@@ -241,6 +244,8 @@ function EventDetail({ slug }) {
     );
   } else {
     const e = evento;
+    // El servidor manda `pasado` (hora de BCS); si no llega, se calcula aquí también con hora de BCS.
+    const finalizado = Boolean(e.convocatoria.pasado) || eventoYaPaso(e);
     const guardado = isSaved(e.slug);
     const parrafos = e.descripcionEvento.split(/\n{2,}/);
     const tituloCorto = e.tituloEvento;
@@ -391,6 +396,7 @@ function EventDetail({ slug }) {
           <aside className="evd-side">
             <Convocatoria
               convocatoria={e.convocatoria}
+              finalizado={finalizado}
               inscrito={inscrito}
               isAdmin={isAdmin}
               onEnroll={() => setFormAbierto(true)}
@@ -400,7 +406,7 @@ function EventDetail({ slug }) {
               participantsLoading={participantsLoading}
               participantsError={participantsError}
             />
-            {formAbierto && !isAdmin && !inscrito && !e.convocatoria.lleno && (
+            {formAbierto && !isAdmin && !inscrito && !finalizado && !e.convocatoria.lleno && (
               <EnrollModal evento={e} user={user} onClose={() => setFormAbierto(false)} onSuccess={handleInscrito} />
             )}
 

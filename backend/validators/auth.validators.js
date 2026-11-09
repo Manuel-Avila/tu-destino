@@ -1,8 +1,14 @@
 import { z } from 'zod';
+import { parse } from 'tldts';
+
+const registrationEmail = z.string().trim().email('Correo electrónico inválido').refine(
+  (email) => parse(email.slice(email.lastIndexOf('@') + 1)).isIcann,
+  'El dominio del correo no es válido.'
+);
 
 export const registerSchema = z.object({
-  fullName: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  email: z.string().email('Correo electrónico inválido'),
+  fullName: z.string().trim().min(2, 'El nombre debe tener al menos 4 caracteres'),
+  email: registrationEmail,
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
 });
 
