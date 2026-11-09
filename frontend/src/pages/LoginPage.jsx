@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import Icon from '../components/events/EventIcons';
 import AuthLayout from './AuthLayout';
 import { useAuthStore } from '../store/authStore';
 
@@ -25,6 +26,7 @@ export default function LoginPage() {
   const redirectTo = location.state?.from?.pathname || '/app/destinos';
 
   const [form, setForm] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -82,16 +84,27 @@ export default function LoginPage() {
 
         <div className="auth-field">
           <label htmlFor="password">Contraseña</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            placeholder=""
-            value={form.password}
-            onChange={handleChange('password')}
-            aria-invalid={Boolean(fieldErrors.password)}
-          />
+          <div className="auth-password-input">
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              placeholder=""
+              value={form.password}
+              onChange={handleChange('password')}
+              aria-invalid={Boolean(fieldErrors.password)}
+            />
+            <button
+              type="button"
+              className="auth-password-toggle"
+              onClick={() => setShowPassword((visible) => !visible)}
+              aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              aria-pressed={showPassword}
+            >
+              <Icon name={showPassword ? 'eye-off' : 'eye'} size={18} />
+            </button>
+          </div>
           {fieldErrors.password && (
             <p className="auth-field__error">{fieldErrors.password}</p>
           )}
