@@ -9,7 +9,7 @@ import ProfileEditModal from '../../components/profile/ProfileEditModal';
 import ChangePasswordModal from '../../components/profile/ChangePasswordModal';
 import { destinationsData } from '../../data/destinations';
 import { eliminarResena, getMisResenas } from '../../services/resenas.service';
-import { getEventos, getMisInscripciones } from '../../services/eventos.service';
+import { cancelarInscripcionEvento, getEventos, getMisInscripciones } from '../../services/eventos.service';
 import { axiosInstance } from '../../api/axios';
 import { useSavedEvents } from '../../hooks/useSavedEvents';
 import { useSavedDestinations } from '../../hooks/useSavedDestinations';
@@ -28,6 +28,12 @@ function badgeFecha(fecha) {
 
 function formatDate(value) {
   return new Date(value).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function canCancelEvent(evento) {
+  // Los eventos se programan en la zona local de B.C.S. (UTC-7 durante todo el año).
+  const startsAt = Date.parse(`${evento.fecha}T${evento.horaInicio}:00-07:00`);
+  return Number.isFinite(startsAt) && startsAt - Date.now() >= 48 * 60 * 60 * 1000;
 }
 
 const Toast = Swal.mixin({
@@ -197,6 +203,24 @@ export default function ProfilePage() {
     if (!ok) return;
     toggle(evento.slug);
     notifySuccess('Evento quitado', 'Ya no está en tus eventos guardados.');
+  }
+
+  async function handleCancelAttendance(evento) {
+    const ok = await confirmAction({
+      title: '¿Cancelar asistencia?',
+      text: `Puedes cancelar tu asistencia a "${evento.tituloEvento}" hasta 48 horas antes del inicio. Al cancelar, tu lugar quedará disponible para otra persona.`,
+      confirmText: 'Sí, cancelar asistencia',
+    });
+    if (!ok) return;
+
+    try {
+      await cancelarInscripcionEvento(evento.slug);
+      setAttendingSlugs((current) => current.filter((slug) => slug !== evento.slug));
+      getEventos().then(setAllEvents).catch(() => {});
+      notifySuccess('Asistencia cancelada', 'Tu lugar quedó disponible para otra persona.');
+    } catch (err) {
+      notifyError('No se pudo cancelar la asistencia', err.response?.data?.error || err.message || 'Intenta de nuevo.');
+    }
   }
 
   function openEditModal() {
@@ -512,6 +536,11 @@ export default function ProfilePage() {
                               )}
                             </div>
                             <p className="event-location"><Icon name="pin" size={15} /> <span className="event-location__text">{evento.lugarEvento}, {evento.localidad}</span></p>
+                            {eventTab === 'asistire' && (
+                              canCancelEvent(evento)
+                                ? <button type="button" className="profile-cancel-attendance" onClick={() => handleCancelAttendance(evento)}>Cancelar asistencia</button>
+                                : <small className="profile-cancel-deadline">Ya no es posible cancelar: faltan menos de 48 horas para el evento.</small>
+                            )}
                           </div>
                         </li>
                       ))}

@@ -273,6 +273,61 @@ export async function inscribirUsuario(slug, user, datos) {
   }
 }
 
+/** Cancela una inscripción propia solo cuando faltan al menos 48 horas para el inicio. */
+export async function cancelarInscripcionUsuario(slug, userId) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    const evento = await client.query(
+      `SELECT id,
+              ((fecha_evento + hora_inicio) - (NOW() AT TIME ZONE 'America/Mazatlan')) >= INTERVAL '48 hours' AS puede_cancelar
+       FROM eventos WHERE slug = $1 AND activo = TRUE FOR UPDATE`,
+      [slug]
+    );
+    if (!evento.rows[0]) {
+      await client.query('ROLLBACK');
+      return { estado: 'no_encontrado' };
+    }
+    if (!evento.rows[0].puede_cancelar) {
+      await client.query('ROLLBACK');
+      return { estado: 'fuera_de_plazo' };
+    }
+
+    const eliminada = await client.query(
+      `DELETE FROM evento_inscripciones WHERE evento_id = $1 AND user_id = $2 RETURNING id`,
+      [evento.rows[0].id, userId]
+    );
+    if (eliminada.rowCount === 0) {
+      await client.query('ROLLBACK');
+      return { estado: 'no_inscrito' };
+    }
+
+    const updated = await client.query(
+      `UPDATE eventos
+       SET cupos_ocupados = GREATEST(cupos_ocupados - 1, 0)
+       WHERE id = $1
+       RETURNING cupo_total, cupos_ocupados`,
+      [evento.rows[0].id]
+    );
+    await client.query('COMMIT');
+    const { cupo_total: cupoTotal, cupos_ocupados: cuposOcupados } = updated.rows[0];
+    return {
+      estado: 'ok',
+      convocatoria: {
+        cupoTotal,
+        cuposOcupados,
+        cuposRestantes: Math.max(0, cupoTotal - cuposOcupados),
+        lleno: cuposOcupados >= cupoTotal,
+      },
+    };
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 /** Slugs de los eventos a los que el usuario ya se inscribió. */
 export async function listSlugsInscritos(userId) {
   const { rows } = await query(

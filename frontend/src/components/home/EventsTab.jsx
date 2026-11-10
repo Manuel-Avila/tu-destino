@@ -267,7 +267,7 @@ export default function EventsTab() {
           </div>
           {isAdmin && (
             <button type="button" className="ev-btn ev-btn--ghost" onClick={handleCreate} style={{ whiteSpace: 'nowrap' }}>
-              + Crear Evento
+              <Icon name="edit" size={15} /> Crear Evento
             </button>
           )}
         </div>

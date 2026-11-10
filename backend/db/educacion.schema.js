@@ -20,6 +20,13 @@ export async function createEducacionTables() {
 
   await query(`CREATE INDEX IF NOT EXISTS idx_educacion_categoria ON educacion_publicaciones (categoria);`);
   await query(`CREATE INDEX IF NOT EXISTS idx_educacion_created ON educacion_publicaciones (created_at DESC);`);
+  await query(`ALTER TABLE educacion_publicaciones ADD COLUMN IF NOT EXISTS recuerda TEXT;`);
+  await query(`ALTER TABLE educacion_publicaciones ALTER COLUMN recuerda SET DEFAULT 'Cuida cada espacio natural y sigue las indicaciones de las autoridades y del personal local durante tu visita.';`);
+  await query(`
+    UPDATE educacion_publicaciones
+    SET recuerda = 'Cuida cada espacio natural y sigue las indicaciones de las autoridades y del personal local durante tu visita.'
+    WHERE recuerda IS NULL;
+  `);
 
   // Normaliza las categorías antiguas a las categorías de la biblioteca educativa.
   await query(`

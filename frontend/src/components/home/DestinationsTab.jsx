@@ -242,7 +242,7 @@ export default function DestinationsTab({ locked = false }) {
               </div>
               {isAdmin && (
                 <button type="button" className="ev-btn ev-btn--ghost" onClick={handleCreate} style={{ whiteSpace: 'nowrap' }}>
-                  + Crear Destino
+                  <Icon name="edit" size={15} /> Crear Destino
                 </button>
               )}
             </div>

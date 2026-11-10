@@ -107,6 +107,7 @@
 
 .admin-reports__header { display: flex; justify-content: space-between; gap: 2rem; align-items: end; margin-bottom: 1.5rem; }
 .admin-reports__header > div > p:last-child { margin-top: .8rem; color: #637974; }
+.admin-reports__header-actions { display: flex; align-items: center; gap: .65rem; }
 .admin-reports__count { padding: .55rem .9rem; border-radius: 999px; background: #e1f6ec; color: #087c6e; font-size: .8rem; font-weight: 700; white-space: nowrap; }
 .admin-report-filters { display: grid; grid-template-columns: 2fr 1fr 1.4fr auto; gap: .7rem; margin-bottom: 1.25rem; padding: 1rem; border: 1px solid #cde8e0; border-radius: 12px; background: #f5fbf8; }
 .admin-report-hint { display: flex; align-items: center; gap: .4rem; margin: -.35rem 0 1rem; color: #708681; font-size: .82rem; }

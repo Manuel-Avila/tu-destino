@@ -169,7 +169,7 @@ export default function EducationTab() {
         </div>
 
         {isAdmin && (
-          <button type="button" className="edu-create-btn" onClick={handleCreate}>
+          <button type="button" className="ev-btn ev-btn--ghost" onClick={handleCreate}>
             <Icon name="edit" size={15} /> Crear publicación
           </button>
         )}
@@ -221,7 +221,7 @@ export default function EducationTab() {
         <div className="edu-state">
           <p>Todavía no hay publicaciones de educación ambiental.</p>
           {isAdmin && (
-            <button type="button" className="edu-create-btn" onClick={handleCreate}>
+            <button type="button" className="ev-btn ev-btn--ghost" onClick={handleCreate}>
               <Icon name="edit" size={15} /> Crear la primera publicación
             </button>
           )}

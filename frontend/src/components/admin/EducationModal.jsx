@@ -32,6 +32,7 @@ const emptyForm = {
   titulo: '',
   categoria: '',
   texto: '',
+  recuerda: 'Cuida cada espacio natural y sigue las indicaciones de las autoridades y del personal local durante tu visita.',
   imagen: '',
 };
 
@@ -44,6 +45,7 @@ export default function EducationModal({ isOpen, onClose, publicacion, onSave })
             ? publicacion.categoria
             : '',
           texto: publicacion.texto || '',
+          recuerda: publicacion.recuerda ?? emptyForm.recuerda,
           imagen: publicacion.imagen || '',
         }
       : emptyForm
@@ -90,6 +92,7 @@ export default function EducationModal({ isOpen, onClose, publicacion, onSave })
       payload.append('titulo', formData.titulo);
       payload.append('categoria', formData.categoria);
       payload.append('texto', formData.texto);
+      payload.append('recuerda', formData.recuerda);
 
       if (formData.imagen instanceof File) {
         payload.append('imagen', formData.imagen);
@@ -154,6 +157,18 @@ export default function EducationModal({ isOpen, onClose, publicacion, onSave })
             placeholder="Escribe el contenido educativo para la comunidad..."
           />
           {errors.texto && <span style={{ color: 'red', fontSize: '0.85em' }}>{errors.texto}</span>}
+        </label>
+
+        <label>
+          Recuerda
+          <textarea
+            name="recuerda"
+            rows={3}
+            value={formData.recuerda}
+            onChange={handleChange}
+            placeholder="Escribe el recordatorio que aparecerá al final de la publicación..."
+          />
+          {errors.recuerda && <span style={{ color: 'red', fontSize: '0.85em' }}>{errors.recuerda}</span>}
         </label>
 
         <label>Imagen</label>

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { uploadBufferToCloudinary } from '../utils/cloudinary.js';
 import { findUserById } from '../models/user.model.js';
-import { listEventos, findEventoBySlug, registrarInscripcion, inscribirUsuario, listSlugsInscritos, listParticipantesEvento as listParticipantesEventoModel, createEvento as createEventoModel, updateEvento as updateEventoModel, deleteEvento as deleteEventoModel } from '../models/evento.model.js';
+import { listEventos, findEventoBySlug, registrarInscripcion, inscribirUsuario, cancelarInscripcionUsuario, listSlugsInscritos, listParticipantesEvento as listParticipantesEventoModel, createEvento as createEventoModel, updateEvento as updateEventoModel, deleteEvento as deleteEventoModel } from '../models/evento.model.js';
 
 
 export async function getEventos(req, res) {
@@ -131,6 +131,22 @@ export async function misInscripciones(req, res) {
   } catch (err) {
     console.error('[eventos] mis inscripciones:', err);
     res.status(500).json({ error: 'No se pudieron cargar tus inscripciones.' });
+  }
+}
+
+/** Cancela la inscripción propia; solo se acepta con un mínimo de 48 horas de anticipación. */
+export async function cancelarInscripcion(req, res) {
+  try {
+    const result = await cancelarInscripcionUsuario(req.params.slug, req.user.id);
+    if (result.estado === 'no_encontrado') return res.status(404).json({ error: 'Evento no encontrado.' });
+    if (result.estado === 'no_inscrito') return res.status(404).json({ error: 'No tienes una inscripción activa para este evento.' });
+    if (result.estado === 'fuera_de_plazo') {
+      return res.status(409).json({ error: 'La asistencia solo se puede cancelar hasta 48 horas antes del inicio del evento.' });
+    }
+    return res.json({ cancelado: true, convocatoria: result.convocatoria });
+  } catch (err) {
+    console.error('[eventos] cancelar inscripción:', err);
+    return res.status(500).json({ error: 'No se pudo cancelar la asistencia.' });
   }
 }
 

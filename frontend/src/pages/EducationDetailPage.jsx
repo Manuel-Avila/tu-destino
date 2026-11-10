@@ -103,13 +103,12 @@ export default function EducationDetailPage({ variant = 'app' }) {
             <p>{publicacion.texto}</p>
           )}
 
-          <aside>
-            <strong>Recuerda</strong>
-            <p>
-              Cuida cada espacio natural y sigue las indicaciones de las autoridades y del personal
-              local durante tu visita.
-            </p>
-          </aside>
+          {publicacion.recuerda?.trim() && (
+            <aside>
+              <strong>Recuerda</strong>
+              <p>{publicacion.recuerda}</p>
+            </aside>
+          )}
 
           <Link className="ev-btn ev-btn--outline" to={backPath}>
             ← Volver a Educación Ambiental

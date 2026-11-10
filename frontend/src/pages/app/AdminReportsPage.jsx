@@ -14,6 +14,12 @@ function formatDate(value) {
   return new Date(value).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
 }
 
+function csvCell(value, protectFormula = true) {
+  let text = String(value ?? '');
+  if (protectFormula && /^[\s]*[=+@-]/.test(text)) text = `'${text}`;
+  return `"${text.replaceAll('"', '""')}"`;
+}
+
 export default function AdminReportsPage() {
   const [filters, setFilters] = useState({ status: '', incidentType: '', search: '' });
   const [reports, setReports] = useState([]);
@@ -83,6 +89,36 @@ export default function AdminReportsPage() {
     loadReports(filters);
   }
 
+  function downloadReports() {
+    if (!reports.length) return;
+
+    const columns = [
+      'Folio', 'Categoría', 'Estado', 'Descripción', 'Latitud', 'Longitud',
+      'Anónimo', 'Cantidad de evidencias', 'Fecha de creación',
+    ];
+    const rows = reports.map((report) => [
+      report.folio,
+      reportTypeLabel(report.incidentType),
+      STATUS_LABELS[report.status] || report.status,
+      report.description,
+      report.coordinates?.[0] ?? '',
+      report.coordinates?.[1] ?? '',
+      report.isAnonymous ? 'Sí' : 'No',
+      report.evidenceCount,
+      formatDate(report.createdAt),
+    ].map((value, index) => csvCell(value, ![4, 5, 7].includes(index))).join(','));
+    const csv = `\uFEFF${[columns.map((value) => csvCell(value)).join(','), ...rows].join('\r\n')}`;
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `reportes-ciudadanos-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <section className="admin-reports" aria-labelledby="admin-reports-title">
       <header className="admin-reports__header">
@@ -91,7 +127,12 @@ export default function AdminReportsPage() {
           <h1 id="admin-reports-title">Reportes ciudadanos</h1>
           <p>Revisa evidencias, ubicación y seguimiento de incidencias ambientales.</p>
         </div>
-        <span className="admin-reports__count">{reports.length} reportes</span>
+        <div className="admin-reports__header-actions">
+          <span className="admin-reports__count">{reports.length} reportes</span>
+          <button type="button" className="report-secondary-btn" onClick={downloadReports} disabled={status !== 'ready' || reports.length === 0}>
+            Descargar CSV
+          </button>
+        </div>
       </header>
 
       <form className="admin-report-filters" onSubmit={applyFilters}>

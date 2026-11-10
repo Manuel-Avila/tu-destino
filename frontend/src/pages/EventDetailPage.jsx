@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import ReactModal from 'react-modal';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -8,9 +9,10 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import Icon from '../components/events/EventIcons';
 import { useSavedEvents } from '../hooks/useSavedEvents';
-import { getEvento, getMisInscripciones, getParticipantesEvento } from '../services/eventos.service';
+import { cancelarInscripcionEvento, getEvento, getMisInscripciones, getParticipantesEvento } from '../services/eventos.service';
 import { useAuthStore } from '../store/authStore';
 import EnrollModal from '../components/events/EnrollModal';
+import { confirmAction, notifyError, notifySuccess } from '../utils/confirmAction';
 import {
   duracionEntreHoras,
   eventoYaPaso,
@@ -35,6 +37,96 @@ L.Icon.Default.mergeOptions({
 
 // La convocatoria se vuelve a consultar cada 30 s para reflejar nuevas confirmaciones del Google Form.
 const REFRESH_MS = 30000;
+ReactModal.setAppElement('#root');
+
+const participantsModalStyles = {
+  overlay: {
+    zIndex: 1200,
+    display: 'grid',
+    placeItems: 'center',
+    padding: '1rem',
+    backgroundColor: 'rgba(10, 30, 26, .62)',
+  },
+  content: {
+    position: 'relative',
+    inset: 'auto',
+    width: 'min(760px, calc(100vw - 2rem))',
+    maxHeight: '90vh',
+    padding: 0,
+    border: 0,
+    borderRadius: '16px',
+    overflow: 'hidden',
+  },
+};
+const CANCELLATION_NOTICE_MS = 48 * 60 * 60 * 1000;
+
+function canCancelAttendance(evento) {
+  const startsAt = Date.parse(`${evento.fecha}T${evento.horaInicio}:00-07:00`);
+  return Number.isFinite(startsAt) && startsAt - Date.now() >= CANCELLATION_NOTICE_MS;
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  })[character]);
+}
+
+function downloadParticipantsPdf(evento, participants) {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) return;
+
+  const participantCards = participants.length
+    ? participants.map((participant, index) => `
+        <article class="participant">
+          <h2>${index + 1}. ${escapeHtml(participant.nombre || 'Participante')}</h2>
+          <dl>
+            ${participant.correo ? `<div><dt>Correo</dt><dd>${escapeHtml(participant.correo)}</dd></div>` : ''}
+            ${participant.telefono ? `<div><dt>Teléfono</dt><dd>${escapeHtml(participant.telefono)}</dd></div>` : ''}
+            ${participant.edad ? `<div><dt>Edad</dt><dd>${escapeHtml(participant.edad)}</dd></div>` : ''}
+            ${participant.contactoEmergenciaNombre ? `<div><dt>Contacto de emergencia</dt><dd>${escapeHtml(participant.contactoEmergenciaNombre)}${participant.contactoEmergenciaTelefono ? ` · ${escapeHtml(participant.contactoEmergenciaTelefono)}` : ''}</dd></div>` : ''}
+            ${participant.notas ? `<div><dt>Notas</dt><dd>${escapeHtml(participant.notas)}</dd></div>` : ''}
+            ${participant.fechaRegistro ? `<div><dt>Inscripción</dt><dd>${escapeHtml(participant.fechaRegistro)}</dd></div>` : ''}
+          </dl>
+        </article>`).join('')
+    : '<p class="empty">Aún no hay participantes inscritos.</p>';
+
+  const title = `Lista de participantes - ${evento.tituloEvento}`;
+  printWindow.document.open();
+  printWindow.document.write(`<!doctype html>
+    <html lang="es"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title>
+    <style>
+      @page { size: A4 portrait; margin: 16mm; }
+      * { box-sizing: border-box; }
+      body { margin: 0; color: #173b35; font: 12px Arial, sans-serif; }
+      header { padding-bottom: 14px; border-bottom: 2px solid #0a4d3c; }
+      .eyebrow { margin: 0 0 6px; color: #087c6e; font-size: 9px; font-weight: bold; letter-spacing: 1.2px; text-transform: uppercase; }
+      h1 { margin: 0 0 8px; font-size: 21px; }
+      .meta { margin: 3px 0; color: #526b65; }
+      .count { margin: 14px 0 10px; font-weight: bold; }
+      .participant { margin: 0 0 10px; padding: 10px 12px; border: 1px solid #cbded8; border-radius: 7px; break-inside: avoid; }
+      .participant h2 { margin: 0 0 7px; color: #0a4d3c; font-size: 13px; }
+      dl { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; margin: 0; }
+      dl div { min-width: 0; }
+      dt { color: #637974; font-size: 9px; font-weight: bold; text-transform: uppercase; }
+      dd { margin: 2px 0 0; overflow-wrap: anywhere; }
+      .empty { margin-top: 18px; color: #526b65; }
+      footer { margin-top: 16px; color: #71827e; font-size: 9px; }
+    </style></head><body>
+      <header>
+        <p class="eyebrow">TuDestino · Registro administrativo</p>
+        <h1>${escapeHtml(evento.tituloEvento)}</h1>
+        <p class="meta">${escapeHtml(formatFechaLarga(evento.fecha))} · ${escapeHtml(formatHora12(evento.horaInicio))}</p>
+        <p class="meta">${escapeHtml(evento.lugarEvento)}${evento.localidad ? `, ${escapeHtml(evento.localidad)}` : ''}</p>
+      </header>
+      <p class="count">Participantes inscritos: ${participants.length}</p>
+      ${participantCards}
+      <footer>Generado el ${escapeHtml(new Date().toLocaleString('es-MX'))}</footer>
+    </body></html>`);
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.onafterprint = () => printWindow.close();
+  window.setTimeout(() => printWindow.print(), 250);
+}
 
 function Gallery({ imagenes, titulo }) {
   const [index, setIndex] = useState(0);
@@ -59,7 +151,56 @@ function Gallery({ imagenes, titulo }) {
   );
 }
 
-function Convocatoria({ convocatoria, finalizado, inscrito, isAdmin, onEnroll, onViewParticipants, participantsOpen, participants, participantsLoading, participantsError }) {
+function ParticipantsModal({ isOpen, onClose, evento, participants, loading, error, onDownload }) {
+  return (
+    <ReactModal
+      isOpen={isOpen}
+      onRequestClose={onClose}
+      style={participantsModalStyles}
+      contentLabel={`Participantes de ${evento.tituloEvento}`}
+      closeTimeoutMS={180}
+    >
+      <section className="participants-modal" aria-labelledby="participants-modal-title">
+        <header className="participants-modal__header">
+          <div>
+            <p className="evd-eyebrow">VISTA PREVIA DE PARTICIPANTES</p>
+            <h2 id="participants-modal-title">{evento.tituloEvento}</h2>
+            <p>{formatFechaLarga(evento.fecha)} · {formatHora12(evento.horaInicio)} · {evento.lugarEvento}, {evento.localidad}</p>
+          </div>
+          <button type="button" className="participants-modal__close" onClick={onClose} aria-label="Cerrar lista de participantes">
+            <Icon name="x" size={20} />
+          </button>
+        </header>
+        <div className="participants-modal__body" aria-live="polite">
+          {loading ? <p className="participants-modal__state">Cargando participantes...</p>
+            : error ? <p className="participants-modal__state participants-modal__state--error">{error}</p>
+              : participants.length === 0 ? <p className="participants-modal__state">Aún no hay participantes inscritos.</p>
+                : <ol className="participants-modal__list">{participants.map((participant, index) => (
+                  <li key={`${participant.correo || participant.nombre || 'participante'}-${index}`}>
+                    <strong>{participant.nombre || 'Participante'}</strong>
+                    <div>
+                      {participant.correo && <span>{participant.correo}</span>}
+                      {participant.telefono && <span>Teléfono: {participant.telefono}</span>}
+                      {participant.edad && <span>Edad: {participant.edad}</span>}
+                      {participant.contactoEmergenciaNombre && <span>Contacto de emergencia: {participant.contactoEmergenciaNombre}{participant.contactoEmergenciaTelefono ? ` · ${participant.contactoEmergenciaTelefono}` : ''}</span>}
+                      {participant.notas && <span>Nota: {participant.notas}</span>}
+                      {participant.fechaRegistro && <small>Inscripción: {participant.fechaRegistro}</small>}
+                    </div>
+                  </li>
+                ))}</ol>}
+        </div>
+        <footer className="participants-modal__footer">
+          <span>{participants.length} {participants.length === 1 ? 'participante' : 'participantes'}</span>
+          <button type="button" className="ev-btn ev-btn--outline" onClick={onDownload} disabled={loading || Boolean(error) || participants.length === 0}>
+            Descargar lista PDF
+          </button>
+        </footer>
+      </section>
+    </ReactModal>
+  );
+}
+
+function Convocatoria({ evento, convocatoria, finalizado, inscrito, isAdmin, onEnroll, onCancelAttendance, onViewParticipants, participantsOpen, participants, participantsLoading, participantsError }) {
   const { cupoTotal, cuposOcupados, cuposRestantes, lleno } = convocatoria;
   const porcentaje = Math.min(100, Math.round((cuposOcupados / cupoTotal) * 100));
   // Se avisa "últimos espacios" cuando queda el 30 % o menos del cupo.
@@ -91,9 +232,14 @@ function Convocatoria({ convocatoria, finalizado, inscrito, isAdmin, onEnroll, o
           <Icon name={participantsOpen ? 'chevron-down' : 'arrow'} size={15} />
         </button>
       ) : inscrito ? (
-        <span className="evd-cta is-enrolled" aria-live="polite">
-          <Icon name="check" size={16} /> Ya estás inscrito
-        </span>
+        <div className="evd-enrolled-actions">
+          <span className="evd-cta is-enrolled" aria-live="polite">
+            <Icon name="check" size={16} /> Ya estás inscrito
+          </span>
+          {canCancelAttendance(evento)
+            ? <button type="button" className="ev-btn ev-btn--outline" onClick={onCancelAttendance}>Cancelar asistencia</button>
+            : <small>La asistencia solo se puede cancelar hasta 48 horas antes del evento.</small>}
+        </div>
       ) : finalizado ? (
         <span className="evd-cta is-disabled" aria-disabled="true">Evento finalizado</span>
       ) : lleno ? (
@@ -106,24 +252,15 @@ function Convocatoria({ convocatoria, finalizado, inscrito, isAdmin, onEnroll, o
       <p className="evd-convocatoria__hint">
         {isAdmin ? 'Consulta los datos de las personas inscritas en esta jornada.' : inscrito ? 'Encuentra este evento en tu perfil, en "Voy a asistir".' : finalizado ? 'Este evento ya pasó, por eso las inscripciones están cerradas.' : 'Tus datos se guardan de forma segura con tu cuenta.'}
       </p>
-      {isAdmin && participantsOpen && (
-        <div className="evd-participants" aria-live="polite">
-          {participantsLoading ? <p>Consultando participantes…</p>
-            : participantsError ? <p className="evd-participants__error">{participantsError}</p>
-              : participants.length === 0 ? <p>Aún no hay participantes inscritos.</p>
-                : <ul>{participants.map((participant, index) => (
-                  <li key={`${participant.correo || participant.nombre || 'participante'}-${index}`}>
-                    <strong>{participant.nombre || 'Participante'}</strong>
-                    {participant.correo && <span>{participant.correo}</span>}
-                    {participant.telefono && <span>Teléfono: {participant.telefono}</span>}
-                    {participant.edad && <span>Edad: {participant.edad}</span>}
-                    {participant.contactoEmergenciaNombre && <span>Contacto de emergencia: {participant.contactoEmergenciaNombre}{participant.contactoEmergenciaTelefono ? ` · ${participant.contactoEmergenciaTelefono}` : ''}</span>}
-                    {participant.notas && <span>Nota: {participant.notas}</span>}
-                    {participant.fechaRegistro && <small>Inscripción: {participant.fechaRegistro}</small>}
-                  </li>
-                ))}</ul>}
-        </div>
-      )}
+      <ParticipantsModal
+        isOpen={isAdmin && participantsOpen}
+        onClose={() => onViewParticipants()}
+        evento={evento}
+        participants={participants}
+        loading={participantsLoading}
+        error={participantsError}
+        onDownload={() => downloadParticipantsPdf(evento, participants)}
+      />
     </div>
   );
 }
@@ -180,6 +317,24 @@ function EventDetail({ slug }) {
     // Ya estaba inscrito o el cupo se llenó mientras llenaba el formulario: se vuelve a consultar todo.
     getEvento(slug).then((data) => setEvento(data)).catch(() => {});
     getMisInscripciones().then((slugs) => setInscrito(slugs.includes(slug))).catch(() => {});
+  };
+
+  const handleCancelarAsistencia = async () => {
+    const ok = await confirmAction({
+      title: '¿Cancelar asistencia?',
+      text: `Puedes cancelar tu asistencia a "${evento.tituloEvento}" hasta 48 horas antes del inicio. Al cancelar, tu lugar quedará disponible para otra persona.`,
+      confirmText: 'Sí, cancelar asistencia',
+    });
+    if (!ok) return;
+
+    try {
+      await cancelarInscripcionEvento(slug);
+      setInscrito(false);
+      getEvento(slug).then((data) => setEvento(data)).catch(() => {});
+      notifySuccess('Asistencia cancelada', 'Tu lugar quedó disponible para otra persona.');
+    } catch (err) {
+      notifyError('No se pudo cancelar la asistencia', err.response?.data?.error || err.message || 'Intenta de nuevo.');
+    }
   };
 
   useEffect(() => {
@@ -395,11 +550,13 @@ function EventDetail({ slug }) {
 
           <aside className="evd-side">
             <Convocatoria
+              evento={e}
               convocatoria={e.convocatoria}
               finalizado={finalizado}
               inscrito={inscrito}
               isAdmin={isAdmin}
               onEnroll={() => setFormAbierto(true)}
+              onCancelAttendance={handleCancelarAsistencia}
               onViewParticipants={handleViewParticipants}
               participantsOpen={participantsOpen}
               participants={participants}

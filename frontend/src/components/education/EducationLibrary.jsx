@@ -161,7 +161,7 @@ export default function EducationLibrary({ variant = 'app' }) {
           </div>
 
           {isAdmin && (
-            <button type="button" className="ev-btn ev-btn--solid app-education__create" onClick={handleCreate}>
+            <button type="button" className="ev-btn ev-btn--ghost app-education__create" onClick={handleCreate}>
               <Icon name="edit" size={15} /> Crear publicación
             </button>
           )}
@@ -212,7 +212,7 @@ export default function EducationLibrary({ variant = 'app' }) {
           <div className="app-education__empty" role="status">
             <p>No encontramos publicaciones con esa búsqueda. Prueba con otra palabra o categoría.</p>
             {isAdmin && (
-              <button type="button" className="ev-btn ev-btn--solid" onClick={handleCreate}>
+              <button type="button" className="ev-btn ev-btn--ghost" onClick={handleCreate}>
                 <Icon name="edit" size={15} /> Crear publicación
               </button>
             )}

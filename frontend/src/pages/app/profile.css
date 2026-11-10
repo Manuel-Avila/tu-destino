@@ -656,6 +656,22 @@
   flex: 1;
   flex-direction: column;
 }
+.profile-cancel-attendance {
+  align-self: flex-start;
+  margin-top: .55rem;
+  padding: .4rem .7rem;
+  border: 1px solid var(--profile-error);
+  border-radius: 7px;
+  color: var(--profile-error);
+  background: #fff;
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.profile-cancel-attendance:hover { background: rgba(192, 57, 43, .07); }
+.profile-cancel-attendance:focus-visible { outline: 2px solid var(--profile-error); outline-offset: 2px; }
+.profile-cancel-deadline { margin-top: .55rem; color: var(--profile-muted); font-size: .7rem; }
 .event-title-row {
   display: flex;
   align-items: flex-start;

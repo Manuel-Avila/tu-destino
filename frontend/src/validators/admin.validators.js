@@ -28,6 +28,7 @@ export const educationSchema = z.object({
     error: 'Selecciona una categoría válida.',
   }),
   texto: z.string().trim().min(20, 'El texto debe tener al menos 20 caracteres'),
+  recuerda: z.string().trim().max(1000, 'El texto de Recuerda no puede superar 1000 caracteres').optional(),
   imagen: z.any().optional(),
 });
 

@@ -12,6 +12,7 @@ export const publicacionSchema = z.object({
     .trim()
     .min(20, 'El texto debe tener al menos 20 caracteres.')
     .max(5000, 'El texto es demasiado largo (máx. 5000).'),
+  recuerda: z.string().trim().max(1000, 'El texto de Recuerda es demasiado largo (máx. 1000).').optional(),
   categoria: z.enum(EDUCATION_CATEGORIES, {
     error: 'Selecciona una categoría válida.',
   }),

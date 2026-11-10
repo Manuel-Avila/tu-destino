@@ -12,6 +12,11 @@ export async function inscribirseEvento(slug, datos) {
   return data;
 }
 
+export async function cancelarInscripcionEvento(slug) {
+  const { data } = await axiosInstance.delete(`/api/eventos/${encodeURIComponent(slug)}/inscripcion`);
+  return data;
+}
+
 /** Slugs de los eventos a los que el usuario ya se inscribió. */
 export async function getMisInscripciones() {
   const { data } = await axiosInstance.get('/api/eventos/mis-inscripciones');

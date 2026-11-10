@@ -12,31 +12,33 @@
   gap: 1.5rem;
 }
 
-.edu-create-btn {
+.ev-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: .45rem;
-  flex-shrink: 0;
-  padding: .68rem 1.1rem;
-  border: 0;
+  gap: .4rem;
+  padding: .55rem 1.05rem;
   border-radius: 999px;
-  background: #00695b;
-  color: #fff;
+  border: 1px solid transparent;
   font: inherit;
-  font-size: .82rem;
+  font-size: .8rem;
   font-weight: 700;
   line-height: 1.2;
+  text-decoration: none;
   cursor: pointer;
-  box-shadow: 0 6px 16px rgba(0, 105, 91, .18);
-  transition: background .2s ease, transform .2s ease;
+  transition: background 0.2s ease, color 0.2s ease;
+  transition: background .2s ease, border-color .2s ease;
 }
-
-.edu-create-btn:hover {
-  background: #00564a;
-  transform: translateY(-1px);
-}
-
+.ev-btn--solid { background: var(--ev-green); color: #fff; }
+.ev-btn--solid:hover { background: var(--ev-green-hover); }
+.ev-btn--outline { background: #fff; color: var(--ev-green); border-color: var(--ev-line); }
+.ev-btn--outline:hover { background: var(--ev-lav); }
+.ev-btn--ghost { background: rgba(10, 77, 60, 0.08); color: #0a4d3c; }
+.ev-btn--ghost:hover { background: rgba(10, 77, 60, 0.15); }
+.ev-btn:focus-visible,
+.ev-chip:focus-visible,
+.ev-card__save:focus-visible,
+.ev-tab a:focus-visible { outline: 2px solid var(--ev-green); outline-offset: 2px; }
 /* Guías de Educación */
 .education-content-grid {
   display: grid;
@@ -194,7 +196,4 @@
     gap: 1rem;
   }
 
-  .edu-create-btn {
-    align-self: flex-start;
-  }
 }
