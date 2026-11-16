@@ -8,16 +8,11 @@ import {
   reportTypeLabel,
   updateReporteStatus,
 } from '../../services/reportes.service';
+import { openPdfWindow, printReportsPdf } from '../../utils/reportsPdf';
 import '../../components/home/ReportsTab.css';
 
 function formatDate(value) {
   return new Date(value).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
-}
-
-function csvCell(value, protectFormula = true) {
-  let text = String(value ?? '');
-  if (protectFormula && /^[\s]*[=+@-]/.test(text)) text = `'${text}`;
-  return `"${text.replaceAll('"', '""')}"`;
 }
 
 export default function AdminReportsPage() {
@@ -28,11 +23,16 @@ export default function AdminReportsPage() {
   const [stateForm, setStateForm] = useState({ status: 'en_revision', note: '' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [checked, setChecked] = useState(() => new Set());
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState('');
 
   async function loadReports(nextFilters = filters) {
     setStatus('loading');
     try {
-      setReports(await getReportes(nextFilters));
+      const data = await getReportes(nextFilters);
+      setReports(data);
+      setChecked((current) => new Set(data.filter((item) => current.has(item.id)).map((item) => item.id)));
       setStatus('ready');
     } catch {
       setStatus('error');
@@ -89,34 +89,41 @@ export default function AdminReportsPage() {
     loadReports(filters);
   }
 
-  function downloadReports() {
-    if (!reports.length) return;
+  const allChecked = reports.length > 0 && reports.every((item) => checked.has(item.id));
 
-    const columns = [
-      'Folio', 'Categoría', 'Estado', 'Descripción', 'Latitud', 'Longitud',
-      'Anónimo', 'Cantidad de evidencias', 'Fecha de creación',
-    ];
-    const rows = reports.map((report) => [
-      report.folio,
-      reportTypeLabel(report.incidentType),
-      STATUS_LABELS[report.status] || report.status,
-      report.description,
-      report.coordinates?.[0] ?? '',
-      report.coordinates?.[1] ?? '',
-      report.isAnonymous ? 'Sí' : 'No',
-      report.evidenceCount,
-      formatDate(report.createdAt),
-    ].map((value, index) => csvCell(value, ![4, 5, 7].includes(index))).join(','));
-    const csv = `\uFEFF${[columns.map((value) => csvCell(value)).join(','), ...rows].join('\r\n')}`;
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `reportes-ciudadanos-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    URL.revokeObjectURL(url);
+  function toggleOne(id) {
+    setChecked((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleAll() {
+    setChecked(allChecked ? new Set() : new Set(reports.map((item) => item.id)));
+  }
+
+  async function downloadSelectedPdf() {
+    if (checked.size === 0 || exporting) return;
+    // La ventana se abre dentro del clic; si no, el navegador bloquea la descarga.
+    const printWindow = openPdfWindow();
+    if (!printWindow) {
+      setExportError('El navegador bloqueó la ventana del PDF. Permite las ventanas emergentes e inténtalo de nuevo.');
+      return;
+    }
+    setExporting(true);
+    setExportError('');
+    try {
+      const ids = reports.filter((item) => checked.has(item.id)).map((item) => item.id);
+      const details = await Promise.all(ids.map((id) => getReporte(id)));
+      await printReportsPdf(printWindow, details);
+    } catch (err) {
+      printWindow.close();
+      setExportError(err.message || 'No se pudo generar el PDF.');
+    } finally {
+      setExporting(false);
+    }
   }
 
   return (
@@ -129,8 +136,8 @@ export default function AdminReportsPage() {
         </div>
         <div className="admin-reports__header-actions">
           <span className="admin-reports__count">{reports.length} reportes</span>
-          <button type="button" className="report-secondary-btn" onClick={downloadReports} disabled={status !== 'ready' || reports.length === 0}>
-            Descargar CSV
+          <button type="button" className="report-secondary-btn" onClick={downloadSelectedPdf} disabled={status !== 'ready' || checked.size === 0 || exporting}>
+            {exporting ? 'Generando PDF...' : `Descargar PDF${checked.size ? ` (${checked.size})` : ''}`}
           </button>
         </div>
       </header>
@@ -155,14 +162,30 @@ export default function AdminReportsPage() {
         <p className="admin-report-hint"><Icon name="list" size={16} /> Selecciona un reporte para revisar sus detalles.</p>
       )}
 
+      {status === 'ready' && reports.length > 0 && (
+        <div className="admin-report-selection">
+          <label>
+            <input type="checkbox" checked={allChecked} onChange={toggleAll} />
+            Seleccionar todos
+          </label>
+          <span>{checked.size === 0 ? 'Marca los reportes que quieres descargar en PDF.' : `${checked.size} seleccionado${checked.size === 1 ? '' : 's'}`}</span>
+        </div>
+      )}
+      {exportError && <p className="admin-report-state report-error">{exportError}</p>}
+
       <div className={`admin-reports__layout ${selected ? '' : 'admin-reports__layout--list-only'}`}>
         <div className="admin-report-list">
           {reports.map((report) => (
-            <button type="button" key={report.id} className={`admin-report-row ${selected?.id === report.id ? 'is-selected' : ''}`} onClick={() => openReport(report.id)}>
-              <div><strong>{report.folio}</strong><span>{reportTypeLabel(report.incidentType)}</span></div>
-              <p>{report.description}</p>
-              <div><span className={`report-status report-status--${report.status}`}>{STATUS_LABELS[report.status]}</span><small>{formatDate(report.createdAt)}</small></div>
-            </button>
+            <div key={report.id} className={`admin-report-item ${checked.has(report.id) ? 'is-checked' : ''}`}>
+              <label className="admin-report-check">
+                <input type="checkbox" checked={checked.has(report.id)} onChange={() => toggleOne(report.id)} aria-label={`Seleccionar reporte ${report.folio} para descargar`} />
+              </label>
+              <button type="button" className={`admin-report-row ${selected?.id === report.id ? 'is-selected' : ''}`} onClick={() => openReport(report.id)}>
+                <div><strong>{report.folio}</strong><span>{reportTypeLabel(report.incidentType)}</span></div>
+                <p>{report.description}</p>
+                <div><span className={`report-status report-status--${report.status}`}>{STATUS_LABELS[report.status]}</span><small>{formatDate(report.createdAt)}</small></div>
+              </button>
+            </div>
           ))}
         </div>
 
