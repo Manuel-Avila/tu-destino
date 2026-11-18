@@ -89,7 +89,8 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
     llevar: [],
     reglasTitulo: '',
     reglasIntro: '',
-    reglas: []
+    reglas: [],
+    preguntasFrecuentes: []
   });
   const [errors, setErrors] = useState({});
   const [isUploading, setIsUploading] = useState(false);
@@ -139,7 +140,8 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
         llevar: evento.llevar || [],
         reglasTitulo: evento.reglasTitulo || '',
         reglasIntro: evento.reglasIntro || '',
-        reglas: evento.reglas || []
+        reglas: evento.reglas || [],
+        preguntasFrecuentes: (evento.preguntasFrecuentes || []).slice(0, 3)
       });
     } else {
       setFormData({
@@ -172,7 +174,8 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
         llevar: [],
         reglasTitulo: '',
         reglasIntro: '',
-        reglas: []
+        reglas: [],
+        preguntasFrecuentes: []
       });
     }
   }, [evento, isOpen]);
@@ -349,6 +352,12 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
       payload.append('reglas_titulo', formData.reglasTitulo);
       payload.append('reglas_intro', formData.reglasIntro);
       payload.append('reglas', JSON.stringify(formData.reglas));
+      payload.append('preguntas_frecuentes', JSON.stringify(
+        formData.preguntasFrecuentes
+          .slice(0, 3)
+          .map((item) => ({ pregunta: item.pregunta.trim(), respuesta: item.respuesta.trim() }))
+          .filter((item) => item.pregunta && item.respuesta)
+      ));
 
       let existingImages = [];
       const currentImages = Array.isArray(formData.imagenes) 
@@ -569,6 +578,21 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
           </div>)}
           {itineraryError && <span className="admin-field-error">{itineraryError}</span>}
           <button type="button" className="admin-btn admin-btn--secondary admin-add-itinerary" onClick={() => { setItineraryError(''); setFormData((current) => ({ ...current, itinerario: [...current.itinerario, { hora: '', titulo: '', descripcion: '' }] })); }}>+ Agregar momento al programa</button>
+        </section>
+
+        <section className="admin-event-options">
+          <h3>Preguntas frecuentes</h3>
+          <p>Agrega hasta 3 preguntas y sus respuestas.</p>
+          {formData.preguntasFrecuentes.map((item, index) => (
+            <div className="admin-itinerary-row" key={`pregunta-frecuente-${index}`}>
+              <label>Pregunta<input value={item.pregunta || ''} onChange={(e) => setFormData((current) => ({ ...current, preguntasFrecuentes: current.preguntasFrecuentes.map((entry, entryIndex) => entryIndex === index ? { ...entry, pregunta: e.target.value } : entry) }))} placeholder="Ej. ¿Pueden asistir niños?" /></label>
+              <label>Respuesta<textarea value={item.respuesta || ''} onChange={(e) => setFormData((current) => ({ ...current, preguntasFrecuentes: current.preguntasFrecuentes.map((entry, entryIndex) => entryIndex === index ? { ...entry, respuesta: e.target.value } : entry) }))} rows={2} placeholder="Escribe una respuesta clara." /></label>
+              <button type="button" className="admin-btn admin-btn--secondary" onClick={() => setFormData((current) => ({ ...current, preguntasFrecuentes: current.preguntasFrecuentes.filter((_, itemIndex) => itemIndex !== index) }))}>Quitar pregunta</button>
+            </div>
+          ))}
+          {formData.preguntasFrecuentes.length < 3 && (
+            <button type="button" className="admin-btn admin-btn--secondary admin-add-itinerary" onClick={() => setFormData((current) => ({ ...current, preguntasFrecuentes: [...current.preguntasFrecuentes, { pregunta: '', respuesta: '' }] }))}>+ Agregar pregunta frecuente</button>
+          )}
         </section>
         </> : null}
 

@@ -49,6 +49,17 @@ function resumenDe(descripcion) {
   return match ? match[0] : primerParrafo;
 }
 
+function preguntasFrecuentesDe(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== 'string') return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function toApi(row) {
   const restantes = row.cupo_total - row.cupos_ocupados;
   return {
@@ -93,7 +104,7 @@ function toApi(row) {
     reglasTitulo: row.reglas_titulo,
     reglasIntro: row.reglas_intro,
     reglas: row.reglas,
-    preguntasFrecuentes: row.preguntas_frecuentes,
+    preguntasFrecuentes: preguntasFrecuentesDe(row.preguntas_frecuentes),
     itinerario: row.itinerario || [],
     incluye: row.incluye || [],
     llevar: row.llevar || [],

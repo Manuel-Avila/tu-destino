@@ -73,7 +73,7 @@ const slugSchema = z
   .max(120, 'El slug no puede superar los 120 caracteres.');
 
 function parseJsonFields(data) {
-  for (const field of ['itinerario', 'incluye', 'llevar', 'reglas', 'metricas', 'organizadores', 'lineas_impacto']) {
+  for (const field of ['itinerario', 'incluye', 'llevar', 'reglas', 'metricas', 'organizadores', 'lineas_impacto', 'preguntas_frecuentes']) {
     if (typeof data[field] === 'string') {
       try {
         data[field] = JSON.parse(data[field]);

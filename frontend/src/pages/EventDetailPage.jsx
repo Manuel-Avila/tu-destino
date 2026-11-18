@@ -628,11 +628,11 @@ function EventDetail({ slug }) {
               </section>
             )}
 
-            {e.preguntasFrecuentes.length > 0 && (
+            {(Array.isArray(e.preguntasFrecuentes) ? e.preguntasFrecuentes : []).length > 0 && (
               <section className="evd-card evd-faq">
                 <p className="evd-eyebrow">RESOLUCIÓN DE DUDAS</p>
                 <h2 className="evd-title">Preguntas Frecuentes de Voluntarios</h2>
-                {e.preguntasFrecuentes.map((f) => (
+                {(Array.isArray(e.preguntasFrecuentes) ? e.preguntasFrecuentes : []).map((f) => (
                   <details key={f.pregunta}>
                     <summary>
                       <Icon name="help" size={15} /> <span>{f.pregunta}</span>
