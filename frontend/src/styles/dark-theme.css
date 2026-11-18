@@ -362,6 +362,20 @@ html[data-theme='dark'] .admin-btn--secondary {
 html[data-theme='dark'] .admin-btn--secondary:hover {
   background: #31443c;
 }
+/* Pasos del stepper en modales admin: misma línea visual que "Cancelar". */
+html[data-theme='dark'] .admin-form-stepper span {
+  color: #ffffff;
+  background: rgba(38, 53, 47, 0.7);
+  border-color: rgba(126, 224, 200, 0.18);
+}
+html[data-theme='dark'] .admin-form-stepper span.is-active {
+  color: #ffffff;
+  background: rgba(13, 107, 92, 0.45);
+  border-color: #7ee0c8;
+}
+html[data-theme='dark'] .admin-form-stepper span.is-complete {
+  color: #ffffff;
+}
 html[data-theme='dark'] .img-picker__dropzone {
   color: #9be8d4;
   background: #10201b;
@@ -422,7 +436,7 @@ html[data-theme='dark'] .auth-error {
 html[data-theme='dark'] .ev-tab,
 html[data-theme='dark'] .ev-detail {
   --ev-ink: #e6f2ed;
-  --ev-green: #7ee0c8;
+  --ev-green: #ffffff;
   --ev-green-hover: #a2eeda;
   --ev-aqua: #1d3b33;
   --ev-lav: #1b2c27;
