@@ -106,7 +106,6 @@ export default function AdminReportsPage() {
 
   async function downloadSelectedPdf() {
     if (checked.size === 0 || exporting) return;
-    // La ventana se abre dentro del clic; si no, el navegador bloquea la descarga.
     const printWindow = openPdfWindow();
     if (!printWindow) {
       setExportError('El navegador bloqueó la ventana del PDF. Permite las ventanas emergentes e inténtalo de nuevo.');

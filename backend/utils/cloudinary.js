@@ -1,6 +1,10 @@
 import { v2 as cloudinary } from 'cloudinary';
 
 export const uploadBufferToCloudinary = (buffer, folder = 'tudestino', mimeType = 'image/jpeg') => {
+  if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    return Promise.reject(new Error('Cloudinary no está configurado'));
+  }
+
   return new Promise((resolve, reject) => {
     const b64 = Buffer.from(buffer).toString('base64');
     const dataURI = `data:${mimeType};base64,${b64}`;

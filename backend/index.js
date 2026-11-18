@@ -19,6 +19,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+  console.warn('[cloudinary] Credenciales no configuradas. Las cargas de imágenes estarán deshabilitadas.');
+}
+
 const app = express();
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 
