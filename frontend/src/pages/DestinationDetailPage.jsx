@@ -250,7 +250,12 @@ function DestinationDetail({ id }) {
         </div>
 
         <div className="destination-detail__hero">
-          <ImageCarousel images={destination.images?.length > 0 ? destination.images : (destination.image ? [destination.image] : [])} title={destination.name} />
+          <ImageCarousel
+            images={destination.image
+              ? [destination.image, ...(destination.images || []).filter((src) => src !== destination.image)]
+              : (destination.images || [])}
+            title={destination.name}
+          />
         </div>
 
         <div className="destination-detail__grid">

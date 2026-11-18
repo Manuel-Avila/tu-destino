@@ -130,7 +130,7 @@ html[data-theme='dark'] .info-step-card {
   border: 1px solid #2a3b36;
 }
 
-/* Tarjetas y estados de Acerca de / Educación / Reportes */
+/* Tarjetas y estados de Acerca de / EducaciÃ³n / Reportes */
 html[data-theme='dark'] .about-text-card,
 html[data-theme='dark'] .about-info-box,
 html[data-theme='dark'] .edu-guide-card,
@@ -362,7 +362,19 @@ html[data-theme='dark'] .admin-btn--secondary {
 html[data-theme='dark'] .admin-btn--secondary:hover {
   background: #31443c;
 }
-/* Pasos del stepper en modales admin: misma línea visual que "Cancelar". */
+
+/* Modales admin (Crear/Editar Evento, Destino, Educación): contraste en tema oscuro */
+html[data-theme='dark'] .admin-modal-heading h2 {
+  color: #ffffff !important;
+}
+html[data-theme='dark'] .admin-modal-close {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+html[data-theme='dark'] .admin-modal-close:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.18);
+}
 html[data-theme='dark'] .admin-form-stepper span {
   color: #ffffff;
   background: rgba(38, 53, 47, 0.7);
@@ -376,6 +388,51 @@ html[data-theme='dark'] .admin-form-stepper span.is-active {
 html[data-theme='dark'] .admin-form-stepper span.is-complete {
   color: #ffffff;
 }
+html[data-theme='dark'] .admin-form label,
+html[data-theme='dark'] .admin-event-options h3 {
+  color: #ffffff;
+}
+html[data-theme='dark'] .admin-form input,
+html[data-theme='dark'] .admin-form select,
+html[data-theme='dark'] .admin-form textarea {
+  color: #ffffff;
+  background-color: #0c1714;
+  border: 1px solid #3b5d53;
+  box-shadow: none;
+  color-scheme: dark;
+}
+html[data-theme='dark'] .admin-form input:hover,
+html[data-theme='dark'] .admin-form select:hover,
+html[data-theme='dark'] .admin-form textarea:hover {
+  border-color: #4f7d70;
+}
+html[data-theme='dark'] .admin-form input:focus,
+html[data-theme='dark'] .admin-form select:focus,
+html[data-theme='dark'] .admin-form textarea:focus {
+  color: #ffffff;
+  background-color: #0c1714;
+}
+html[data-theme='dark'] .admin-form input::placeholder,
+html[data-theme='dark'] .admin-form textarea::placeholder {
+  color: #9fb7af;
+  opacity: 1;
+}
+html[data-theme='dark'] .admin-form select option {
+  color: #ffffff;
+  background-color: #16231f;
+}
+html[data-theme='dark'] .admin-form input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+html[data-theme='dark'] .admin-form input:disabled,
+html[data-theme='dark'] .admin-form select:disabled,
+html[data-theme='dark'] .admin-form textarea:disabled {
+  color: #9fb7af;
+  background-color: #13201c;
+}
+html[data-theme='dark'] .admin-field-error {
+  color: #ffb4a8;
+}
 html[data-theme='dark'] .img-picker__dropzone {
   color: #9be8d4;
   background: #10201b;
@@ -384,11 +441,40 @@ html[data-theme='dark'] .img-picker__dropzone {
 html[data-theme='dark'] .img-picker__dropzone:hover {
   background: #162b24;
 }
+
+/* Modal de eventos: paso "Jornada" (opciones, reglas y programa) */
+html[data-theme='dark'] .admin-event-options,
+html[data-theme='dark'] .admin-itinerary-row {
+  background: #10201b;
+  border-color: #2a3b36;
+}
+html[data-theme='dark'] .admin-event-options h3 {
+  color: #9be8d4;
+}
+html[data-theme='dark'] .admin-event-options > p {
+  color: #a9beb6;
+}
+html[data-theme='dark'] .admin-form .admin-checkbox-option {
+  color: #e6f2ed;
+  background: #16231f;
+  border-color: #2a3b36;
+}
+html[data-theme='dark'] .admin-form .admin-checkbox-option:hover {
+  background: #1a2b26;
+  border-color: #3b6d5f;
+}
+html[data-theme='dark'] .admin-form .admin-checkbox-option:has(input:checked) {
+  background: #1d3b33;
+  border-color: #3b8f7c;
+}
+html[data-theme='dark'] .admin-checkbox-option small {
+  color: #a9beb6;
+}
 html[data-theme='dark'] .img-picker__preview-item {
   border-color: #2a3b36;
 }
 
-/* Autenticación */
+/* AutenticaciÃ³n */
 html[data-theme='dark'] .auth-shell,
 html[data-theme='dark'] .auth-form-panel {
   background: #0f1715;
@@ -432,11 +518,11 @@ html[data-theme='dark'] .auth-error {
   background: rgba(186, 26, 26, 0.16);
 }
 
-/* Eventos y biblioteca de Educación */
+/* Eventos y biblioteca de EducaciÃ³n */
 html[data-theme='dark'] .ev-tab,
 html[data-theme='dark'] .ev-detail {
   --ev-ink: #e6f2ed;
-  --ev-green: #ffffff;
+  --ev-green: #7ee0c8;
   --ev-green-hover: #a2eeda;
   --ev-aqua: #1d3b33;
   --ev-lav: #1b2c27;
@@ -594,7 +680,7 @@ html[data-theme='dark'] .evd-alert {
   background: #3a2418;
 }
 
-/* Detalle de Educación */
+/* Detalle de EducaciÃ³n */
 html[data-theme='dark'] .education-detail__state,
 html[data-theme='dark'] .education-detail__content,
 html[data-theme='dark'] .education-detail__contact {
@@ -616,7 +702,7 @@ html[data-theme='dark'] .education-detail__content aside {
   background: #10201b;
 }
 
-/* Catálogo de Educación */
+/* CatÃ¡logo de EducaciÃ³n */
 html[data-theme='dark'] .app-education {
   --education-ink: #e6f2ed;
   --education-green: #7ee0c8;

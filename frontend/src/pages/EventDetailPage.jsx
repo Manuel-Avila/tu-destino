@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ReactModal from 'react-modal';
+import { jsPDF } from 'jspdf';
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import tuDestinoLogo from '../assets/logo.png';
 import Icon from '../components/events/EventIcons';
 import { useSavedEvents } from '../hooks/useSavedEvents';
 import { cancelarInscripcionEvento, getEvento, getMisInscripciones, getParticipantesEvento } from '../services/eventos.service';
@@ -65,67 +67,162 @@ function canCancelAttendance(evento) {
   return Number.isFinite(startsAt) && startsAt - Date.now() >= CANCELLATION_NOTICE_MS;
 }
 
-function escapeHtml(value) {
-  return String(value ?? '').replace(/[&<>"']/g, (character) => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-  })[character]);
+async function loadImageDataUrl(url) {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 
-function downloadParticipantsPdf(evento, participants) {
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) return;
+async function downloadParticipantsPdf(evento, participants) {
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const margin = 16;
+  const contentWidth = pageWidth - margin * 2;
 
-  const participantCards = participants.length
-    ? participants.map((participant, index) => `
-        <article class="participant">
-          <h2>${index + 1}. ${escapeHtml(participant.nombre || 'Participante')}</h2>
-          <dl>
-            ${participant.correo ? `<div><dt>Correo</dt><dd>${escapeHtml(participant.correo)}</dd></div>` : ''}
-            ${participant.telefono ? `<div><dt>Teléfono</dt><dd>${escapeHtml(participant.telefono)}</dd></div>` : ''}
-            ${participant.edad ? `<div><dt>Edad</dt><dd>${escapeHtml(participant.edad)}</dd></div>` : ''}
-            ${participant.contactoEmergenciaNombre ? `<div><dt>Contacto de emergencia</dt><dd>${escapeHtml(participant.contactoEmergenciaNombre)}${participant.contactoEmergenciaTelefono ? ` · ${escapeHtml(participant.contactoEmergenciaTelefono)}` : ''}</dd></div>` : ''}
-            ${participant.notas ? `<div><dt>Notas</dt><dd>${escapeHtml(participant.notas)}</dd></div>` : ''}
-            ${participant.fechaRegistro ? `<div><dt>Inscripción</dt><dd>${escapeHtml(participant.fechaRegistro)}</dd></div>` : ''}
-          </dl>
-        </article>`).join('')
-    : '<p class="empty">Aún no hay participantes inscritos.</p>';
+  try {
+    const logoDataUrl = await loadImageDataUrl(tuDestinoLogo);
+    doc.addImage(logoDataUrl, 'PNG', margin, 8, 10, 10);
+  } catch {
+    // Conserva el nombre en el encabezado si el logo no puede cargarse.
+  }
+  doc.setTextColor(23, 59, 53);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text('TuDestino', margin + 13, 15);
 
-  const title = `Lista de participantes - ${evento.tituloEvento}`;
-  printWindow.document.open();
-  printWindow.document.write(`<!doctype html>
-    <html lang="es"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title>
-    <style>
-      @page { size: A4 portrait; margin: 16mm; }
-      * { box-sizing: border-box; }
-      body { margin: 0; color: #173b35; font: 12px Arial, sans-serif; }
-      header { padding-bottom: 14px; border-bottom: 2px solid #0a4d3c; }
-      .eyebrow { margin: 0 0 6px; color: #087c6e; font-size: 9px; font-weight: bold; letter-spacing: 1.2px; text-transform: uppercase; }
-      h1 { margin: 0 0 8px; font-size: 21px; }
-      .meta { margin: 3px 0; color: #526b65; }
-      .count { margin: 14px 0 10px; font-weight: bold; }
-      .participant { margin: 0 0 10px; padding: 10px 12px; border: 1px solid #cbded8; border-radius: 7px; break-inside: avoid; }
-      .participant h2 { margin: 0 0 7px; color: #0a4d3c; font-size: 13px; }
-      dl { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; margin: 0; }
-      dl div { min-width: 0; }
-      dt { color: #637974; font-size: 9px; font-weight: bold; text-transform: uppercase; }
-      dd { margin: 2px 0 0; overflow-wrap: anywhere; }
-      .empty { margin-top: 18px; color: #526b65; }
-      footer { margin-top: 16px; color: #71827e; font-size: 9px; }
-    </style></head><body>
-      <header>
-        <p class="eyebrow">TuDestino · Registro administrativo</p>
-        <h1>${escapeHtml(evento.tituloEvento)}</h1>
-        <p class="meta">${escapeHtml(formatFechaLarga(evento.fecha))} · ${escapeHtml(formatHora12(evento.horaInicio))}</p>
-        <p class="meta">${escapeHtml(evento.lugarEvento)}${evento.localidad ? `, ${escapeHtml(evento.localidad)}` : ''}</p>
-      </header>
-      <p class="count">Participantes inscritos: ${participants.length}</p>
-      ${participantCards}
-      <footer>Generado el ${escapeHtml(new Date().toLocaleString('es-MX'))}</footer>
-    </body></html>`);
-  printWindow.document.close();
-  printWindow.focus();
-  printWindow.onafterprint = () => printWindow.close();
-  window.setTimeout(() => printWindow.print(), 250);
+  doc.setFontSize(18);
+  doc.text(doc.splitTextToSize(evento.tituloEvento, contentWidth), margin, 25);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(82, 107, 101);
+  doc.text(`${formatFechaLarga(evento.fecha)} · ${formatHora12(evento.horaInicio)}`, margin, 38);
+  doc.text(`${evento.lugarEvento}${evento.localidad ? `, ${evento.localidad}` : ''}`, margin, 44);
+
+  doc.setDrawColor(10, 77, 60);
+  doc.setLineWidth(0.6);
+  doc.line(margin, 49, pageWidth - margin, 49);
+
+  doc.setTextColor(23, 59, 53);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.text(`Participantes inscritos: ${participants.length}`, margin, 58);
+
+  let y = 64;
+  const cardHeight = 35;
+  const cardBottomMargin = 4;
+
+  if (participants.length === 0) {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(82, 107, 101);
+    doc.text('Aún no hay participantes inscritos.', margin, y);
+  }
+
+  participants.forEach((participant, index) => {
+    if (y + cardHeight > doc.internal.pageSize.getHeight() - 14) {
+      doc.addPage();
+      y = 16;
+    }
+
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(203, 222, 216);
+    doc.setLineWidth(0.35);
+    doc.roundedRect(margin, y, contentWidth, cardHeight, 2.5, 2.5, 'FD');
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(23, 59, 53);
+    doc.text(`${index + 1}. ${participant.nombre || 'Participante'}`, margin + 3, y + 7);
+
+    const columnWidth = contentWidth / 2;
+    const leftX = margin + 3;
+    const rightX = margin + columnWidth + 3;
+    let leftY = y + 14;
+    let rightY = y + 14;
+
+    if (participant.correo) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(82, 107, 101);
+      doc.text('CORREO', leftX, leftY);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(23, 59, 53);
+      doc.text(doc.splitTextToSize(participant.correo, columnWidth - 8), leftX, leftY + 3.2);
+      leftY += 9;
+    }
+    if (participant.edad) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(82, 107, 101);
+      doc.text('EDAD', leftX, leftY);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(23, 59, 53);
+      doc.text(String(participant.edad), leftX, leftY + 3.2);
+      leftY += 9;
+    }
+    if (participant.fechaRegistro) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(82, 107, 101);
+      doc.text('INSCRIPCIÓN', leftX, leftY);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(23, 59, 53);
+      doc.text(participant.fechaRegistro, leftX, leftY + 3.2);
+    }
+
+    if (participant.telefono) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(82, 107, 101);
+      doc.text('TELÉFONO', rightX, rightY);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(23, 59, 53);
+      doc.text(participant.telefono, rightX, rightY + 3.2);
+      rightY += 9;
+    }
+    if (participant.contactoEmergenciaNombre) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(82, 107, 101);
+      doc.text('CONTACTO DE EMERGENCIA', rightX, rightY);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(23, 59, 53);
+      const emergency = `${participant.contactoEmergenciaNombre}${participant.contactoEmergenciaTelefono ? ` · ${participant.contactoEmergenciaTelefono}` : ''}`;
+      doc.text(doc.splitTextToSize(emergency, columnWidth - 8), rightX, rightY + 3.2);
+      rightY += 9;
+    }
+    if (participant.notas) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      doc.setTextColor(82, 107, 101);
+      doc.text('NOTAS', rightX, rightY);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(23, 59, 53);
+      doc.text(doc.splitTextToSize(participant.notas, columnWidth - 8), rightX, rightY + 3.2);
+    }
+
+    y += cardHeight + cardBottomMargin;
+  });
+
+  const slug = String(evento.slug || 'evento')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .toLowerCase();
+  doc.save(`participantes-${slug || 'evento'}.pdf`);
 }
 
 function Gallery({ imagenes, titulo }) {
@@ -259,7 +356,7 @@ function Convocatoria({ evento, convocatoria, finalizado, inscrito, isAdmin, onE
         participants={participants}
         loading={participantsLoading}
         error={participantsError}
-        onDownload={() => downloadParticipantsPdf(evento, participants)}
+        onDownload={() => void downloadParticipantsPdf(evento, participants)}
       />
     </div>
   );
@@ -531,11 +628,11 @@ function EventDetail({ slug }) {
               </section>
             )}
 
-            {e.preguntasFrecuentes.length > 0 && (
+            {(Array.isArray(e.preguntasFrecuentes) ? e.preguntasFrecuentes : []).length > 0 && (
               <section className="evd-card evd-faq">
                 <p className="evd-eyebrow">RESOLUCIÓN DE DUDAS</p>
                 <h2 className="evd-title">Preguntas Frecuentes de Voluntarios</h2>
-                {e.preguntasFrecuentes.map((f) => (
+                {(Array.isArray(e.preguntasFrecuentes) ? e.preguntasFrecuentes : []).map((f) => (
                   <details key={f.pregunta}>
                     <summary>
                       <Icon name="help" size={15} /> <span>{f.pregunta}</span>

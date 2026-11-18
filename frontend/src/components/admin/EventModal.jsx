@@ -62,6 +62,7 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
   const [formData, setFormData] = useState({
     slug: '',
     tituloEvento: '',
+    subtituloEvento: '',
     descripcionEvento: '',
     categoria: 'limpieza',
     fecha: '',
@@ -69,19 +70,27 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
     horaFin: '',
     lugarEvento: '',
     localidad: '',
+    puntoEncuentroNombre: '',
+    puntoEncuentroDireccion: '',
     latitud: 24.1422,
     longitud: -110.3108,
     responsableNombre: '',
+    responsableCargo: '',
     responsableCorreo: '',
     responsableTelefono: '',
+    responsableCita: '',
     cupoTotal: 100,
     imagenes: '',
+    metricas: [],
+    organizadores: [],
+    lineasImpacto: [],
     itinerario: [],
     incluye: [],
     llevar: [],
     reglasTitulo: '',
     reglasIntro: '',
-    reglas: []
+    reglas: [],
+    preguntasFrecuentes: []
   });
   const [errors, setErrors] = useState({});
   const [isUploading, setIsUploading] = useState(false);
@@ -104,6 +113,7 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
       setFormData({
         slug: evento.slug || '',
         tituloEvento: evento.tituloEvento || '',
+        subtituloEvento: evento.subtituloEvento || '',
         descripcionEvento: evento.descripcionEvento || '',
         categoria: evento.categoria || 'limpieza',
         fecha: evento.fecha || '',
@@ -111,24 +121,33 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
         horaFin: evento.horaFin || '',
         lugarEvento: evento.lugarEvento || '',
         localidad: evento.localidad || '',
+        puntoEncuentroNombre: evento.puntoEncuentro?.nombre || '',
+        puntoEncuentroDireccion: evento.puntoEncuentro?.direccion || '',
         latitud: evento.coordenadas?.[0] || evento.puntoEncuentro?.coordenadas?.[0] || 24.1422,
         longitud: evento.coordenadas?.[1] || evento.puntoEncuentro?.coordenadas?.[1] || -110.3108,
         imagenes: Array.isArray(evento.imagenes) ? evento.imagenes.join(', ') : '',
         responsableNombre: evento.responsable?.nombre || '',
+        responsableCargo: evento.responsable?.cargo || '',
         responsableCorreo: evento.responsable?.correo || '',
         responsableTelefono: evento.responsable?.telefono || '',
+        responsableCita: evento.responsable?.cita || '',
         cupoTotal: evento.convocatoria?.cupoTotal || 100,
+        metricas: evento.metricas || [],
+        organizadores: evento.organizadores || [],
+        lineasImpacto: evento.lineasImpacto || [],
         itinerario: evento.itinerario || [],
         incluye: evento.incluye || [],
         llevar: evento.llevar || [],
         reglasTitulo: evento.reglasTitulo || '',
         reglasIntro: evento.reglasIntro || '',
-        reglas: evento.reglas || []
+        reglas: evento.reglas || [],
+        preguntasFrecuentes: (evento.preguntasFrecuentes || []).slice(0, 3)
       });
     } else {
       setFormData({
         slug: '',
         tituloEvento: '',
+        subtituloEvento: '',
         descripcionEvento: '',
         categoria: 'limpieza',
         fecha: '',
@@ -136,19 +155,27 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
         horaFin: '',
         lugarEvento: '',
         localidad: '',
+        puntoEncuentroNombre: '',
+        puntoEncuentroDireccion: '',
         latitud: 24.1422,
         longitud: -110.3108,
         responsableNombre: '',
+        responsableCargo: '',
         responsableCorreo: '',
         responsableTelefono: '',
+        responsableCita: '',
         cupoTotal: 100,
         imagenes: '',
+        metricas: [],
+        organizadores: [],
+        lineasImpacto: [],
         itinerario: [],
         incluye: [],
         llevar: [],
         reglasTitulo: '',
         reglasIntro: '',
-        reglas: []
+        reglas: [],
+        preguntasFrecuentes: []
       });
     }
   }, [evento, isOpen]);
@@ -235,6 +262,26 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
     clear('');
   };
 
+  const updateArrayItem = (field, index, key, value) => {
+    setFormData((current) => ({
+      ...current,
+      [field]: current[field].map((item, itemIndex) =>
+        itemIndex === index ? { ...item, [key]: value } : item
+      )
+    }));
+  };
+
+  const addArrayItem = (field, item) => {
+    setFormData((current) => ({ ...current, [field]: [...current[field], item] }));
+  };
+
+  const removeArrayItem = (field, index) => {
+    setFormData((current) => ({
+      ...current,
+      [field]: current[field].filter((_, itemIndex) => itemIndex !== index)
+    }));
+  };
+
     const handleSubmit = async (e) => {
     e.preventDefault();
     if (step < 4) {
@@ -271,6 +318,7 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
       
       payload.append('slug', cleanSlug);
       payload.append('titulo_evento', formData.tituloEvento);
+      payload.append('subtitulo_evento', formData.subtituloEvento);
       payload.append('descripcion_evento', formData.descripcionEvento);
       payload.append('categoria', formData.categoria);
       payload.append('fecha_evento', formData.fecha);
@@ -278,13 +326,24 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
       payload.append('hora_fin', formData.horaFin);
       payload.append('lugar_evento', formData.lugarEvento);
       payload.append('localidad', formData.localidad);
+      payload.append('punto_encuentro_nombre', formData.puntoEncuentroNombre);
+      payload.append('punto_encuentro_direccion', formData.puntoEncuentroDireccion);
       payload.append('latitud', formData.latitud);
       payload.append('longitud', formData.longitud);
       payload.append('responsable_nombre', formData.responsableNombre);
+      payload.append('responsable_cargo', formData.responsableCargo);
       payload.append('responsable_correo', formData.responsableCorreo);
       payload.append('responsable_telefono', formData.responsableTelefono);
+      payload.append('responsable_cita', formData.responsableCita);
       payload.append('cupo_total', formData.cupoTotal);
       payload.append('activo', 'true');
+      payload.append('metricas', JSON.stringify(formData.metricas));
+      payload.append('organizadores', JSON.stringify(formData.organizadores));
+      payload.append('lineas_impacto', JSON.stringify(
+        formData.lineasImpacto
+          .map((linea) => ({ ...linea, etiqueta: linea.etiqueta.trim() }))
+          .filter((linea) => linea.etiqueta)
+      ));
       payload.append('itinerario', JSON.stringify(formData.itinerario
         .filter((item) => item.hora && item.titulo.trim() && item.descripcion.trim())
         .sort((a, b) => a.hora.localeCompare(b.hora))));
@@ -293,6 +352,12 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
       payload.append('reglas_titulo', formData.reglasTitulo);
       payload.append('reglas_intro', formData.reglasIntro);
       payload.append('reglas', JSON.stringify(formData.reglas));
+      payload.append('preguntas_frecuentes', JSON.stringify(
+        formData.preguntasFrecuentes
+          .slice(0, 3)
+          .map((item) => ({ pregunta: item.pregunta.trim(), respuesta: item.respuesta.trim() }))
+          .filter((item) => item.pregunta && item.respuesta)
+      ));
 
       let existingImages = [];
       const currentImages = Array.isArray(formData.imagenes) 
@@ -337,6 +402,10 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
           {errors.tituloEvento && <span style={{ color: "red", fontSize: "0.85em" }}>{errors.tituloEvento}</span>}
         </label>
         <label>
+          Subtítulo
+          <input name="subtituloEvento" value={formData.subtituloEvento} onChange={handleChange} placeholder="Frase destacada del evento" />
+        </label>
+        <label>
           Descripción
           <textarea name="descripcionEvento" value={formData.descripcionEvento} onChange={handleChange} rows={3} />
           {errors.descripcionEvento && <span style={{ color: "red", fontSize: "0.85em" }}>{errors.descripcionEvento}</span>}
@@ -348,6 +417,29 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
           </select>
           {errors.categoria && <span style={{ color: "red", fontSize: "0.85em" }}>{errors.categoria}</span>}
         </label>
+        <section className="admin-event-options">
+          <h3>Líneas de impacto y ejes temáticos</h3>
+          <p>Escribe las etiquetas sin el símbolo #.</p>
+          {formData.lineasImpacto.map((linea, index) => (
+            <div className="admin-add-option" key={`linea-impacto-${index}`}>
+              <input
+                aria-label={`Etiqueta de impacto ${index + 1}`}
+                value={linea.etiqueta}
+                onChange={(e) => updateArrayItem('lineasImpacto', index, 'etiqueta', e.target.value)}
+              />
+              <label className="admin-checkbox-option">
+                <input
+                  type="checkbox"
+                  checked={!!linea.destacada}
+                  onChange={(e) => updateArrayItem('lineasImpacto', index, 'destacada', e.target.checked)}
+                />
+                <span>Destacada</span>
+              </label>
+              <button type="button" className="admin-btn admin-btn--secondary" onClick={() => removeArrayItem('lineasImpacto', index)}>Eliminar</button>
+            </div>
+          ))}
+          <button type="button" className="admin-btn admin-btn--secondary" onClick={() => addArrayItem('lineasImpacto', { etiqueta: '', destacada: false })}>Agregar línea de impacto</button>
+        </section>
         </> : step === 2 ? <>
         <div className="admin-event-datetime">
           <label style={{ flex: 1 }}>Fecha<input type="date" name="fecha" value={formData.fecha} onChange={handleChange} />
@@ -371,6 +463,14 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
           </select>
           {errors.localidad && <span style={{ color: "red", fontSize: "0.85em" }}>{errors.localidad}</span>}
         </label>
+        <label>
+          Nombre del punto de encuentro
+          <input name="puntoEncuentroNombre" value={formData.puntoEncuentroNombre} onChange={handleChange} />
+        </label>
+        <label>
+          Dirección del punto de encuentro
+          <textarea name="puntoEncuentroDireccion" value={formData.puntoEncuentroDireccion} onChange={handleChange} rows={2} />
+        </label>
         
         <label>Ubicación en Mapa</label>
         <MapPicker 
@@ -382,6 +482,7 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
 
         <label>Responsable Nombre<input name="responsableNombre" value={formData.responsableNombre} onChange={handleChange} />
           {errors.responsableNombre && <span style={{ color: "red", fontSize: "0.85em" }}>{errors.responsableNombre}</span>}</label>
+        <label>Responsable Cargo<input name="responsableCargo" value={formData.responsableCargo} onChange={handleChange} placeholder="Ej. Coordinadora de restauración" /></label>
         <label>Responsable Correo<input type="email" name="responsableCorreo" value={formData.responsableCorreo} onChange={handleChange} />
           {errors.responsableCorreo && <span style={{ color: "red", fontSize: "0.85em" }}>{errors.responsableCorreo}</span>}</label>
         <label>Responsable Teléfono
@@ -398,8 +499,37 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
           />
           {errors.responsableTelefono && <span style={{ color: "red", fontSize: "0.85em" }}>{errors.responsableTelefono}</span>}
         </label>
+        <label>
+          Cita del responsable
+          <textarea name="responsableCita" value={formData.responsableCita} onChange={handleChange} rows={2} placeholder="Frase que aparecerá en el detalle del evento" />
+        </label>
         <label>Cupo Total<input type="number" name="cupoTotal" value={formData.cupoTotal} onChange={handleChange} />
           {errors.cupoTotal && <span style={{ color: "red", fontSize: "0.85em" }}>{errors.cupoTotal}</span>}</label>
+
+        <section className="admin-event-options">
+          <h3>Métricas de impacto</h3>
+          {formData.metricas.map((metrica, index) => (
+            <div className="admin-add-option" key={`metrica-${index}`}>
+              <input aria-label={`Valor de métrica ${index + 1}`} placeholder="Valor (ej. 400 Propágulos)" value={metrica.valor || ''} onChange={(e) => updateArrayItem('metricas', index, 'valor', e.target.value)} />
+              <input aria-label={`Detalle de métrica ${index + 1}`} placeholder="Detalle" value={metrica.detalle || ''} onChange={(e) => updateArrayItem('metricas', index, 'detalle', e.target.value)} />
+              <button type="button" className="admin-btn admin-btn--secondary" onClick={() => removeArrayItem('metricas', index)}>Eliminar</button>
+            </div>
+          ))}
+          <button type="button" className="admin-btn admin-btn--secondary" onClick={() => addArrayItem('metricas', { valor: '', detalle: '', icono: 'leaf' })}>Agregar métrica</button>
+        </section>
+
+        <section className="admin-event-options">
+          <h3>Comité organizador y aval científico</h3>
+          {formData.organizadores.map((organizador, index) => (
+            <div className="admin-add-option" key={`organizador-${index}`}>
+              <input aria-label={`Nombre del organizador ${index + 1}`} placeholder="Nombre completo" value={organizador.nombre || ''} onChange={(e) => updateArrayItem('organizadores', index, 'nombre', e.target.value)} />
+              <input aria-label={`Nombre corto ${index + 1}`} placeholder="Nombre corto" value={organizador.nombreCorto || organizador.nombre_corto || ''} onChange={(e) => updateArrayItem('organizadores', index, 'nombreCorto', e.target.value)} />
+              <input aria-label={`Descripción del organizador ${index + 1}`} placeholder="Descripción" value={organizador.descripcion || ''} onChange={(e) => updateArrayItem('organizadores', index, 'descripcion', e.target.value)} />
+              <button type="button" className="admin-btn admin-btn--secondary" onClick={() => removeArrayItem('organizadores', index)}>Eliminar</button>
+            </div>
+          ))}
+          <button type="button" className="admin-btn admin-btn--secondary" onClick={() => addArrayItem('organizadores', { nombre: '', nombreCorto: '', descripcion: '' })}>Agregar organizador</button>
+        </section>
         
         <label>Imágenes</label>
         <ImagePicker 
@@ -448,6 +578,21 @@ export default function EventModal({ isOpen, onClose, evento, onSave }) {
           </div>)}
           {itineraryError && <span className="admin-field-error">{itineraryError}</span>}
           <button type="button" className="admin-btn admin-btn--secondary admin-add-itinerary" onClick={() => { setItineraryError(''); setFormData((current) => ({ ...current, itinerario: [...current.itinerario, { hora: '', titulo: '', descripcion: '' }] })); }}>+ Agregar momento al programa</button>
+        </section>
+
+        <section className="admin-event-options">
+          <h3>Preguntas frecuentes</h3>
+          <p>Agrega hasta 3 preguntas y sus respuestas.</p>
+          {formData.preguntasFrecuentes.map((item, index) => (
+            <div className="admin-itinerary-row" key={`pregunta-frecuente-${index}`}>
+              <label>Pregunta<input value={item.pregunta || ''} onChange={(e) => setFormData((current) => ({ ...current, preguntasFrecuentes: current.preguntasFrecuentes.map((entry, entryIndex) => entryIndex === index ? { ...entry, pregunta: e.target.value } : entry) }))} placeholder="Ej. ¿Pueden asistir niños?" /></label>
+              <label>Respuesta<textarea value={item.respuesta || ''} onChange={(e) => setFormData((current) => ({ ...current, preguntasFrecuentes: current.preguntasFrecuentes.map((entry, entryIndex) => entryIndex === index ? { ...entry, respuesta: e.target.value } : entry) }))} rows={2} placeholder="Escribe una respuesta clara." /></label>
+              <button type="button" className="admin-btn admin-btn--secondary" onClick={() => setFormData((current) => ({ ...current, preguntasFrecuentes: current.preguntasFrecuentes.filter((_, itemIndex) => itemIndex !== index) }))}>Quitar pregunta</button>
+            </div>
+          ))}
+          {formData.preguntasFrecuentes.length < 3 && (
+            <button type="button" className="admin-btn admin-btn--secondary admin-add-itinerary" onClick={() => setFormData((current) => ({ ...current, preguntasFrecuentes: [...current.preguntasFrecuentes, { pregunta: '', respuesta: '' }] }))}>+ Agregar pregunta frecuente</button>
+          )}
         </section>
         </> : null}
 

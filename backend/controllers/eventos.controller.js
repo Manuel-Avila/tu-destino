@@ -73,7 +73,7 @@ const slugSchema = z
   .max(120, 'El slug no puede superar los 120 caracteres.');
 
 function parseJsonFields(data) {
-  for (const field of ['itinerario', 'incluye', 'llevar', 'reglas']) {
+  for (const field of ['itinerario', 'incluye', 'llevar', 'reglas', 'metricas', 'organizadores', 'lineas_impacto', 'preguntas_frecuentes']) {
     if (typeof data[field] === 'string') {
       try {
         data[field] = JSON.parse(data[field]);
@@ -173,7 +173,7 @@ export async function createEvento(req, res) {
     }
 
     if (req.files && req.files.length > 0) {
-      const uploadPromises = req.files.map(file => uploadBufferToCloudinary(file.buffer));
+      const uploadPromises = req.files.map(file => uploadBufferToCloudinary(file.buffer, 'tudestino', file.mimetype));
       const newUrls = await Promise.all(uploadPromises);
       data.imagenes = [...data.imagenes, ...newUrls];
     }
@@ -184,6 +184,9 @@ export async function createEvento(req, res) {
     console.error('[eventos] crear:', err);
     if (err.code === '23505') {
       return res.status(400).json({ error: 'El Slug (URL) ya existe. Por favor usa uno diferente.' });
+    }
+    if (err.message === 'Cloudinary no está configurado') {
+      return res.status(503).json({ error: 'No se pudo subir la imagen: faltan las credenciales de Cloudinary en el servidor.' });
     }
     res.status(500).json({ error: 'No se pudo crear el evento.' });
   }
@@ -214,7 +217,7 @@ export async function updateEvento(req, res) {
     }
 
     if (req.files && req.files.length > 0) {
-      const uploadPromises = req.files.map(file => uploadBufferToCloudinary(file.buffer));
+      const uploadPromises = req.files.map(file => uploadBufferToCloudinary(file.buffer, 'tudestino', file.mimetype));
       const newUrls = await Promise.all(uploadPromises);
       data.imagenes = [...data.imagenes, ...newUrls];
     }
@@ -224,6 +227,9 @@ export async function updateEvento(req, res) {
     res.json({ evento });
   } catch (err) {
     console.error('[eventos] actualizar:', err);
+    if (err.message === 'Cloudinary no está configurado') {
+      return res.status(503).json({ error: 'No se pudo subir la imagen: faltan las credenciales de Cloudinary en el servidor.' });
+    }
     res.status(500).json({ error: 'No se pudo actualizar el evento.' });
   }
 }
@@ -238,4 +244,3 @@ export async function deleteEvento(req, res) {
     res.status(500).json({ error: 'No se pudo eliminar el evento.' });
   }
 }
-

@@ -214,7 +214,7 @@ function buildHtml(reports) {
 }
 
 function waitForImages(doc, timeoutMs = 8000) {
-  const pending = [...doc.images]
+  const pending = [...(doc.images ? doc.images : doc.querySelectorAll('img'))]
     .filter((img) => !img.complete)
     .map((img) => new Promise((resolve) => {
       img.onload = resolve;
