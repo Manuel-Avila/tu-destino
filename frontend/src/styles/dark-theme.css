@@ -536,6 +536,13 @@ html[data-theme='dark'] .ev-detail {
 html[data-theme='dark'] .ev-tab-wrap {
   background: #0f1715;
 }
+/* Títulos principales en blanco para máxima legibilidad sobre el fondo oscuro. */
+html[data-theme='dark'] .ev-hero h1,
+html[data-theme='dark'] .evd-heading h1,
+html[data-theme='dark'] .ev-card__title,
+html[data-theme='dark'] .ev-card__title a {
+  color: #ffffff;
+}
 html[data-theme='dark'] .ev-hero,
 html[data-theme='dark'] .ev-filters,
 html[data-theme='dark'] .ev-card,
