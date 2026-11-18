@@ -55,7 +55,12 @@ export async function create(req, res) {
     if (req.file) {
       data.image = await uploadBufferToCloudinary(req.file.buffer);
     }
-    
+
+    // La imagen principal también debe quedar en el arreglo que usa el carrusel del detalle.
+    if (data.image && (!data.images || data.images.length === 0)) {
+      data.images = [data.image];
+    }
+
     const destino = await createDestino(data);
     res.status(201).json({ destino });
   } catch (err) {
@@ -82,6 +87,11 @@ export async function update(req, res) {
 
     if (req.file) {
       data.image = await uploadBufferToCloudinary(req.file.buffer);
+    }
+
+    // Mantiene sincronizado el arreglo del carrusel con la imagen principal.
+    if (data.image && (!data.images || data.images.length === 0)) {
+      data.images = [data.image];
     }
 
     const destino = await updateDestino(req.params.id, data);

@@ -146,10 +146,13 @@ export default function DestinationModal({ isOpen, onClose, destination, onSave 
       setFormData((prev) => ({ ...prev, id: cleanId }));
     }
 
+    const imageValue = typeof formData.image === 'string' ? formData.image : '';
     const dataToValidate = {
       ...formData,
       id: cleanId,
-      rules: formData.rules.map(rule => rule.trim()).filter(Boolean)
+      rules: formData.rules.map(rule => rule.trim()).filter(Boolean),
+      // La imagen principal también se envía como arreglo para el carrusel del detalle.
+      ...(imageValue ? { images: [imageValue] } : {}),
     };
     const result = destinationSchema.safeParse(dataToValidate);
     if (!result.success) {
